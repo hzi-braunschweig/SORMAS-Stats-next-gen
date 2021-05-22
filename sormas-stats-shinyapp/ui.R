@@ -634,6 +634,14 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                                                column(3, infoBoxOutput("totalEventResultingCases", width = 12)),
                                                column(3, infoBoxOutput("totalEventContacts", width = 12))
                                              )
+                                             ,
+                                             fluidRow(
+                                               column(3, infoBoxOutput("totalEventManagementPending", width = 12)),
+                                               column(3, infoBoxOutput("totalEventManagementOngoing", width = 12)),
+                                               column(3, infoBoxOutput("totalEventManagementDone", width = 12)),
+                                               column(3, infoBoxOutput("totalEventManagementClosed", width = 12))
+                                             )
+                                             
                                    ),
                                    wellPanel(
                                      h4(helpText("Barplot for events by region/district grouped by event status")) , 

@@ -1428,6 +1428,29 @@ shinyServer(
         "Total resulting contacts", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("handshake"),  color = colCont, fill = FALSE)
     })
     
+    # total events by management status
+    output$totalEventManagementPending <- renderInfoBox({
+      infoBox(
+        "Pending", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent, fill = FALSE) 
+    })
+    # 
+    output$totalEventManagementOngoing <- renderInfoBox({
+      infoBox(
+        "Ongoing", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent, fill = FALSE)
+    })
+    # 
+    output$totalEventManagementDone <- renderInfoBox({
+      infoBox(
+        "Done", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent, fill = FALSE)
+    })
+    # 
+    output$totalEventManagementClosed <- renderInfoBox({
+      infoBox(
+        "Discarded", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent, fill = FALSE)
+    })
+    
+    
+    
     ## evnet status by type of place
     output$eventCuntbytyplaceTable <- DT::renderDataTable({
      
