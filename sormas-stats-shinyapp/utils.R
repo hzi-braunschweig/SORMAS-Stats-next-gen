@@ -1383,19 +1383,20 @@ eventExport = function(sormas_db, fromDate, toDate){
                         WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   event = dbGetQuery(sormas_db,queryEvent)
   
-  # ## reading event participants. This can leter be nested in the where clause when loading events
-  # queryEventPart <- paste0("SELECT uuid AS uuid_eventPart, id as id_eventPart, event_id, person_id AS person_id_eventPart, resultingcase_id AS resultingcaseid_eventPart
-  #                         FROM public.eventParticipant
-  #                          WHERE deleted = FALSE")
-  # eventParticipant = dbGetQuery(sormas_db, queryEventPart)
+  ## reading event participants data that are in events only; this is needed to compute the number of ep per events
+  queryEventPart <- sprintf("SELECT  id AS id_eventPart, event_id AS event_id_eventpart, person_id AS person_id_eventPart, resultingcase_id AS resultingcase_id_eventPart
+                        FROM public.eventParticipant
+                        WHERE deleted = FALSE and event_id  in (%s)", paste("'", event$id_event, "'",collapse=",") )
+  eventParticipant = dbGetQuery(sormas_db, queryEventPart)
   
-  ## reading location; this can later be nested in event sql command
-  queryLocation <- paste0("SELECT  id AS id_location, district_id AS district_id_location, region_id AS region_id_location,
+  ## reading location; selecting only locations that correspond to an events. This improve performance
+  queryLocation <- sprintf("SELECT  id AS id_location, district_id AS district_id_location, region_id AS region_id_location,
     facility_id AS facility_id_location, facilitytype AS facilitytype_location, latitude, longitude 
-                        FROM public.location")
+                        FROM public.location
+                        WHERE id  in (%s)", paste("'", na.omit(event$eventlocation_id), "'",collapse=",") )
   location = dbGetQuery(sormas_db,queryLocation)
   
-  # load region
+  # load region 
   region = dbGetQuery(
     sormas_db,
     "SELECT id AS region_id, name AS region_name
@@ -1409,28 +1410,32 @@ eventExport = function(sormas_db, fromDate, toDate){
     FROM district
     WHERE archived = FALSE"
   )
-  # #loading facility
-  # facility = dbGetQuery(
-  #   sormas_db,
-  #   "SELECT id AS id_facility, type AS type_facility, region_id AS region_id_facility, district_id AS district_id_facility, name AS name_facility
-  # FROM public.facility 
-  #   WHERE archived = FALSE"
-  # )
   
+  # merging event data with jurisdiction data
   event = event %>%
-    dplyr::mutate(reportdatetime_event = as.Date(format(reportdatetime_event, "%Y-%m-%d")))
-  
-  ret = event %>%
+    dplyr::mutate(reportdatetime_event = as.Date(format(reportdatetime_event, "%Y-%m-%d")), 
+                  startdate_event = as.Date(format(startdate_event, "%Y-%m-%d")),
+                  enddate_event = as.Date(format(enddate_event, "%Y-%m-%d")),
+                  creationdate_event = as.Date(format(creationdate_event, "%Y-%m-%d"))  ) %>%  # converting dates from POSIXct class to Date class
+    dplyr::mutate(relevantdate_event = coalesce(startdate_event, reportdatetime_event )  ) %>% # computing most relevant date using start date and fall back to report date
     dplyr::left_join(. , location,  c( "eventlocation_id" = "id_location")) %>% # merging with locationn
     dplyr::left_join(. , region,  c( "region_id_location" = "region_id")) %>% # merging with region
     dplyr::left_join(. , district,  c( "district_id_location" = "district_id")) %>% 
     tidyr::replace_na(list(region_name = "Missing Region", district_name = "Missing District"))
   
+  # merging event data with eventPart data and count number of resulting cases and ep per event
+  eventPartEvent = eventParticipant %>%
+      dplyr::left_join(. , event, c( "event_id_eventpart" = "id_event") ) %>%  # merging eventParticipant with event
+      dplyr::group_by(. , event_id_eventpart) %>% 
+      dplyr::summarise(eventPart_sum = n(),
+                       resulting_case_sum = sum(!is.na(resultingcase_id_eventpart) )
+                       ) %>% # counting number of ep and resulting cases per event
+    dplyr::left_join(., event, c("event_id_eventpart" = "id_event") )  # merging with event
   
-  return(event_data = ret)  
+  return(event_data = eventPartEvent)  
 }
 save(eventExport, file = "eventExport.R")
-eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate) 
+eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
 ### end of event export
 
 ## 
