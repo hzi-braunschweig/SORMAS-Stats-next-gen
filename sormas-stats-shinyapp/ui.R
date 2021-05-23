@@ -629,17 +629,21 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
               tabsetPanel(tabPanel("Event dashboard", value = 6,
                                    wellPanel(style = "background: white", 
                                              fluidRow(
-                                               column(3, infoBoxOutput("totalEvent", width = 12)),
-                                               column(3, infoBoxOutput("totalEventParticipants", width = 12)),
-                                               column(3, infoBoxOutput("totalEventResultingCases", width = 12)),
-                                               column(3, infoBoxOutput("totalEventContacts", width = 12))
+                                               column(2, infoBoxOutput("totalEvent", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementPending", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementOngoing", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementDone", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementClosed", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementMissing", width = 12))
                                              )
                                              ,
                                              fluidRow(
-                                               column(3, infoBoxOutput("totalEventManagementPending", width = 12)),
-                                               column(3, infoBoxOutput("totalEventManagementOngoing", width = 12)),
-                                               column(3, infoBoxOutput("totalEventManagementDone", width = 12)),
-                                               column(3, infoBoxOutput("totalEventManagementClosed", width = 12))
+                                               column(2, infoBoxOutput("totalEventParticipants", width = 12)),
+                                               column(2, infoBoxOutput("totalEventResultingCases", width = 12)),
+                                               column(2, infoBoxOutput("totalEventstatusSignal", width = 12)),
+                                               column(2, infoBoxOutput("totalEventstatusEvent" , width = 12)),
+                                               column(2, infoBoxOutput("totalEventstatusCluster" , width = 12)),
+                                               column(2, infoBoxOutput("totalEventstatusScreening" , width = 12))
                                              )
                                              
                                    ),

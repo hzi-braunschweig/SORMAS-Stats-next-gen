@@ -1407,48 +1407,96 @@ shinyServer(
     })
     
     # Event dashboard indicators ----
-    ## rotal events
+    ## Total events
     output$totalEvent <- renderInfoBox({
       infoBox(
-        "Total Events", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("users"),  color = colEvent, fill = FALSE)
+        "", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent,
+        fill = FALSE, subtitle =  "Total Events")
     })  
     # totol event particopant
     output$totalEventParticipants <- renderInfoBox({
       infoBox(
-        "Total Event Participants", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("users"),  color = colEvent, fill = FALSE)
+        "", sum(eventDataDiseaseRegionTimeFilter()$eventPart_sum ), icon = icon("users"),
+        color = colEvent, fill = FALSE, subtitle = "Event Participants")
     })
     # total resulting cases from events
     output$totalEventResultingCases <- renderInfoBox({
       infoBox(
-        "Total resulting cases", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("procedures"),  color = colCase, fill = FALSE)
-    })
-    # total contacts  in events
-    output$totalEventContacts <- renderInfoBox({
-      infoBox(
-        "Total resulting contacts", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("handshake"),  color = colCont, fill = FALSE)
+        "", sum(eventDataDiseaseRegionTimeFilter()$resulting_case_sum ), icon = icon("procedures"),
+        color = colCase, fill = FALSE, subtitle = "Resulting Cases")
     })
     
     # total events by management status
     output$totalEventManagementPending <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventmanagementstatus == "PENDING") 
       infoBox(
-        "Pending", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent, fill = FALSE) 
+        "", nrow(temp),
+        icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Pending" ) 
     })
     # 
     output$totalEventManagementOngoing <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventmanagementstatus == "ONGOING")
       infoBox(
-        "Ongoing", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent, fill = FALSE)
+        "", nrow(temp), icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Ongoing")
     })
-    # 
+    #
     output$totalEventManagementDone <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventmanagementstatus == "DONE")
       infoBox(
-        "Done", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent, fill = FALSE)
+        "", nrow(temp), icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Done" )
     })
     # 
     output$totalEventManagementClosed <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventmanagementstatus == "CLOSED")
       infoBox(
-        "Discarded", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent, fill = FALSE)
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Management: Closed" )
+    })
+    #
+    output$totalEventManagementMissing <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(is.na(eventmanagementstatus))
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Management: Missing " )
     })
     
+    ### total events by event status
+    output$totalEventstatusSignal <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventstatus == "SIGNAL" )
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Signal" ) 
+    })
+    # 
+    output$totalEventstatusEvent <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventstatus == "EVENT" )
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Event")
+    })
+    # 
+    output$totalEventstatusCluster <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventstatus == "CLUSTER" )
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Cluster" ) 
+    })
+    # 
+    output$totalEventstatusScreening <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventstatus == "SCREENING" )
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Screening" )
+    })
     
     
     ## evnet status by type of place
