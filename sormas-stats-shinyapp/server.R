@@ -1339,20 +1339,12 @@ shinyServer(
       )
     })
 
-    # selEventRegionUi = reactive({
-    #   if(!is.null(input$regionEventUi)){
-    #     eventData[((eventData$region_name  %in% input$regionEventUi) & (eventData$disease_event == input$diseaseEventUi) & (eventData$reportdatetime_event >= (min(input$reportdateEventUi) )  ) & (eventData$reportdatetime_event <= (max(input$reportdateEventUi) ))),]
-    #   } else{
-    #       eventData[((eventData$disease_event == input$diseaseEventUi) & (eventData$reportdatetime_event >= (min(input$reportdateEventUi))) & (eventData$reportdatetime_event <= (max(input$reportdateEventUi)) )), ]
-    #       
-    #   }
-    # }) 
+# filter eventData by disease, region, and time
     selEventRegionUi = reactive({
       if(!is.null(input$regionEventUi)){
         eventData[((eventData$region_name  %in% input$regionEventUi) & (eventData$disease_event == input$diseaseEventUi) & (eventData$relevantdate_event >= (min(input$reportdateEventUi) )  ) & (eventData$relevantdate_event <= (max(input$reportdateEventUi) ))),]
       } else{
         eventData[((eventData$disease_event == input$diseaseEventUi) & (eventData$relevantdate_event >= (min(input$reportdateEventUi))) & (eventData$relevantdate_event <= (max(input$reportdateEventUi)) )), ]
-        
       }
     }) 
     
