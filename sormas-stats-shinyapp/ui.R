@@ -570,7 +570,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
 tabPanel( "Event data analysis", icon = icon("procedures"),
           sidebarLayout( position = "left",
             sidebarPanel(
-              span(tags$i(h6("Visualization options.")), style="color:#045a8d"),
+              span(tags$i(h6("Filter options for events.")), style="color:#045a8d"),
               width = 2,
               pickerInput("diseaseEventUi", "Disease", 
                           choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
@@ -578,10 +578,11 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                           selected = c("CORONAVIRUS"),
                           multiple = FALSE),
               
-              dateRangeInput("reportdateEventUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-30, end = Sys.Date(), min = NULL,
+              dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date()-30, end = Sys.Date(), min = NULL,
                              max = NULL, format = "dd-mm-yyyy", startview = "month",
                              weekstart = 0, language = "en", separator = " to ", width = NULL,
                              autoclose = TRUE),
+              span(tags$i(h6("Relevant date uses date of event and if missing, impute with report date.")), style="color:#045a8d"),
               
               # Filter specific event region and district
               # filter by Region of event
