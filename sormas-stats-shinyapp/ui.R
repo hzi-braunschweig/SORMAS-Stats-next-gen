@@ -14,8 +14,8 @@ shinyUI(bootstrapPage(
                        sidebarLayout(
                          div( id ="Sidebar",
                          sidebarPanel(
-                           span(tags$i(h6("Please filter the database using tabs below.")), style="color:#045a8d"),
-                           
+                           # Filter specific to network diagram only
+                           span(tags$i(h6("Filter options for network diagram. Please filter by region, district and click on Visualize network diagram to plot network diagram.")), style="color:#045a8d"),
                            pickerInput("diseaseUi", "Disease", 
                                        choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
                                                    "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
@@ -26,9 +26,7 @@ shinyUI(bootstrapPage(
                                           max = NULL, format = "dd-mm-yyyy", startview = "month",
                                           weekstart = 0, language = "en", separator = " to ", width = NULL,
                                           autoclose = TRUE),
-                          br(),
-                          # Filter specific to network diagram only
-                          span(tags$i(h6("Filters specific to network diagram only")), style="color:#045a8d"),
+
                           # filter by Region
                           pickerInput(
                             inputId = "regionNetworkUi",
@@ -43,11 +41,13 @@ shinyUI(bootstrapPage(
                           ),
                           # filter by district
                           uiOutput('pickerInputDistrict2'),
-                          #br(),
+                          # checkboc to plot notwork diagram
+                          checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", FALSE),
+                          
                           # filter by entity type
                           pickerInput(
                             inputId = "contactEntitiyTypeUi", 
-                            label = 'Infector entity type',
+                            label = 'Source infector entity type',
                             choices = sort(unique(elist$entityType)), 
                             options = list(
                               `actions-box` = TRUE, 
@@ -97,8 +97,8 @@ shinyUI(bootstrapPage(
                           ),
                           
                           checkboxInput("resultingCaseOnlyUi", "Only chains with resulting cases ?", TRUE),
+                          checkboxInput("excludeHealthyEventPartUi", "Exclude healthy event participant ?", FALSE),
                           checkboxInput("activeEventsOnlyUi", "Only chains with active events ?", FALSE),
-                       
                          textInput("visSingleChainUi", label = h5("Only chain resulting from this ID"),
                                    value = "", placeholder = "Enter uuid of node ..." ),
                         
