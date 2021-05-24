@@ -98,6 +98,7 @@ shinyUI(bootstrapPage(
                           
                           checkboxInput("resultingCaseOnlyUi", "Only chains with resulting cases ?", TRUE),
                           checkboxInput("excludeHealthyEventPartUi", "Exclude healthy event participant ?", FALSE),
+                          checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
                           checkboxInput("activeEventsOnlyUi", "Only chains with active events ?", FALSE),
                          textInput("visSingleChainUi", label = h5("Only chain resulting from this ID"),
                                    value = "", placeholder = "Enter uuid of node ..." ),
@@ -106,7 +107,7 @@ shinyUI(bootstrapPage(
                                   value = "", placeholder = "Enter uuid of node ..." ),
                           
                           br(),
-                          hr(),
+                          #hr(),
                          
                           h6("Powered by:"),
                           tags$img(src = "HZI_Logo.jpg", height = 50, width = 200)
