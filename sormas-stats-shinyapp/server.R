@@ -165,11 +165,11 @@ shinyServer(
   }) 
   
   # pltting network using selElist
-  output$transChain <- renderVisNetwork({
+  output$transChain <- renderVisNetwork({ 
     if(input$visNetworkDiagramUi == TRUE){
       elistSel =  elistSel2ResCaseSourseCase()
       nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel$from, elistSel$to)), ]
-      plotNet(nodeLineList= nodeLineListSelResCase, elist = elistSel)
+      plotNet(nodeLineList= nodeLineListSelResCase, elist = elistSel, IgraphLayout= input$IgraphLayoutUi)
     } 
   })
 
