@@ -45,9 +45,9 @@ shinyServer(
     if(!is.null(input$regionNetworkUi))
     {
       #as.numeric(elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )), colnames(elist) == "id" ])
-      temp =  elist[((elist$region_name %in% input$regionNetworkUi) & (elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi) )  ) & (elist$reportdatetime <= (max(input$reportdateUi) ))),  colnames(elist)  %in% c("id","entityType", "district_name", "relationtocase","eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person")]
+      temp =  elist[((elist$region_name %in% input$regionNetworkUi) & (elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi) )  ) & (elist$reportdatetime <= (max(input$reportdateUi) ))),  colnames(elist)  %in% c("id","entityType", "district_name", "relationtocase","eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person", "resultingcase_id")]
     } else{
-    temp = elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )), colnames(elist) %in% c("id","entityType", "district_name", "relationtocase", "eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person") ]
+    temp = elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )), colnames(elist) %in% c("id","entityType", "district_name", "relationtocase", "eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person", "resultingcase_id") ]
     }
     return(temp)
   })
@@ -122,10 +122,24 @@ shinyServer(
     } 
     return(temp)
     })
+  
+  # filter to exclude helthy event participants
+  selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy = reactive({
+    if(input$excludeHealthyEventPartUi == TRUE){
+      temp = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode() %>%
+        dplyr::filter(is.na(resultingcase_id) & (entityType == "Event")  )  # selecting health ep 
+      
+      ret = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode() %>%
+        dplyr::filter( !(id %in% temp$id)) # dropping dropping edges of healthy ep
+    } else{
+      ret = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode()
+      }
+    return(ret)
+  })
 
   # further filtering based on resultingCaseOnlyUi, activeEventsOnlyUi, visSingleChainUi
   elistSel2ResCaseSourseCase  = reactive({ 
-  elistSel <- elist[elist$id %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode()$id, ]
+  elistSel <- elist[elist$id %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy()$id, ]
   #Filter elist based on resulting cases varaible
   if(input$resultingCaseOnlyUi == FALSE){
     elistSel2ResCase = elistSel
@@ -152,9 +166,11 @@ shinyServer(
   
   # pltting network using selElist
   output$transChain <- renderVisNetwork({
-    elistSel =  elistSel2ResCaseSourseCase()
-    nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel$from, elistSel$to)), ]
-    plotNet(nodeLineList= nodeLineListSelResCase, elist = elistSel)
+    if(input$visNetworkDiagramUi == TRUE){
+      elistSel =  elistSel2ResCaseSourseCase()
+      nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel$from, elistSel$to)), ]
+      plotNet(nodeLineList= nodeLineListSelResCase, elist = elistSel)
+    } 
   })
 
   ## computation of network parameters esing transmission network data ----
@@ -191,7 +207,7 @@ shinyServer(
    temp =  as.numeric(
      elistSel2ResCaseSourseCase() %>%
        dplyr::select(from_uuid_person, entityType ) %>%
-       dplyr::filter(entityType == "event") %>%
+       dplyr::filter(entityType == "Event") %>%
        dplyr::distinct_at(. , vars(from_uuid_person))  %>%
        dplyr::summarise(n = n())
    )
