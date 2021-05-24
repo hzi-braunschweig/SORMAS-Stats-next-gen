@@ -14,8 +14,8 @@ shinyUI(bootstrapPage(
                        sidebarLayout(
                          div( id ="Sidebar",
                          sidebarPanel(
-                           span(tags$i(h6("Please filter the database using tabs below.")), style="color:#045a8d"),
-                           
+                           # Filter specific to network diagram only
+                           span(tags$i(h6("Filter options for network diagram. Please filter by region, district and click on Visualize network diagram to plot network diagram.")), style="color:#045a8d"),
                            pickerInput("diseaseUi", "Disease", 
                                        choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
                                                    "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
@@ -26,9 +26,7 @@ shinyUI(bootstrapPage(
                                           max = NULL, format = "dd-mm-yyyy", startview = "month",
                                           weekstart = 0, language = "en", separator = " to ", width = NULL,
                                           autoclose = TRUE),
-                          br(),
-                          # Filter specific to network diagram only
-                          span(tags$i(h6("Filters specific to network diagram only")), style="color:#045a8d"),
+
                           # filter by Region
                           pickerInput(
                             inputId = "regionNetworkUi",
@@ -43,11 +41,13 @@ shinyUI(bootstrapPage(
                           ),
                           # filter by district
                           uiOutput('pickerInputDistrict2'),
-                          #br(),
+                          # checkboc to plot notwork diagram
+                          checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", FALSE),
+                          
                           # filter by entity type
                           pickerInput(
                             inputId = "contactEntitiyTypeUi", 
-                            label = 'Infector entity type',
+                            label = 'Source infector entity type',
                             choices = sort(unique(elist$entityType)), 
                             options = list(
                               `actions-box` = TRUE, 
@@ -97,8 +97,9 @@ shinyUI(bootstrapPage(
                           ),
                           
                           checkboxInput("resultingCaseOnlyUi", "Only chains with resulting cases ?", TRUE),
+                          checkboxInput("excludeHealthyEventPartUi", "Exclude healthy event participant ?", FALSE),
+                          checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
                           checkboxInput("activeEventsOnlyUi", "Only chains with active events ?", FALSE),
-                       
                          textInput("visSingleChainUi", label = h5("Only chain resulting from this ID"),
                                    value = "", placeholder = "Enter uuid of node ..." ),
                         
@@ -106,7 +107,7 @@ shinyUI(bootstrapPage(
                                   value = "", placeholder = "Enter uuid of node ..." ),
                           
                           br(),
-                          hr(),
+                          #hr(),
                          
                           h6("Powered by:"),
                           tags$img(src = "HZI_Logo.jpg", height = 50, width = 200)
@@ -570,7 +571,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
 tabPanel( "Event data analysis", icon = icon("procedures"),
           sidebarLayout( position = "left",
             sidebarPanel(
-              span(tags$i(h6("Visualization options.")), style="color:#045a8d"),
+              span(tags$i(h6("Filter options for events.")), style="color:#045a8d"),
               width = 2,
               pickerInput("diseaseEventUi", "Disease", 
                           choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
@@ -578,10 +579,11 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                           selected = c("CORONAVIRUS"),
                           multiple = FALSE),
               
-              dateRangeInput("reportdateEventUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-30, end = Sys.Date(), min = NULL,
+              dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date()-30, end = Sys.Date(), min = NULL,
                              max = NULL, format = "dd-mm-yyyy", startview = "month",
                              weekstart = 0, language = "en", separator = " to ", width = NULL,
                              autoclose = TRUE),
+              span(tags$i(h6("Relevant date uses date of event and if missing, impute with report date.")), style="color:#045a8d"),
               
               # Filter specific event region and district
               # filter by Region of event
@@ -629,11 +631,23 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
               tabsetPanel(tabPanel("Event dashboard", value = 6,
                                    wellPanel(style = "background: white", 
                                              fluidRow(
-                                               column(3, infoBoxOutput("totalEvent", width = 12)),
-                                               column(3, infoBoxOutput("totalEventParticipants", width = 12)),
-                                               column(3, infoBoxOutput("totalEventResultingCases", width = 12)),
-                                               column(3, infoBoxOutput("totalEventContacts", width = 12))
+                                               column(2, infoBoxOutput("totalEvent", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementPending", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementOngoing", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementDone", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementClosed", width = 12)),
+                                               column(2, infoBoxOutput("totalEventManagementMissing", width = 12))
                                              )
+                                             ,
+                                             fluidRow(
+                                               column(2, infoBoxOutput("totalEventParticipants", width = 12)),
+                                               column(2, infoBoxOutput("totalEventResultingCases", width = 12)),
+                                               column(2, infoBoxOutput("totalEventstatusSignal", width = 12)),
+                                               column(2, infoBoxOutput("totalEventstatusEvent" , width = 12)),
+                                               column(2, infoBoxOutput("totalEventstatusCluster" , width = 12)),
+                                               column(2, infoBoxOutput("totalEventstatusScreening" , width = 12))
+                                             )
+                                             
                                    ),
                                    wellPanel(
                                      h4(helpText("Barplot for events by region/district grouped by event status")) , 

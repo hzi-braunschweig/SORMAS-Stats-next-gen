@@ -45,9 +45,9 @@ shinyServer(
     if(!is.null(input$regionNetworkUi))
     {
       #as.numeric(elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )), colnames(elist) == "id" ])
-      temp =  elist[((elist$region_name %in% input$regionNetworkUi) & (elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi) )  ) & (elist$reportdatetime <= (max(input$reportdateUi) ))),  colnames(elist)  %in% c("id","entityType", "district_name", "relationtocase","eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person")]
+      temp =  elist[((elist$region_name %in% input$regionNetworkUi) & (elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi) )  ) & (elist$reportdatetime <= (max(input$reportdateUi) ))),  colnames(elist)  %in% c("id","entityType", "district_name", "relationtocase","eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person", "resultingcase_id")]
     } else{
-    temp = elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )), colnames(elist) %in% c("id","entityType", "district_name", "relationtocase", "eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person") ]
+    temp = elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )), colnames(elist) %in% c("id","entityType", "district_name", "relationtocase", "eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person", "resultingcase_id") ]
     }
     return(temp)
   })
@@ -122,10 +122,24 @@ shinyServer(
     } 
     return(temp)
     })
+  
+  # filter to exclude helthy event participants
+  selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy = reactive({
+    if(input$excludeHealthyEventPartUi == TRUE){
+      temp = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode() %>%
+        dplyr::filter(is.na(resultingcase_id) & (entityType == "Event")  )  # selecting health ep 
+      
+      ret = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode() %>%
+        dplyr::filter( !(id %in% temp$id)) # dropping dropping edges of healthy ep
+    } else{
+      ret = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode()
+      }
+    return(ret)
+  })
 
   # further filtering based on resultingCaseOnlyUi, activeEventsOnlyUi, visSingleChainUi
   elistSel2ResCaseSourseCase  = reactive({ 
-  elistSel <- elist[elist$id %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode()$id, ]
+  elistSel <- elist[elist$id %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy()$id, ]
   #Filter elist based on resulting cases varaible
   if(input$resultingCaseOnlyUi == FALSE){
     elistSel2ResCase = elistSel
@@ -151,10 +165,12 @@ shinyServer(
   }) 
   
   # pltting network using selElist
-  output$transChain <- renderVisNetwork({
-    elistSel =  elistSel2ResCaseSourseCase()
-    nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel$from, elistSel$to)), ]
-    plotNet(nodeLineList= nodeLineListSelResCase, elist = elistSel)
+  output$transChain <- renderVisNetwork({ 
+    if(input$visNetworkDiagramUi == TRUE){
+      elistSel =  elistSel2ResCaseSourseCase()
+      nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel$from, elistSel$to)), ]
+      plotNet(nodeLineList= nodeLineListSelResCase, elist = elistSel, IgraphLayout= input$IgraphLayoutUi)
+    } 
   })
 
   ## computation of network parameters esing transmission network data ----
@@ -191,7 +207,7 @@ shinyServer(
    temp =  as.numeric(
      elistSel2ResCaseSourseCase() %>%
        dplyr::select(from_uuid_person, entityType ) %>%
-       dplyr::filter(entityType == "event") %>%
+       dplyr::filter(entityType == "Event") %>%
        dplyr::distinct_at(. , vars(from_uuid_person))  %>%
        dplyr::summarise(n = n())
    )
@@ -1339,12 +1355,12 @@ shinyServer(
       )
     })
 
+# filter eventData by disease, region, and time
     selEventRegionUi = reactive({
       if(!is.null(input$regionEventUi)){
-        eventData[((eventData$region_name  %in% input$regionEventUi) & (eventData$disease_event == input$diseaseEventUi) & (eventData$reportdatetime_event >= (min(input$reportdateEventUi) )  ) & (eventData$reportdatetime_event <= (max(input$reportdateEventUi) ))),]
+        eventData[((eventData$region_name  %in% input$regionEventUi) & (eventData$disease_event == input$diseaseEventUi) & (eventData$relevantdate_event >= (min(input$reportdateEventUi) )  ) & (eventData$relevantdate_event <= (max(input$reportdateEventUi) ))),]
       } else{
-          eventData[((eventData$disease_event == input$diseaseEventUi) & (eventData$reportdatetime_event >= (min(input$reportdateEventUi))) & (eventData$reportdatetime_event <= (max(input$reportdateEventUi)) )), ]
-          
+        eventData[((eventData$disease_event == input$diseaseEventUi) & (eventData$relevantdate_event >= (min(input$reportdateEventUi))) & (eventData$relevantdate_event <= (max(input$reportdateEventUi)) )), ]
       }
     }) 
     
@@ -1407,26 +1423,97 @@ shinyServer(
     })
     
     # Event dashboard indicators ----
-    ## rotal events
+    ## Total events
     output$totalEvent <- renderInfoBox({
       infoBox(
-        "Total Events", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("users"),  color = colEvent, fill = FALSE)
+        "", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent,
+        fill = FALSE, subtitle =  "Total Events")
     })  
     # totol event particopant
     output$totalEventParticipants <- renderInfoBox({
       infoBox(
-        "Total Event Participants", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("users"),  color = colEvent, fill = FALSE)
+        "", sum(eventDataDiseaseRegionTimeFilter()$eventPart_sum ), icon = icon("users"),
+        color = colEvent, fill = FALSE, subtitle = "Event Participants")
     })
     # total resulting cases from events
     output$totalEventResultingCases <- renderInfoBox({
       infoBox(
-        "Total resulting cases", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("procedures"),  color = colCase, fill = FALSE)
+        "", sum(eventDataDiseaseRegionTimeFilter()$resulting_case_sum ), icon = icon("procedures"),
+        color = colCase, fill = FALSE, subtitle = "Resulting Cases")
     })
-    # total contacts  in events
-    output$totalEventContacts <- renderInfoBox({
+    
+    # total events by management status
+    output$totalEventManagementPending <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventmanagementstatus == "PENDING") 
       infoBox(
-        "Total resulting contacts", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("handshake"),  color = colCont, fill = FALSE)
+        "", nrow(temp),
+        icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Pending" ) 
     })
+    # 
+    output$totalEventManagementOngoing <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventmanagementstatus == "ONGOING")
+      infoBox(
+        "", nrow(temp), icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Ongoing")
+    })
+    #
+    output$totalEventManagementDone <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventmanagementstatus == "DONE")
+      infoBox(
+        "", nrow(temp), icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Done" )
+    })
+    # 
+    output$totalEventManagementClosed <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventmanagementstatus == "CLOSED")
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Management: Closed" )
+    })
+    #
+    output$totalEventManagementMissing <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(is.na(eventmanagementstatus))
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Management: Missing " )
+    })
+    
+    ### total events by event status
+    output$totalEventstatusSignal <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventstatus == "SIGNAL" )
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Signal" ) 
+    })
+    # 
+    output$totalEventstatusEvent <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventstatus == "EVENT" )
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Event")
+    })
+    # 
+    output$totalEventstatusCluster <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventstatus == "CLUSTER" )
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Cluster" ) 
+    })
+    # 
+    output$totalEventstatusScreening <- renderInfoBox({
+      temp = eventDataDiseaseRegionTimeFilter() %>%
+        dplyr::filter(eventstatus == "SCREENING" )
+      infoBox(
+        "", nrow(temp), icon = icon("cog"),  
+        color = colEvent, fill = FALSE, subtitle = "Screening" )
+    })
+    
     
     ## evnet status by type of place
     output$eventCuntbytyplaceTable <- DT::renderDataTable({

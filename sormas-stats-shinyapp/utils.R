@@ -26,36 +26,55 @@ import.multiple.csv.files<-function(mypath,mypattern,...)
 }
 save(import.multiple.csv.files, file = "import.multiple.csv.files.R")
 ##
-plotNet = function(nodeLineList, elist)
+plotNet = function(nodeLineList, elist, IgraphLayout=TRUE)
 {
+  # IgraphLayout helps to reduce ploting time but the nodes are placed on fixed positions
   defaultFont="font-family:'Open Sans', sans-serif, 'Source Sans Pro'"
   mainStyle = paste(defaultFont, "color: #6591C4", ";font-weight: 600", "font-size: 1.6em", "text-align:center;", sep="; ")
   submainStyle = paste(defaultFont, "text-align:center;", sep="; ")
   footerStyle = defaultFont
-  addNodesS <- data.frame(label = c("Legend", "Healthy","Not_classified" ,"Suspected", "Probable", "Confirmed", "Not case", "1 = High risk", "2 = Low risk", "Event"), shape = "icon",
-                          icon.code = c("f0c0","f007", "f007", "f007", "f007", "f007","f007", "f178", "f178", "f013"),
-                          icon.size = c(0.1,25, 25, 25, 25, 25,25,25,25,25), icon.color = c("#0d0c0c","#17bd27", "#706c67", "#ffff00", "#ffa500", "#f70707","#99bd17", "#0d0c0c", "#0d0c0c", "#0000ff"))
-  
-  g= visNetwork(nodeLineList, elist,  main = list(text = "Disease network diagram", style = mainStyle),
-                submain = list(text = "The arrows indicate the direction of transmission", style = submainStyle), 
-                # footer = list(text = "Zoom in to see the IDs and contact category", style = footerStyle), 
-                background = "white", annot = T, width = "100%", height = "100vh") %>%  # width = "100%", height = "90vh", "500px" 
-    visEdges(arrows = "to", color = "black") %>% 
-    #visOptions(selectedBy = "Classification",highlightNearest = TRUE,nodesIdSelection = FALSE) %>% 
-    visOptions(selectedBy = NULL,highlightNearest = TRUE,nodesIdSelection = FALSE) %>% 
-    #visOptions(selectedBy = NULL,highlightNearest = TRUE,nodesIdSelection = FALSE) %>% 
-    visGroups(groupname = "SUSPECT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffff00")) %>%
-    visGroups(groupname = "PROBABLE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffa500")) %>%
-    visGroups(groupname = "CONFIRMED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#f70707")) %>%
-    visGroups(groupname = "NOT_CLASSIFIED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#706c67" )) %>%
-    visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
-    visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
-    visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
-    addFontAwesome() %>%
-    visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.2, ncol = 1, stepX = 100, stepY = 100) %>%  
-    visPhysics(stabilization = F) %>%
-    visInteraction(dragNodes = T, dragView = T, zoomView = T)
-  
+  addNodesS <- data.frame(label = c("Healthy","Not_classified" ,"Suspected", "Probable", "Confirmed", "Not case", "1 = High risk", "2 = Low risk", "Event"), shape = "icon",
+                          icon.code = c("f007", "f007", "f007", "f007", "f007","f007", "f178", "f178", "f013"),
+                          icon.size = c(25, 25, 25, 25, 25,25,25,25,25), icon.color = c("#17bd27", "#706c67", "#ffff00", "#ffa500", "#f70707","#99bd17", "#0d0c0c", "#0d0c0c", "#0000ff"))
+  if(IgraphLayout ==FALSE){
+    g= visNetwork(nodeLineList, elist,  main = list(text = "Disease network diagram", style = mainStyle),
+                  submain = list(text = "The arrows indicate the direction of transmission", style = submainStyle), 
+                  # footer = list(text = "Zoom in to see the IDs and contact category", style = footerStyle), 
+                  background = "white", annot = T, width = "100%", height = "100vh") %>%  
+      visEdges(arrows = "to", color = "black", smooth = FALSE) %>% 
+      visOptions(selectedBy = NULL,highlightNearest = TRUE, nodesIdSelection = FALSE) %>% 
+      visGroups(groupname = "SUSPECT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffff00")) %>%
+      visGroups(groupname = "PROBABLE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffa500")) %>%
+      visGroups(groupname = "CONFIRMED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#f70707")) %>%
+      visGroups(groupname = "NOT_CLASSIFIED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#706c67" )) %>%
+      visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
+      visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
+      visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
+      addFontAwesome() %>%
+      visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.1, ncol = 1, stepX = 100, stepY = 100, main = "Legend") %>%  
+      visPhysics(stabilization = F) %>%
+      visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
+    
+  } else{
+    g= visNetwork(nodeLineList, elist,  main = list(text = "Disease network diagram", style = mainStyle),
+                  submain = list(text = "The arrows indicate the direction of transmission", style = submainStyle), 
+                  # footer = list(text = "Zoom in to see the IDs and contact category", style = footerStyle), 
+                  background = "white", annot = T, width = "100%", height = "100vh") %>%
+      visIgraphLayout() %>%  # to improve performance ie reduce plotting time
+      visEdges(arrows = "to", color = "black", smooth = FALSE) %>% 
+      visOptions(selectedBy = NULL,highlightNearest = TRUE, nodesIdSelection = FALSE) %>% 
+      visGroups(groupname = "SUSPECT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffff00")) %>%
+      visGroups(groupname = "PROBABLE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffa500")) %>%
+      visGroups(groupname = "CONFIRMED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#f70707")) %>%
+      visGroups(groupname = "NOT_CLASSIFIED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#706c67" )) %>%
+      visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
+      visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
+      visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
+      addFontAwesome() %>%
+      visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.1, ncol = 1, stepX = 100, stepY = 100, main = "Legend") %>%  
+      visPhysics(stabilization = F) %>%
+      visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
+  }
   print(g)
 }
 save(plotNet, file = "plotNet.R")
@@ -68,13 +87,13 @@ compute_person_node_uuid = function(elist)
   person_eventPart_uuid = 
     elist %>%
     dplyr::select(to_uuid_person, entityType ) %>%
-    dplyr::filter(entityType == "event") %>%
+    dplyr::filter(entityType == "Event") %>%
     dplyr::distinct_at(. , vars(to_uuid_person)) 
   
   person_uuid = 
     elist %>%
     dplyr::select(from_uuid_person, to_uuid_person, entityType ) %>%
-    dplyr::filter(entityType == "case") %>%
+    dplyr::filter(entityType == "Case") %>%
     dplyr::distinct_at(. , vars(from_uuid_person, to_uuid_person))  
   
   paerson_node_uuid = unique( c(person_eventPart_uuid$to_uuid_person, person_uuid$from_uuid_person, person_uuid$to_uuid_person))
@@ -131,11 +150,6 @@ prop_missing_source_case_nodes = function(elist, nodeLineList){
 }
 save(prop_missing_source_case_nodes, file = "prop_missing_source_case_nodes.R")
 #prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)
-
-
-
-
-
 
 ##
 mergingData = function(dataList)
@@ -671,7 +685,7 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   elist =  contRegionDist %>%
     dplyr::rename(from = person_idCase, to = person_id) %>%
     dplyr::mutate(uuid_label = substr(uuid,1,6), smooth = TRUE, dashes = ifelse(label ==2,TRUE, FALSE), arrows = "to", uuid_case= substr(uuid_case,1,6),
-                  eventstatus = NA,  entityType = "case", archivedEvent = NA, risklevelEvent = NA, .keep = "all") %>%
+                  eventstatus = NA,  entityType = "Case", archivedEvent = NA, risklevelEvent = NA, .keep = "all") %>%
     dplyr::left_join(., person, by=c("from" = "id_person" )) %>%
     dplyr::mutate(from_uuid_person = substr(uuid_person,1,6), sex_from_person = sex , .keep = "unused") %>%
     dplyr::left_join(., person, by=c("to" = "id_person" )) %>%
@@ -803,7 +817,7 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   # definint elist of event similar to that of contacts
   elistEvent =  eventsParticipantEventsCasesRegDist %>%
     dplyr::mutate(uuid_label = substr(uuid_EventParticipant,1,6), from_uuid_person = substr(uuid_event,1,6) , label = 1, smooth = TRUE, dashes = FALSE, arrows = "to",
-                  entityType = "event", .keep = "unused" ) %>%
+                  entityType = "Event", .keep = "unused" ) %>%
     dplyr::left_join(., person, by=c("to" = "id_person" )) %>%
     dplyr::mutate(to_uuid_person = substr(uuid_person,1,6), .keep = "unused" )
   
@@ -929,447 +943,6 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   return(list(contRegionDist = contRegionDist, nodeLineList = nodeListCaseEvent, elist = elistCaseEvent, siDat = siDat))
 }
 save(mergingDataFromDB, file = "mergingDataFromDB.R")
- 
-mergingDataFromDB_210416 = function(DB_USER, DB_NAME, DB_PASS, DB_HOST, DB_PORT, fromDate, toDate, uniquePersonPersonContact = TRUE)
-{ 
-  ## computing default time based on 90 days in the past if  not provided by user
-  if(missing(fromDate) | missing(toDate)){
-    fromDate = as.character(Sys.Date() - delay) 
-    toDate = as.character(Sys.Date()) 
-  }
-  
-  # connecting to db
-  #con = dbConnect(PostgreSQL(), user="sormas_user", dbname="sormas", password = "password", host="127.0.0.1", port="5432")
-  con = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
-  
-  # reading unique cases based on all varaibles. 
-  # use  where deleted = FALSE  and caseclassification != 'NO_CASE'  in case you want to eliminate not a cases
-  
-  # case = dbGetQuery(con,"select distinct id, disease, reportdate,person_id,region_id,district_id, caseclassification, outcome, epidnumber, symptoms_id  
-  #                        from public.cases
-  #                        where deleted = FALSE
-  #                       ")  
-  queryCase <- paste0("SELECT  DISTINCT id, uuid, disease, reportdate,person_id,region_id,district_id, caseclassification, outcome, epidnumber, symptoms_id
-                        FROM public.cases 
-                        WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "' ")
-  case = dbGetQuery(con,queryCase)
-  
-  ## reading contact data ###
-  # excluded contacts without a source case. Including them will mess up stuffs when merging contdacts and case table
-  # contact = dbGetQuery(con,"SELECT  DISTINCT id,caze_id,district_id, region_id, person_id,reportdatetime, lastcontactdate, disease,
-  #             contactclassification,contactproximity,resultingcase_id, followupstatus, followupuntil, contactstatus,
-  #             contactcategory, relationtocase
-  #                        FROM public.contact
-  #                        WHERE deleted = FALSE and caze_id IS NOT NULL
-  #                       ")
-  queryContact <- paste0("SELECT  DISTINCT id, uuid, caze_id,district_id, region_id, person_id,reportdatetime, lastcontactdate, disease,
-                  contactclassification,contactproximity,resultingcase_id, followupstatus, followupuntil, contactstatus,
-                  contactcategory, relationtocase
-                        FROM public.contact
-                        WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
-  contact = dbGetQuery(con,queryContact)
-  
-  ### reading person data  ###
-  person = dbGetQuery(con,"SELECT  DISTINCT id, uuid, sex 
-                             from public.person
-                             ") 
-  # reading region
-  region = dbGetQuery(con,"SELECT  DISTINCT id, name
-                             from public.region
-                             where archived = FALSE
-                             ") 
-  
-  #loading district
-  district = dbGetQuery(con,"SELECT  DISTINCT id, name
-                             from public.district
-                             where archived = FALSE
-                             ")
-  #loading symptom data
-  symptoms = dbGetQuery(con,"SELECT  DISTINCT id, onsetdate
-                             from public.symptoms
-                            ")
-  # reading event
-  # events = dbGetQuery(con,"select distinct id, reportdatetime,eventstatus,disease, typeofplace, eventlocation_id
-  #                        from public.events
-  #                        where deleted = FALSE and eventstatus != 'DROPPED'
-  #                       ")
-  queryEvent <- paste0("SELECT  DISTINCT id, uuid, reportdatetime,eventstatus,disease, typeofplace, eventlocation_id, archived, risklevel
-                        FROM public.events
-                        WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
-  events = dbGetQuery(con,queryEvent)
-  
-  
-  ## reading event participants
-  eventsParticipant = dbGetQuery(con,"SELECT  DISTINCT id, uuid, event_id, person_id, resultingcase_id
-                             from public.eventParticipant
-                             ")
-  ## reading location; this can later be nested in event sql command
-  queryLocation <- paste0("SELECT  id, district_id, region_id
-                        FROM public.location")
-  location = dbGetQuery(con,queryLocation)
-  
-  #disconnect from db
-  dbDisconnect(con)
-  
-  ## converting all date formats from POSIXct to date
-  case$reportdate = dateTimeToDate(case$reportdate)
-  #
-  contact$reportdatetime = dateTimeToDate(contact$reportdatetime)
-  contact$lastcontactdate = dateTimeToDate(contact$lastcontactdate)
-  contact$followupuntil = dateTimeToDate(contact$followupuntil)
-  #
-  symptoms$onsetdate  = dateTimeToDate(symptoms$onsetdate)
-  #
-  events$reportdatetime = dateTimeToDate(events$reportdatetime)
-  #
-  
-  #cleaning data 
-  
-  
-  # renaming varaibles, 
-  # migrate later to sql code
-  eventsParticipant = eventsParticipant %>%
-    rename(id_EventParticipant = id, uuid_EventParticipant = uuid, resultingcase_idEvent = resultingcase_id, 
-           person_idEvent = person_id)
-  
-  events = events %>%
-    rename(id_event = id, uuid_event = uuid, reportdatetimeEvent = reportdatetime, diseaseEvents = disease, risklevelEvent = risklevel ) %>%
-    dplyr::mutate(archivedEvent = ifelse(archived == TRUE, "t", "f"), .keep = "unused")
-  
-  #merging Event and location
-  eventLocation = events %>%
-    dplyr::left_join(., location,  by=c("eventlocation_id" = "id" )) %>%
-    rename(region_idEvent = region_id , district_idEvent = district_id )
-  
-  ## merging event and event participants
-  eventsParticipantEvents =  merge(eventsParticipant, eventLocation, by.x = "event_id" , by.y = "id_event" , all.x = F, all.y = F) # merging event participants with events and 
-  # exclude events that has no participant and also ep that has no event since the list of event excluded dropped events.
-  
-  ## Mergion evet and location
-  
-  # renaming 
-  # eventsParticipantEvents = eventsParticipantEvents %>% 
-  #   rename(resultingcase_idEvent = resultingcase_id, person_idEvent = person_id, reportdatetimeEvent = reportdatetime)
-  #
-  case = case %>% 
-    rename(caze_id = id, uuid_case = uuid, diseaseCase = disease, reportdateCase = reportdate, person_idCase = person_id, region_idCase = region_id,
-           district_idCase = district_id, caseclassificationCase = caseclassification,  epidnumberCase = epidnumber, outcomeCase = outcome,
-           symptoms_idCase = symptoms_id)
-  
-  region = region %>%
-    rename(region_id = id, region_name = name)
-  #
-  district = district %>%
-    rename(district_id = id, district_name = name)
-  #
-  person = person %>%
-    rename(uuid_person = uuid, id_person = id)
-  
-  ## Merging data and cleaning
-  contCase = merge(contact,case, by = "caze_id", all.x = F, all.y = F ) # to ge the casevaraibles of contacts.
-  
-  # cases without having contacts will not show up here.
-  # giving contacts with missing region id  the id of the region of the case   
-  temp1 = contCase[is.na(contCase$region_id) == T,] # cotacts with missiing region_id
-  temp2 = contCase[is.na(contCase$region_id) == F,]
-  temp1$region_id = temp1$region_idCase
-  temp1$district_id = temp1$district_idCase
-  contCase = rbind(temp1, temp2)
-  
-  # selecting cntacts with mim set of varables needed to plot
-  #minVar = c("id","caze_id","reportdatetime", "disease", "contactclassification", "region_id", "district_id", "resultingcase_id", "contactproximity" )
-  #contactMinVar = contCase[, colnames(contCase) %in% minVar]
-  
-  # merging contCase with region to get the names of the regions
-  
-  contRegion = merge(contCase,region, by = "region_id", all.x = T, all.y = F) # do not keep regions that do not have a contact
-  
-  contRegionDist = merge(contRegion,district, by = "district_id", all.x = T, all.y = F)
-  
-  # deleting dupliccate contacts for the same disease between the same persons in contRegionDist
-  if (uniquePersonPersonContact == TRUE){
-    contRegionDist = distinct(contRegionDist, person_idCase, person_id, disease, .keep_all = T) 
-  }
-  
-  #   
-  #choosing final set of variables for contRegionDist to be exported and deleting edges linking a node to itselt
-  # contRegionDist = contRegionDist[contRegionDist$person_idCase != contRegionDist$person_id,]
-  contRegionDist = contRegionDist %>%
-    dplyr::select(id, person_id, person_idCase, disease,contactproximity, lastcontactdate, reportdatetime, contactclassification,
-                  followupstatus,followupuntil, resultingcase_id, caseclassificationCase, contactstatus,
-                  region_name,district_name, outcomeCase,caze_id, relationtocase, uuid_case, uuid, reportdateCase) %>%
-    dplyr::filter(person_idCase != person_id ) 
-  
-  
-  # expVar = c("id", "person_id", "person_idCase", "disease","contactproximity", "lastcontactdate", "reportdatetime", "contactclassification",
-  #            "followupstatus","followupuntil", "resultingcase_id", "caseclassificationCase", "contactstatus",
-  #            "region_name","district_name", "outcomeCase", "caze_id", "relationtocase") 
-  # contRegionDist = contRegionDist[ ,colnames(contRegionDist) %in% expVar ]
-  # 
-  
-  ## defining contact categories based on proximity
-  # Would later add a configuration for this
-  contRegionDist$label = NA
-  contRegionDist$label[contRegionDist$contactproximity %in% c("FACE_TO_FACE_LONG","TOUCHED_FLUID","MEDICAL_UNSAVE","CLOTHES_OR_OTHER","PHYSICAL_CONTACT" )] = 1 
-  contRegionDist$label[!(contRegionDist$contactproximity %in% c("FACE_TO_FACE_LONG","TOUCHED_FLUID","MEDICAL_UNSAVE","CLOTHES_OR_OTHER","PHYSICAL_CONTACT" ))] = 2
-  
-  
-  
-  #defining attributes of elist from contRegionDist
-  elist =  contRegionDist %>%
-    rename(from = person_idCase, to = person_id) %>%
-    dplyr::mutate(uuid_label = substr(uuid,1,6), smooth = TRUE, dashes = ifelse(label ==1,TRUE, FALSE), arrows = "to", uuid_case= substr(uuid_case,1,6),
-                  eventstatus = NA,  entityType = "case", archivedEvent = NA, risklevelEvent = NA, .keep = "all") %>%
-    dplyr::left_join(., person, by=c("from" = "id_person" )) %>%
-    dplyr::mutate(from_uuid_person = substr(uuid_person,1,6), sex_from_person = sex , .keep = "unused") %>%
-    dplyr::left_join(., person, by=c("to" = "id_person" )) %>%
-    dplyr::mutate(to_uuid_person = substr(uuid_person,1,6), sex_to_person = sex, .keep = "unused") 
-  
-  # col_orderElist <- c( "person_idCase", "person_id" ,"label", "id", "caze_id", "resultingcase_id", "region_name", "district_name", "contactproximity",
-  #                      "lastcontactdate","reportdatetime", "contactclassification","followupstatus", "followupuntil", "contactstatus", "disease",
-  #                      "caseclassificationCase", "outcomeCase", "relationtocase")
-  # elist <- elist[, col_orderElist]
-  # colnames(elist)[1:2] = c("from", "to")
-  
-  # defining attribures of elist
-  
-  # elist$smooth = TRUE
-  # elist$dashes = TRUE
-  # elist$dashes[elist$label == 1] = FALSE #  using broken lines for low risk contacts Need to update mathod latter for events
-  # elist$arrows = "to"
-  # 
-  # # adding eventstatus to elist to facilitate stacking with events
-  # elist =  elist %>%
-  #   mutate(eventstatus = NA)
-  
-  
-  
-  # defining node data
-  #get person id from resulting case id
-  contConvCase = case[case$caze_id %in% elist$resultingcase_id,] ## cases resulted from contacts
-  
-  idPersonCaseCont = unique(as.character(c(elist$to, elist$from, contConvCase$person_idCase))) # uniqur persons in either case or contact table
-  personUnique = person[person$id_person %in% idPersonCaseCont,] # uniqur personts in network diagram of elist
-  
-  Classification = rep("HEALTHY",nrow(personUnique)) # classification if person
-  personId = personUnique$id
-  # selzcting cases that belongs to cntact table or cntacts converted to cases
-  idCaseUnique = unique(na.omit(c(elist$caze_id, elist$resultingcase_id)))
-  caseUnique = case[case$caze_id %in% idCaseUnique, ]
-  
-  casPersonId = caseUnique$person_idCase # using caseUnique table, person id that belong to the set of cases in network
-  personClass = as.character(caseUnique$caseclassificationCase)
-  
-  for( i in 1:length(Classification))
-  {
-    for (j in 1:nrow(caseUnique))
-    {
-      if(personId[i] == casPersonId[j])
-      {
-        Classification[i] = personClass[j]
-      }
-    }
-  }
-  
-  nodeLineList = data.frame(personUnique, Classification)
-  
-  # defining node attributes
-  
-  nodeLineList = nodeLineList %>%
-    dplyr::mutate(group = Classification,  uuid_person = substr(uuid_person,1,6), label = substr(uuid_person,1,6),
-                  value=1, shape = c("icon"), code = c("f007"), Classification = Classification,.keep = "unused") 
-  
-  # %>%
-  #   dplyr::mutate(to = substr(uuid_person, 1,6), .keep = "unused" )
-  
-  
-  
-  # nodeLineList$group = nodeLineList$Classification
-  # nodeLineList$label = nodeLineList$id
-  # nodeLineList$value = 1
-  # nodeLineList$shape = c("icon")
-  # nodeLineList$code = c("f007")
-  #nodeLineList$shadow = F, 
-  
-  
-  ## Building elistCaseEvent for cases that resulted from events and adding it to elist to get the list of all edges and noded in the combined network
-  #extracting all eventsParticipantEvents that resulted to cases
-  
-  #      eventsParticipantEventsHealthy = eventsParticipantEvents[is.na(eventsParticipantEvents$resultingcase_idEvent) == T,] # ep that are healthy
-  #      eventsParticipantEvents = eventsParticipantEvents[is.na(eventsParticipantEvents$resultingcase_idEvent) != T,]  # ep that converted to cases
-  
-  # Merging with case table to get region and district of the resulting casses
-  eventsParticipantEventsCases =  merge(eventsParticipantEvents, case, by.x = "resultingcase_idEvent" , by.y = "caze_id" , all.x = T, all.y = F ) # 
-  
-  
-  
-  #temp =  merge(elist, eventsParticipantEvents, by.x = "caze_id" , by.y = "resultingcase_idEvent" , all.x = F, all.y = F ) # cases from eventsPaart that have contacts
-  # temp will contain only resulting cases from event that do have a contact.
-  # We may also need to show resulting cases that do not have contacts
-  
-  # selecting unique contact between cases and event
-  if (uniquePersonPersonContact == TRUE){
-    eventsParticipantEventsCases = distinct(eventsParticipantEventsCases, event_id, person_idEvent, diseaseEvents, .keep_all = T) 
-  }
-  #eventsParticipantEventsCases = distinct(eventsParticipantEventsCases, event_id, person_idEvent,.keep_all = T) # person_idCase = person_idCase
-  
-  
-  # merging eventsParticipantEventsCases with region and district
-  
-  ## eventsParticipantEventsCasesReg = merge(eventsParticipantEventsCases,region, by.x = "region_idCase", by.y = "region_id" , all.x = T, all.y = F) 
-  eventsParticipantEventsCasesReg = merge(eventsParticipantEventsCases,region, by.x = "region_idEvent", by.y = "region_id" , all.x = T, all.y = F) 
-  #eventsParticipantEventsCasesReg$region_name = as.character(eventsParticipantEventsCasesReg$region_name)
-  
-  # eventsParticipantEventsCasesRegDist = merge(eventsParticipantEventsCasesReg,district, by.x = "district_idCase", by.y ="district_id"  , all.x = T, all.y = F)
-  eventsParticipantEventsCasesRegDist = merge(eventsParticipantEventsCasesReg,district, by.x = "district_idEvent", by.y ="district_id"  , all.x = T, all.y = F)
-  
-  ## Adding relationtocase and contactcategory to eventsParticipantEventsCasesRegDist
-  # eventsParticipantEventsCasesRegDist = eventsParticipantEventsCasesRegDist %>%
-  #   dplyr::mutate(relationtocase = NA, contactcategory = "HIGH_RISK", .keep = "all") 
-  
-  eventsParticipantEventsCasesRegDist = eventsParticipantEventsCasesRegDist %>%
-    #dplyr::mutate(relationtocase = NA, .keep = "all") %>%
-    # select(resultingcase_idEvent, event_id, id_EventParticipant, diseaseCase,
-    #          reportdateCase,person_idCase,symptoms_idCase, caseclassificationCase,
-    #          outcomeCase, district_name, region_name, relationtocase, eventstatus, uuid_event, uuid_case, uuid_EventParticipant, typeofplace) %>%
-    dplyr::mutate(from = event_id, to = person_idEvent, id = id_EventParticipant, resultingcase_id = resultingcase_idEvent,
-                  reportdatetime = reportdatetimeEvent, disease = diseaseEvents, caze_id = event_id, relationtocase = NA, .keep = "all")
-  
-  
-  #dropping useless columns
-  # eventsParticipantEventsCasesRegDist = eventsParticipantEventsCasesRegDist[, colnames(eventsParticipantEventsCasesRegDist) %in% c("resultingcase_idEvent", "event_id", "id_EventParticipant", "diseaseCase",
-  #                                                                                                                                  "reportdateCase","person_idCase","symptoms_idCase", "caseclassificationCase",
-  #                                                                                                                                  "outcomeCase", "district_name", "region_name", "relationtocase", "eventstatus")] # keeping only impottant baraobles, may add the other s latter such as  "eventstatus", "typeofplace",
-  # 
-  
-  # maping and renaming eventsParticipantEventsCasesRegDist to have the same colnames as elist so that we can stack them
-  # eventsParticipantEventsCasesRegDist = eventsParticipantEventsCasesRegDist %>% 
-  #   rename(from = event_id , to = person_idCase, id = id_EventParticipant, resultingcase_id = resultingcase_idEvent,
-  #          reportdatetime = reportdateCase, disease = diseaseCase)
-  # eventsParticipantEventsCasesRegDist$caze_id = eventsParticipantEventsCasesRegDist$from
-  # 
-  # definint elist of event similar to that of contacts
-  elistEvent =  eventsParticipantEventsCasesRegDist %>%
-    dplyr::mutate(uuid_label = substr(uuid_EventParticipant,1,6), from_uuid_person = substr(uuid_event,1,6) , label = 1, smooth = TRUE, dashes = FALSE, arrows = "to",
-                  entityType = "event", .keep = "unused" ) %>%
-    dplyr::left_join(., person, by=c("to" = "id_person" )) %>%
-    dplyr::mutate(to_uuid_person = substr(uuid_person,1,6), .keep = "unused" )
-  
-  # elistEvent = eventsParticipantEventsCasesRegDist[colnames(eventsParticipantEventsCasesRegDist) %in% c("from", "to", "id", "caze_id", "resultingcase_id","region_name",
-  #                                                                                                       "district_name", "reportdatetime", "disease", "caseclassificationCase", "relationtocase", "eventstatus")]
-  # # 
-  # elistEvent$label = 2 # update later if need be
-  # elistEvent$smooth = TRUE
-  # elistEvent$dashes = TRUE
-  # elistEvent$dashes[elistEvent$label == 1] = FALSE #  using broken lines for low risk contacts Need to update mathod later for events
-  # elistEvent$arrows = "to"
-  
-  
-  
-  #defining node properties for elistEvent nodes
-  eventNode = data.frame(id = elistEvent$event_id,  Classification = c("EVENT"), group =c("EVENT"),label = elistEvent$from_uuid_person, code = c("f0c0") )
-  
-  #selecting unique event node since many cases comes from the same event
-  # eventNode = distinct(eventNode, id, .keep_all = T)
-  
-  # caseNode = data.frame(id = elistEvent$person_idEvent,  Classification = elistEvent$caseclassificationCase, group = elistEvent$caseclassificationCase,
-  #                            label = substr(elistEvent$to_uuid_person,1,6), code = c("f007") )
-  
-  caseNode =    elistEvent %>%
-    dplyr::mutate(id = person_idEvent,  Classification = caseclassificationCase, 
-                  group = ifelse(is.na(caseclassificationCase) ==T, "HEALTHY", caseclassificationCase),
-                  label = substr(to_uuid_person,1,6), code = c("f007"),  .keep = "none")
-  
-  
-  
-  nodeListCaseEvent = rbind(eventNode, caseNode)
-  
-  
-  nodeListCaseEvent = nodeListCaseEvent %>%
-    dplyr::mutate(value = 1,shape = c("icon"), sex = NA)
-  
-  
-  # nodeListCaseEvent$value = 1
-  # nodeListCaseEvent$shape = c("icon")
-  # nodeListCaseEvent$sex = c("MALE") # jsut named all male for now since we do not analyse by sex
-  # #nodeListCaseEvent$shadow = F, 
-  # 
-  
-  ## stacking nodelist and elist from events and contacts
-  
-  # stacking nodelinst
-  nodeLineList = nodeLineList %>%
-    dplyr::mutate(id = id_person, .keep = "unused" ) %>%
-    dplyr::select(-c(uuid_person))
-  
-  nodeListCaseEvent = nodeListCaseEvent[,colnames(nodeLineList)]  # order columns as in nodelist
-  nodeListCaseEvent = rbind(nodeListCaseEvent, nodeLineList)
-  # table(nodeListCaseEvent$id)[table(nodeListCaseEvent$id)>1] # to get dupllicates
-  
-  # deleting duplicate nodes at random, this is not the optimum method to do,
-  # Improve laterlater by considering classification of duplicate nodes and keep the once once that are likes to confirmed cases.
-  # nodeListCaseEvent = distinct(nodeListCaseEvent, id,  .keep_all = T)
-  nodeListCaseEvent = distinct(nodeListCaseEvent, label,  .keep_all = T)
-  
-  # stacking elist
-  # ordering  and combining elist and elistEvent
-  
-  elist =  elist %>%
-    dplyr::select(from,	to,	smooth,	dashes,	arrows,	label,	id,	caze_id,	resultingcase_id,	region_name,	district_name,	reportdatetime,
-                  disease,	caseclassificationCase,	relationtocase,	eventstatus,	entityType, uuid_label, from_uuid_person,archivedEvent, risklevelEvent) 
-  # %>%
-  #   dplyr::mutate(from = from_uuid_person, to = to_uuid_person, id = label, label = label,  .keep = "unused" )
-  
-  elistEvent  = elistEvent %>%
-    dplyr::select(event_id,	to,	smooth,	dashes,	arrows,	label,	id,	caze_id,	resultingcase_id,	region_name,	district_name,	reportdatetime,
-                  disease,	caseclassificationCase,	relationtocase,	eventstatus,	entityType, uuid_label, from_uuid_person, archivedEvent, risklevelEvent) %>%
-    dplyr::mutate(from =event_id,  .keep = "unused" )
-  
-  
-  # selecting few columns from elist to match those in elistEvent
-  # elist = elist[, colnames(elist) %in% colnames(elistEvent)]
-  
-  # 
-  # 
-  # varOrder = c("from","to","smooth", "dashes","arrows", "label","id", "caze_id", "resultingcase_id", "region_name", "district_name",
-  #              "reportdatetime", "disease","caseclassificationCase", "relationtocase", "eventstatus")
-  # elistEvent = elistEvent[, varOrder]
-  
-  elist = elist[ , colnames(elistEvent)]
-  
-  # adding source type to elist to denote if the record is from an event or a case
-  # elistEvent = elistEvent %>%
-  #   dplyr::mutate(entityType = "event", .keep = "all")
-  # elist = elist %>%
-  #   dplyr::mutate(entityType = "case", .keep = "all")
-  
-  #Stacking elistEvent and elist to include event to the elist of contacts
-  elistCaseEvent = rbind(elist,elistEvent)
-  
-  
-  
-  ############### determining serial interval  ###########
-  # selecting unique case id from contats table
-  temp = contRegionDist[,colnames(contRegionDist) %in% c("resultingcase_id", "caze_id", "disease", "region_name", "district_name","reportdatetime" )] # these varibales are used to filter commands from ui latter
-  selCases = temp[is.na(temp$resultingcase_id) == F,] # edge table with casee id for source cases and resulting cases. We only use data for cases whose contacts became cases
-  uniqCaseId = unique(c(selCases$caze_id, selCases$resultingcase_id))
-  
-  #merging uniqCaseId with case table to know the syptom of the cases 
-  temp = case[case$caze_id %in% uniqCaseId, c("caze_id", "symptoms_idCase") ]  # cases in involved in contact network
-  #merging with syptoms
-  caseSymp = merge(temp,symptoms, by.x = "symptoms_idCase", by.y = "id", all.x = T, all.y = F)
-  caseSymp = caseSymp[, colnames(caseSymp) != "symptoms_idCase"]
-  #merging caseSymp with selCases
-  selCasesSympCase  = merge(selCases, caseSymp, by = "caze_id", all.x = T, all.y = F)
-  selCasesSympResultCase = merge(selCasesSympCase, caseSymp, by.x = "resultingcase_id", by.y = "caze_id", all.x = T, all.y = F)
-  selCasesSympResultCase$si = as.numeric(c(selCasesSympResultCase$onsetdate.y - selCasesSympResultCase$onsetdate.x))
-  siDat = selCasesSympResultCase[, colnames(selCasesSympResultCase) %in% c("si","reportdatetime", "disease", "region_name","district_name" )]
-  siDat = siDat[is.na(siDat$si) == F,]  # dropping missing values
-  
-  #return(list(contRegionDist = contRegionDist, nodeLineList = nodeLineList, elist = elist, siDat = siDat, 
-  #            nodeListCaseEvent = nodeListCaseEvent, elistCaseEvent = elistCaseEvent))
-  return(list(contRegionDist = contRegionDist, nodeLineList = nodeListCaseEvent, elist = elistCaseEvent, siDat = siDat))
-}
 
 ### exporting event from sormas db ----
 sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
@@ -1383,19 +956,20 @@ eventExport = function(sormas_db, fromDate, toDate){
                         WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   event = dbGetQuery(sormas_db,queryEvent)
   
-  # ## reading event participants. This can leter be nested in the where clause when loading events
-  # queryEventPart <- paste0("SELECT uuid AS uuid_eventPart, id as id_eventPart, event_id, person_id AS person_id_eventPart, resultingcase_id AS resultingcaseid_eventPart
-  #                         FROM public.eventParticipant
-  #                          WHERE deleted = FALSE")
-  # eventParticipant = dbGetQuery(sormas_db, queryEventPart)
+  ## reading event participants data that are in events only; this is needed to compute the number of ep per events
+  queryEventPart <- sprintf("SELECT  id AS id_eventPart, event_id AS event_id_eventpart, person_id AS person_id_eventPart, resultingcase_id AS resultingcase_id_eventPart
+                        FROM public.eventParticipant
+                        WHERE deleted = FALSE and event_id  in (%s)", paste("'", event$id_event, "'",collapse=",") )
+  eventParticipant = dbGetQuery(sormas_db, queryEventPart)
   
-  ## reading location; this can later be nested in event sql command
-  queryLocation <- paste0("SELECT  id AS id_location, district_id AS district_id_location, region_id AS region_id_location,
+  ## reading location; selecting only locations that correspond to an events. This improve performance
+  queryLocation <- sprintf("SELECT  id AS id_location, district_id AS district_id_location, region_id AS region_id_location,
     facility_id AS facility_id_location, facilitytype AS facilitytype_location, latitude, longitude 
-                        FROM public.location")
+                        FROM public.location
+                        WHERE id  in (%s)", paste("'", na.omit(event$eventlocation_id), "'",collapse=",") )
   location = dbGetQuery(sormas_db,queryLocation)
   
-  # load region
+  # load region 
   region = dbGetQuery(
     sormas_db,
     "SELECT id AS region_id, name AS region_name
@@ -1409,28 +983,32 @@ eventExport = function(sormas_db, fromDate, toDate){
     FROM district
     WHERE archived = FALSE"
   )
-  # #loading facility
-  # facility = dbGetQuery(
-  #   sormas_db,
-  #   "SELECT id AS id_facility, type AS type_facility, region_id AS region_id_facility, district_id AS district_id_facility, name AS name_facility
-  # FROM public.facility 
-  #   WHERE archived = FALSE"
-  # )
   
+  # merging event data with jurisdiction data
   event = event %>%
-    dplyr::mutate(reportdatetime_event = as.Date(format(reportdatetime_event, "%Y-%m-%d")))
-  
-  ret = event %>%
+    dplyr::mutate(reportdatetime_event = as.Date(format(reportdatetime_event, "%Y-%m-%d")), 
+                  startdate_event = as.Date(format(startdate_event, "%Y-%m-%d")),
+                  enddate_event = as.Date(format(enddate_event, "%Y-%m-%d")),
+                  creationdate_event = as.Date(format(creationdate_event, "%Y-%m-%d"))  ) %>%  # converting dates from POSIXct class to Date class
+    dplyr::mutate(relevantdate_event = coalesce(startdate_event, reportdatetime_event )  ) %>% # computing most relevant date using start date and fall back to report date
     dplyr::left_join(. , location,  c( "eventlocation_id" = "id_location")) %>% # merging with locationn
     dplyr::left_join(. , region,  c( "region_id_location" = "region_id")) %>% # merging with region
     dplyr::left_join(. , district,  c( "district_id_location" = "district_id")) %>% 
     tidyr::replace_na(list(region_name = "Missing Region", district_name = "Missing District"))
   
+  # merging event data with eventPart data and count number of resulting cases and ep per event
+  eventPartEvent = eventParticipant %>%
+      dplyr::left_join(. , event, c( "event_id_eventpart" = "id_event") ) %>%  # merging eventParticipant with event
+      dplyr::group_by(. , event_id_eventpart) %>% 
+      dplyr::summarise(eventPart_sum = n(),
+                       resulting_case_sum = sum(!is.na(resultingcase_id_eventpart) )
+                       ) %>% # counting number of ep and resulting cases per event
+    dplyr::left_join(., event, c("event_id_eventpart" = "id_event") )  # merging with event
   
-  return(event_data = ret)  
+  return(event_data = eventPartEvent)  
 }
 save(eventExport, file = "eventExport.R")
-eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate) 
+eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
 ### end of event export
 
 ## 
