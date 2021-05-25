@@ -50,6 +50,22 @@
 
 \usepackage{url}
 
+%%% addtional  headers from  http://haozhu233.github.io/kableExtra/awesome_table_in_pdf.pdf
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+
 
 %%%%%%%%%%%%%%%%%%
 
@@ -58,18 +74,58 @@
 <<setup, include=FALSE, cache=FALSE>>=
 library(knitr)
 library(xtable)
+library(kableExtra)
 # set global chunk options
 opts_chunk$set(fig.path='figure/minimal-', fig.align='center', fig.show='hold')
 options(formatR.arrow=TRUE,width=90)
+
+
+
 @
 
 <<loadingPackages, include=FALSE, cache=FALSE>>=
-# add global filter here
-# load port data needed form sormas before launching this app
+# add global filter here ----
+
+library(visNetwork)
+library(ggplot2)
+library(dplyr)
+library(plotly)
+library(extrafont)
+library(rpart)
+library(RColorBrewer)
+library(webshot) # for plot export
+library(ggthemes)
+library(lubridate)
+library(Hmisc)
+library(gdata)
+library(scales)
+library(EpiEstim)
+library(incidence)
+library(tidyr)
+library(DT)  
+
+library(rgdal)
+library(maps)
+library(maptools)
+library(mapdata)
+library(ggplot2)
+library(foreign)    
+library(sp)
+library(broom)
+library(stringi)
+
+library(ggmap)
+library(rgeos)
+library(tmap)
+#library(sf)
+library(lattice)
+library(RPostgreSQL)
+library(igraph)
+library(leaflet)
+library(fitdistrplus) 
+library(tidyverse)
+
 @
-
-
-
 
 \title{Disease Situation Report}
 
@@ -97,11 +153,58 @@ from additional RKI-based surveillance systems.
 
 <<globalIndicators, echo=FALSE >>=
 # add all functions to compute global indicators here an returned a table
-source("/home/bsi17/SORMAS-Stats-next-gen/sormas-stats-shinyapp/loading_functions.R")
-
-load("casePersonRegionDist.RData")
+setwd("/home/bsi17/SORMAS-Stats-next-gen/sormas-stats-sitrep")
 
 @
+
+<<globalFunctions, echo=FALSE >>=
+# add all functions to compute global indicators here an returned a table
+cuntbyRegionDistrictCase = function(data, byRegion = TRUE){  # depends on factorLevelCount function
+  rowTtotal = factorLevelCount(data = data, rowName = "Global")  #forst row on table containing total counts for all regions
+  
+  if(byRegion == FALSE){
+    districtName = unique(data$district_name) 
+    for(i in districtName){
+      tempData = data[data$district_name == i,]
+      rowTtotal = rbind(rowTtotal, factorLevelCount(data = tempData, rowName = i))
+    }
+  }else{
+    regionName = unique(data$region_name)
+    for(i in regionName){
+      tempData = data[data$region_name == i,]
+      rowTtotal = rbind(rowTtotal, factorLevelCount(data = tempData, rowName = i) )
+    }
+    
+  }
+  
+  countByRegionVaribles = rowTtotal[order(rowTtotal$Total, decreasing = T), ]
+  countByRegionVaribles$CONFIRMED = countByRegionVaribles$CONFIRMED
+  countByRegionVaribles = countByRegionVaribles %>%
+    dplyr::mutate(CONFIRMED = CONFIRMED+ CONFIRMED_NO_SYMPTOMS+ CONFIRMED_UNKNOWN_SYMPTOMS ) %>%
+    dplyr::select(-CONFIRMED_NO_SYMPTOMS, -CONFIRMED_UNKNOWN_SYMPTOMS  )
+  countByRegionVaribles = countByRegionVaribles %>% 
+    dplyr::rename(Total_last24hrs  = nlast24hrs, confirmed = CONFIRMED,  Unclassified = NOT_CLASSIFIED, Probable=PROBABLE, Suspected=SUSPECT,
+                  Deseased =DECEASED, No_Outcome= NO_OUTCOME, Recovered = RECOVERED, UnK_Outcome =UNKNOWN, In_Country =IN_COUNTRY, Imported = POINT_OF_ENTRY,
+                  Home_Q=HOME, Institutional_Q=INSTITUTIONELL, No_Q=NONE, Other_Q=OTHER, Unk_Q=UNKNOWN.1 )
+  
+  return(countByRegionVaribles)
+}
+##
+factorLevelCount = function(data,  rowName){ #takes a data and rerun the counts of the variables in the function
+  Name = rowName
+  Total = nrow(data)
+  nlast24hrs = nrow(data[data$reportdate %in% c(Sys.Date()-1, Sys.Date()), ])
+  caseByClassTotal = data.frame(t(as.matrix( table(factor(data$caseclassification, levels = c("CONFIRMED", "CONFIRMED_NO_SYMPTOMS", "CONFIRMED_UNKNOWN_SYMPTOMS",
+                                                                                              "NOT_CLASSIFIED", "PROBABLE", "SUSPECT") ) ) )))
+  caseByOutcomeTotal = data.frame(t(as.matrix( table(factor(data$outcome, levels = c("DECEASED","NO_OUTCOME","RECOVERED","UNKNOWN") )) )))
+  caseByQuarantineTotal = data.frame(t(as.matrix( table(factor(data$quarantine, levels =  c("HOME","INSTITUTIONELL","NONE","OTHER","UNKNOWN") )) )))
+  caseByOriginTotal = data.frame(t(as.matrix( table(factor(data$caseorigin, levels = c("IN_COUNTRY","POINT_OF_ENTRY"))) )))
+  globalCount = data.frame(Name,Total, nlast24hrs, caseByClassTotal, caseByOutcomeTotal, caseByOriginTotal, caseByQuarantineTotal)
+  return(globalCount)
+}
+
+@
+
 
 \begin{table}[H]
 \centering
@@ -128,9 +231,26 @@ day. \textbf{+119} patients with COVID-19 died in ICU since the previous day.
 
 <<cacesByRegion, echo=FALSE >>=
 # table showeing the nmber of cases by region
+load("/home/bsi17/SORMAS-Stats-next-gen/sormas-stats-sitrep/casePersonRegionDist.RData")
 
 countByRegion = cuntbyRegionDistrictCase(data = casePersonRegionDist, byRegion = TRUE )
-xtable(countByRegion)
+#xtable(countByRegion)
+kbl(countByRegion[, c(1:11)], booktabs = T, caption = "Case count by region") %>%  #longtable = T
+kable_styling(latex_options = c("striped", "scale_down"), font_size = 12, position = "center")
+
+
+kbl(countByRegion[, c(1,2,12:18)], booktabs = T, caption = "Case count by region") %>%  #longtable = T
+kable_styling(latex_options = c("striped", "scale_down"), font_size = 12)
+
+
+
+countByDostrict = cuntbyRegionDistrictCase(data = casePersonRegionDist, byRegion = TRUE )
+kbl(countByDostrict[, c(1:11)], booktabs = T, caption = "Case count by district") %>%  #longtable = T
+kable_styling(latex_options = c("striped", "scale_down"), font_size = 12)
+
+
+kbl(countByDostrict[, c(1,2,12:18)], booktabs = T, caption = "Case count by district") %>%  #longtable = T
+kable_styling(latex_options = c("striped", "scale_down"), font_size = 12)
 
 @
 
