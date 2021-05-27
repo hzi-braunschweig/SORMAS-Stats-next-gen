@@ -123,6 +123,11 @@ eventData = eventData %>%
   dplyr::mutate(n_ep = rep(5,nrow(eventData)), lat = 10.53128 + rnorm(nrow(eventData)), long = 52.21099 + nrow(eventData) ) %>%
   dplyr::select(-c(latitude, longitude ))
 
-#disconnect from db ----
+
+## creating event_variable_data dateset that maps event variables to their categories. This mapping would be used for selecting columns on event table by jurisdiction
+event_variable_data = event_variable_category_maper(cuntbyRegionTableEvent = cuntbyRegionDistrictEvent(data = eventData , byRegion = TRUE ))
+
+
+#disconnect from db ---- 
 dbDisconnect(sormas_db)
 

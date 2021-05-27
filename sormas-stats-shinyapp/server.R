@@ -1757,10 +1757,14 @@ shinyServer(
 
 ## event count by jurisdiction -----
     output$eventCountbyJurisdictionTable <- DT::renderDataTable({
+      eventVarSelUi =  event_variable_data %>%
+        dplyr::filter(event_variable %in% input$eventTableColumnVaribleUi ) # getting category of selected varaibles
     
       if(is.null(input$regionEventUi) )
       {
         cuntbyRegionTableEvent = cuntbyRegionDistrictEvent(data = eventDataDiseaseRegionTimeFilter() , byRegion = TRUE )
+        cuntbyRegionTableEvent = cuntbyRegionTableEvent[ , (colnames(cuntbyRegionTableEvent) %in%  eventVarSelUi$category) ] #returning only selected columns
+        
         if(input$EventIndicatorTypeUi == "Count"){
           res =  DT::datatable(
             cuntbyRegionTableEvent,
@@ -1804,6 +1808,7 @@ shinyServer(
         
       } else{
         cuntbyRegionTableEvent = cuntbyRegionDistrictEvent(data = eventDataDiseaseRegionTimeFilter() , byRegion = FALSE )
+        cuntbyRegionTableEvent = cuntbyRegionTableEvent[ , (colnames(cuntbyRegionTableEvent) %in%  eventVarSelUi$category) ] #retaining only selected columns
         if(input$EventIndicatorTypeUi == "Count"){
           res =  DT::datatable(
             cuntbyRegionTableEvent,

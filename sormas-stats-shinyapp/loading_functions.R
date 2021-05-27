@@ -36,6 +36,8 @@ load("infectorInfecteeExport.R")
 load("serialIntervalPlot.R")
 load("offspringDistPlot.R")
 load("fixBirthDate.R")
+load("event_variable_category_maper.R")
+
 
 
 
