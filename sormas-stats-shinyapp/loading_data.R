@@ -110,13 +110,20 @@ eventLocRegDistParticipant = merge(eventLocRegDist, dataCombined$eventParticipan
 # loading shapfiles for France
 # You only need to load one set of shap files for your country. 
 # This is a general version of the app and that is whdy we load shapfiles from different countries
-regionShapesFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "FRA_adm1")
-departementShapesFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "FRA_adm2")
-ArrondissementFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "FRA_adm3")
-CantonFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "FRA_adm4")
-CommuneFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "FRA_adm5")
+regionShapesFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "a_reg2019")
+departementShapesFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "a_dep_2019")
+CommuneFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "a_arm2020")
+#renaming region names. This is needed to be done to the districts also
+temp = regionShapesFrance@data
+temp$libgeo = as.character(temp$libgeo)
+temp$libgeo[temp$libgeo == "Bourgogne-Franche-Comt\xe9" ] = "Bourgogne-Franche-Comte"
+temp$libgeo[temp$libgeo == "Provence-Alpes-C\xf4te d'Azur" ] = "Provence-Alpes-d'Azur"
+temp$libgeo[temp$libgeo == "\xcele-de-France" ] = "xcele-de-France"
+temp$libgeo[temp$libgeo == "La R\xe9union" ] = "La Reunion"
+regionShapesFrance@data = temp
 
-
+# renaming districts   to be added
+#
 # adding random lat, lng, and ep to event to event data
 #  to be added to event data export later
 eventData = eventData %>%

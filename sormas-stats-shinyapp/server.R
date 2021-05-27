@@ -1860,28 +1860,18 @@ shinyServer(
       map_text_size = input$eventMapTextSizeUi
       if(input$eventMapShapesUi == "Region")
       {
-        fg = qtm(shp = regionShapesFrance, text = "NAME_1", 
-                 text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "bottom")) # fill.palette = "-Blues" to qhow in reverse order, type = "4star", "8star", "radar", "rose"
+        fg = qtm(shp = regionShapesFrance, text = "libgeo", 
+                 text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "top")) # fill.palette = "-Blues" to qhow in reverse order, type = "4star", "8star", "radar", "rose"
       }
       if(input$eventMapShapesUi == "Departement")
       {
-        fg = qtm(shp = departementShapesFrance, text = "NAME_2", 
-                 text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "bottom")) 
+        fg = qtm(shp = departementShapesFrance, text = "codgeo", 
+                 text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "top")) 
       }
-      if(input$eventMapShapesUi == "Arrondissement")
+    
+      if(input$eventMapShapesUi == "Commune") 
       {
-        fg = qtm(shp = ArrondissementFrance, text = "NAME_3", 
-                 text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "bottom")) 
-      }
-      if(input$eventMapShapesUi == "Canton")
-      {
-        fg = qtm(shp = CantonFrance, text = "NAME_4", 
-                 text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "bottom")) 
-      }
-      if(input$eventMapShapesUi == "Commune")
-      {
-        fg = qtm(shp = CommuneFrance, text = "NAME_5", 
-                 text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "bottom")) 
+        fg = qtm(shp = CommuneFrance, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "bottom")) 
       }
       
       return(fg)
