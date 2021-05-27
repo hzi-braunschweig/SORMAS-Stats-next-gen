@@ -604,6 +604,18 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
               radioButtons("EventIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion", "Incidence Proportion / 100,000"),selected = c("Count"))
               ,
               pickerInput(
+                inputId = "eventTableColumnVaribleUi", 
+                label = 'Event by Jurisdictions table',
+                choices = c(levels(as.factor(event_variable_data$event_variable)) ) ,
+                selected = c("Name", "Total", "Event status"),
+                multiple = TRUE,
+                options = pickerOptions(
+                  actionsBox = TRUE,
+                  header = "Choose variables to use for table columns",
+                )
+              ),
+              
+              pickerInput(
                 "piechartEventVaribleUi", 'Choose variable to plot Pie chart',
                 choices = c("Event Status",levels(as.factor(colnames(eventData)))) ,
                 selected = "Event Status",
