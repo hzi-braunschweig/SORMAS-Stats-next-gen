@@ -634,10 +634,10 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                 )
               ),
               
-              radioButtons("eventMapShapesUi","Choose map administrative area",  choices = c("Region","Departement", "Arrondissement", "Canton", "Commune"),
+              radioButtons("eventMapShapesUi","Choose map administrative area",  choices = c("Region","Departement", "Commune"),
                            selected = c("Region")),
               sliderInput("eventMapTextSizeUi", label = "Coose text size for map", min = 0, 
-                          max = 3, step = 0.1, value = 1.5)
+                          max = 3, step = 0.1, value = 1.2)
             ),
             mainPanel(width = 10,
               tabsetPanel(tabPanel("Event dashboard", value = 6,
