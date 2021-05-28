@@ -169,7 +169,12 @@ shinyServer(
     if(input$visNetworkDiagramUi == TRUE){
       elistSel =  elistSel2ResCaseSourseCase()
       nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel$from, elistSel$to)), ]
-      plotNet(nodeLineList= nodeLineListSelResCase, elist = elistSel, IgraphLayout= input$IgraphLayoutUi)
+      # ordering colums, this is needed to be in a specific order
+      nodeToPlot = nodeLineListSelResCase %>%
+        dplyr::relocate(id, group, label,  value, shape,  code,  title)
+      elistPlot = elistSel %>%
+        dplyr::relocate(from, to)
+      plotNet(nodeLineList= nodeToPlot, elist = elistPlot, IgraphLayout= input$IgraphLayoutUi)
     } 
   })
 
@@ -275,7 +280,12 @@ shinyServer(
       dplyr::select(id, group) 
     nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$id %in% unique(c(elistSel$from, elistSel$to)), ]
     
-    net <- graph_from_data_frame(d=elistSel, vertices = nodeLineListSelResCase, directed=T)
+    # ordering colums, this is needed to be in a specific order for igraph
+    nodeToPlot = nodeLineListSelResCase %>%
+      dplyr::relocate(id, group)
+    elistPlot = elistSel %>%
+      dplyr::relocate(from, to)
+    net <- graph_from_data_frame(d=elistPlot, vertices = nodeToPlot, directed=T)
     return(net)
   })
  
