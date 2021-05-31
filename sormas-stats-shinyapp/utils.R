@@ -561,7 +561,8 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   ## reading event participants
   eventsParticipant = dbGetQuery(sormas_db,"SELECT  DISTINCT id, uuid, event_id, person_id, resultingcase_id
                                from public.eventParticipant
-                               ")
+                               WHERE deleted = FALSE"
+                                 )
   ## reading location; this can later be nested in event sql command
   queryLocation <- paste0("SELECT  id, district_id, region_id
                           FROM public.location")

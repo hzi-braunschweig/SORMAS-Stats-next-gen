@@ -1,6 +1,8 @@
 # check available R versions here: <https://hub.docker.com/r/rocker/shiny/tags>
-FROM rocker/shiny:3.6.3
+#FROM rocker/shiny:3.6.3
+FROM rocker/shiny:latest
 # ---------------------------------------------
+LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 #code with default packahes from https://hub.docker.com/r/rocker/shiny-verse/dockerfile
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   libxml2-dev \
@@ -10,7 +12,6 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   libmariadbclient-dev \
   libpq-dev \
   libssl-dev \
-  libxml2-dev \
   libcurl4-openssl-dev \
   libssh2-1-dev \
   unixodbc-dev \
@@ -19,11 +20,14 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     tidyverse \
     dplyr \
     devtools \
-    formatR \
+	formatR \
     remotes \
     selectr \
-    caTools \
+    caTools \	      
   && rm -rf /tmp/downloaded_packages
+  
+  
+  
 #----------------------------------------------
 # ---------------------------------------------
 # Install missing debian/ubuntu packages
@@ -59,7 +63,7 @@ RUN apt-get update \
 # Copy the app
 RUN ls -la /srv/shiny-server
 RUN rm -rf /srv/shiny-server/*
-COPY shinyapp /srv/shiny-server/
+COPY sormas-stats-shinyapp /srv/shiny-server/
 RUN chmod -R 755 /srv/shiny-server/
 RUN ls -la /srv/shiny-server
 
@@ -67,5 +71,5 @@ RUN ls -la /srv/shiny-server
 # (We can map it to standard HTTP port lateron when building the container!)
 EXPOSE 3838
 
-# run the shiny app
+# run the shiny app on container start
 CMD ["/usr/bin/shiny-server.sh"]
