@@ -1,6 +1,6 @@
 version: "3"
 services: 
-    sormas-stats-v3:
+    sormas-stats-v4:
         build: .
         ports: 
             - 80:3838

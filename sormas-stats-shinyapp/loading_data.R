@@ -18,12 +18,13 @@ nodeLineList = importDataFrontEndOutput$nodeLineList  # id here is person id
 elist = importDataFrontEndOutput$elist  # id here is contact id
 siDat = importDataFrontEndOutput$siDat
 
-##loading and cleaning shap files ----
+##loading and cleaning shap files for Nigeria----
 # You can download shapfiles for your country at https://www.diva-gis.org/datadown
 # This cleaning will depend on the country and the source of teh shap file, thus codes needto be adjusted in this section.
 # This default code uses the shapfile for Nigeria
-districtShapes <- rgdal::readOGR(dsn = "Shapefiles", layer = "LGAs_Aug28")
-regionShapes <- rgdal::readOGR(dsn = "Shapefiles", layer = "State_Aug28") 
+# districtShapes <- rgdal::readOGR(dsn = "shapefiles", layer = "LGAs_Aug28")
+districtShapes <- rgdal::readOGR(dsn = file.path("./data/shapefiles"), layer = "LGAs_Aug28")
+regionShapes <- rgdal::readOGR(dsn = file.path("./data/shapefiles"), layer = "State_Aug28") 
 # renaming region names to match shapfiles, do this for all names that are not the same
 regionShapes@data$StateName = as.character(regionShapes@data$StateName)
 regionShapes@data$StateName[regionShapes@data$StateName == "Fct, Abuja"] = "FCT"
@@ -75,13 +76,13 @@ eventLocReg = merge(eventLoc, dataCombined$region, by.x =  "region_id", by.y = "
 eventLocRegDist = merge(eventLocReg, dataCombined$district, by.x =  "district_id", by.y = "district_id", all.x = T, all.y = F)
 eventLocRegDistParticipant = merge(eventLocRegDist, dataCombined$eventParticipant, by.x =  "event_id", by.y = "event_id", all.x = T, all.y = F)
 
-
+ 
 # loading shapfiles for France
 # You only need to load one set of shap files for your country. 
 # This is a general version of the app and that is whdy we load shapfiles from different countries
-regionShapesFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "a_reg2019")
-departementShapesFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "a_dep_2019")
-CommuneFrance = rgdal::readOGR(dsn = "shapefiles_France", layer = "a_arm2020")
+regionShapesFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), layer = "a_reg2019")
+departementShapesFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), layer = "a_dep_2019")
+CommuneFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), layer = "a_arm2020")
 #renaming region names. This is needed to be done to the districts also
 temp = regionShapesFrance@data
 temp$libgeo = as.character(temp$libgeo)
