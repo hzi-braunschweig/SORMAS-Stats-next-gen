@@ -15,7 +15,16 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   libcurl4-openssl-dev \
   libssh2-1-dev \
   unixodbc-dev \
-  && install2.r --error \
+  xtail \
+  libv8-dev \
+  libudunits2-dev \
+  libgdal-dev \
+  perl \
+  libcompress-raw-zlib-perl \
+  && apt-get -y autoremove \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+RUN install2.r --error \
     --deps TRUE \
     tidyverse \
     dplyr \
@@ -26,46 +35,14 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     caTools \	      
   && rm -rf /tmp/downloaded_packages
   
-  
-  
-#----------------------------------------------
-# ---------------------------------------------
-# Install missing debian/ubuntu packages
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-       libcurl4-openssl-dev \
-       libv8-dev \
-       libudunits2-dev \
-       libgdal-dev \
-       perl \
-       libcompress-raw-zlib-perl \
- && apt-get -y autoremove \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
 # Install required R packages for shiny
 COPY requirements.R /root/requirements.R
 RUN Rscript /root/requirements.R
 #RUN R -e "library(gdata); gdata::installXLSXsupport()"
 
-# Debugging
-#RUN R -e ".libPaths()"
-
-# ---------------------------------------------
-# Install missing debian/ubuntu packages
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-       xtail \
- && apt-get -y autoremove \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
 # Copy the app
-RUN ls -la /srv/shiny-server
-RUN rm -rf /srv/shiny-server/*
 COPY sormas-stats-shinyapp /srv/shiny-server/
 RUN chmod -R 755 /srv/shiny-server/
-RUN ls -la /srv/shiny-server
 
 # Expose port 
 # (We can map it to standard HTTP port lateron when building the container!)
