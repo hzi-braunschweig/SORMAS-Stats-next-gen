@@ -24,15 +24,17 @@ DB_USER = "sormas_user"
 DB_PASS = "password"
 DB_HOST = "127.0.0.1"
 DB_PORT = "5432"
-DB_NAME= "sormas"
+DB_NAME = "sormas"
 ## end of configuratiion
 
+preserve_logs = true
 
 # load shiny packages
 #source("loading_packages.R")
 source(file.path(".", "loading_packages.R"))
 
-# library(shiny)
+library(shiny)
+library(shinyjs)
 # library(shinythemes)
 # library(shinydashboard)
 # library(shinyWidgets)
