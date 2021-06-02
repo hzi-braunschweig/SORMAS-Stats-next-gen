@@ -11,9 +11,9 @@ node {
         echo 'Deploying....'
         withCredentials([ usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERUSER', passwordVariable: 'DOCKERPASS' )]) {
         	sh """
-            sudo buildah bud --pull-always --no-cache -t sormas-stats .
+            sudo buildah bud --pull-always --no-cache -t sormas-stats-base .
             sudo buildah login -u '${DOCKERUSER}' -p '${DOCKERPASS}' docker.io
-            sudo buildah push -f v2s2 sormas-stats hzibraunschweig/sormas-stats:latest
+            sudo buildah push -f v2s2 sormas-stats-base hzibraunschweig/sormas-stats:latest
             """                                                                                                                 
         }
     }
