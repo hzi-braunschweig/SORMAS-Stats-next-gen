@@ -41,8 +41,9 @@ RUN Rscript /root/requirements.R
 #RUN R -e "library(gdata); gdata::installXLSXsupport()"
 
 # Copy the app
-COPY sormas-stats-shinyapp /srv/shiny-server/
-RUN chmod -R 755 /srv/shiny-server/
+RUN mkdir /srv/shiny-server/sormas-stats-shinyapp
+COPY sormas-stats-shinyapp /srv/shiny-server/sormas-stats-shinyapp
+RUN chmod -R 755 /srv/shiny-server/sormas-stats-shinyapp
 
 # Expose port 
 # (We can map it to standard HTTP port lateron when building the container!)
@@ -52,4 +53,4 @@ RUN ls -la /srv/shiny-server/
 RUN ls -la /usr/bin/
 
 # run the shiny app on container start
-CMD ["/usr/bin/shiny-server.sh"]
+CMD ["/usr/bin/shiny-server"]
