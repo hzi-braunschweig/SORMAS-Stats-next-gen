@@ -27,8 +27,6 @@ DB_PORT = "5432"
 DB_NAME = "sormas"
 ## end of configuratiion
 
-preserve_logs = true
-
 # load shiny packages
 #source("loading_packages.R")
 source(file.path(".", "loading_packages.R"))
