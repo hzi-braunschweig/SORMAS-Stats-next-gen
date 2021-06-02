@@ -4,11 +4,11 @@ FROM hzibraunschweig/sormas-stats-base:latest
 # ---------------------------------------------
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 
-ENV DB_USER = "sormas_user"
-ENV DB_PASS = "password"
-ENV DB_HOST = "127.0.0.1"
-ENV DB_PORT = "5432"
-ENV DB_NAME = "sormas"
+ENV DB_USER="sormas_user"
+ENV DB_PASS="password"
+ENV DB_HOST="127.0.0.1"
+ENV DB_PORT="5432"
+ENV DB_NAME="sormas"
 
 # Copy the app
 RUN mkdir /srv/shiny-server/sormas-stats-shinyapp
