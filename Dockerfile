@@ -14,8 +14,5 @@ RUN chmod -R 755 /srv/shiny-server/sormas-stats-shinyapp
 # (We can map it to standard HTTP port lateron when building the container!)
 EXPOSE 3838
 
-RUN ls -la /srv/shiny-server/
-RUN ls -la /usr/bin/
-
 # run the shiny app on container start
 CMD ["/usr/bin/shiny-server"]
