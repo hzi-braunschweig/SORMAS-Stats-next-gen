@@ -13,11 +13,11 @@ sormas-stats-shinyapp is a web app based on R Shiny framework. It contains modul
 ## Install softwares
 Make sure git and docker is installed.
 ```bash
+sudo -s
 apt install git docker docker-compose
 ```
 ## Download the repo
 ```bash
-sudo -s
 git clone git@github.com:hzi-braunschweig/SORMAS-Stats-next-gen.git
 cd SORMAS-Stats-next-gen
 ```
