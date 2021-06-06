@@ -30,9 +30,9 @@ docker build --no-cache -t sormas-stats-image .
 ```
 Run the container and map to port 3839
 ```bash
-docker run -d --rm -p 3839:3838 sormas-stats-image
+sudo docker run  -d --network=host --rm -p 3839:3839 sormas-stats-image 
 ```
-
+When running the app in detach mode `-d`, you need to refresh the page (http://0.0.0.0:3839/) and wait for the app to load. The duration depends on the amount of data that the app need to export from sormas. Running app with option `--network=host`  may result in a warning message `WARNING: Published ports are discarded when using host network mode`, just ignore it. `--network=host` is needed to specify the network where the app can find the sormas-postgres db.
 You can also download the image from dockerhub by searching for `sormas-stats`, thus saving the time wasted in building the image.
 
 ## Run shinyapp-non-docker
