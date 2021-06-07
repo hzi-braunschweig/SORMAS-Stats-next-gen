@@ -4,7 +4,7 @@ FROM rocker/shiny:latest
 # ---------------------------------------------
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 #code with default packahes from https://hub.docker.com/r/rocker/shiny-verse/dockerfile
-RUN apt-get update -qq && apt-get -y --no-install-recommends install \
+RUN apt-get update -qq && apt-get upgrade -y && apt-get -y --no-install-recommends install \
   libmysqlclient-dev \
   default-libmysqlclient-dev \
   libxml2-dev \
@@ -24,6 +24,8 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   && apt-get -y autoremove \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+  
+    
 RUN install2.r --error \
     --deps TRUE \
     tidyverse \
@@ -36,6 +38,8 @@ RUN install2.r --error \
   && rm -rf /tmp/downloaded_packages
   
 # Install required R packages for shiny
-COPY requirements.R /root/requirements.R
-RUN Rscript /root/requirements.R
-#RUN R -e "library(gdata); gdata::installXLSXsupport()"
+COPY sormas-stats-shinyapp/shinyapp-in-docker/example-app/renv.lock ./renv.lock
+
+# install renv & restore packages
+RUN Rscript -e 'install.packages("renv")'
+RUN Rscript -e 'renv::restore()'

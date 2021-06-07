@@ -13,7 +13,7 @@ node {
         dir('docker-base') {
 	        withCredentials([ usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERUSER', passwordVariable: 'DOCKERPASS' )]) {
 	        	sh """
-	        	cp ../requirements.R .
+	        	cp ../sormas-stats-shinyapp/shinyapp-in-docker/example-app/renv.lock .
 	            sudo buildah bud --pull-always --no-cache -t sormas-stats-base .
 	            sudo buildah login -u '${DOCKERUSER}' -p '${DOCKERPASS}' docker.io
 	            sudo buildah push -f v2s2 sormas-stats-base hzibraunschweig/sormas-stats-base:latest
