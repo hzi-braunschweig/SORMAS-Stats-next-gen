@@ -38,7 +38,7 @@ RUN install2.r --error \
   && rm -rf /tmp/downloaded_packages
   
 # Install required R packages for shiny
-COPY sormas-stats-shinyapp/shinyapp-in-docker/example-app/renv.lock ./renv.lock
+COPY renv.lock ./renv.lock
 
 # install renv & restore packages
 RUN Rscript -e 'install.packages("renv")'
