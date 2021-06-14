@@ -2,7 +2,7 @@ node {
     
         
     stage('checkout') {
-        git branch: 'feature_SORGEN-89', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
+        git branch: 'development', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
     }
     
         
