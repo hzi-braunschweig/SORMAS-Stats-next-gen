@@ -12,7 +12,7 @@ ENV DB_NAME="sormas"
 
 # Copy the app
 RUN mkdir /srv/shiny-server/sormas-stats-shinyapp
-COPY sormas-stats-shinyapp/shinyapp-in-docker/example-app /srv/shiny-server/sormas-stats-shinyapp
+COPY sormas-stats-shinyapp/sormas-stats-app /srv/shiny-server/sormas-stats-shinyapp
 RUN chmod -R 755 /srv/shiny-server/sormas-stats-shinyapp
 COPY run_app.sh /usr/sbin/run_app.sh
 RUN chmod 700 /usr/sbin/run_app.sh
