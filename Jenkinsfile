@@ -2,7 +2,7 @@ node {
     
         
     stage('checkout') {
-        git branch: 'master', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
+        git branch: '${BRANCH}', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
     }
     
         
