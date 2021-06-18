@@ -1,0 +1,13 @@
+# This file contain the credentials to permit sormas-stats to connect to the sormas database
+# For security purposes, it is recommended to store this file outside sormas-stats application 
+# and tel sormas-stats where to find this file when launching sormas-stats app. 
+# Specify the file path in loading_data.R file
+default:
+  sormas_datawarehouse:
+    driver: 'Postgres' 
+    server: '127.0.0.1'
+    uid: 'sormas_user'
+    pwd: 'password'  
+    port: 5432
+    database: 'sormas'
+    

@@ -1,7 +1,9 @@
 
 
 ## Extracting eventData -----
-sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
+dw <- config::get(file = file.path("./db_connection_settings/sormas-stats_config.yml"), value = "sormas_datawarehouse", config = "default")
+sormas_db = DBI::dbConnect(PostgreSQL(), user= dw$uid,  dbname=dw$database, password = dw$pwd, host=dw$server, port=dw$port)
+#sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
 eventData = eventExport(sormas_db,fromDate = event_fromDate, toDate = event_toDate)
 
 ## Extracting infectorInfecteeData -----
@@ -50,12 +52,12 @@ person = person[, colnames(person) %in% personVar]
 
 
 ## mergig case and person table
-casePerson = merge(dataCombined$case , person, by=  "person_id",  all.x = T, all.y = F ) # to ge the casevaraibles of contacts. Contacts that
+casePerson = base::merge(dataCombined$case , person, by=  "person_id",  all.x = T, all.y = F ) # to ge the casevaraibles of contacts. Contacts that
 # calculating age at point that the person was a case
 casePerson$age = as.numeric(round((casePerson$reportdate - casePerson$birthDate)/365))
 
 # merging casePerson with region
-casePersonRegion = merge(casePerson, dataCombined$region, by = "region_id", all.x = T, all.y = F)
+casePersonRegion = base::merge(casePerson, dataCombined$region, by = "region_id", all.x = T, all.y = F)
 
 ## Adding week, month and year  as individual colums using date of report
 #casePersonRegion = casePersonRegion[casePersonRegion$reportdate > as.Date("2017-05-01"),] # deleting cases with date errors 
@@ -67,14 +69,14 @@ casePersonRegion$reportyear = year(casePersonRegion$reportdate)
 casePersonRegion$total = rep(1, nrow(casePersonRegion))
 
 ### merging casePersonRegion with district  ##
-casePersonRegionDist = merge(casePersonRegion, dataCombined$district, by = "district_id", all.x = T, all.y = F)
+casePersonRegionDist = base::merge(casePersonRegion, dataCombined$district, by = "district_id", all.x = T, all.y = F)
 
 #### event and event participant data merging -----
 ## source data is event table and we mergr in this order: event*location*region*district*evetnPartucipant*Person
-eventLoc = merge(dataCombined$event, dataCombined$location, by.x =  "eventlocation_id", by.y = "location_id", all.x = T, all.y = F)
-eventLocReg = merge(eventLoc, dataCombined$region, by.x =  "region_id", by.y = "region_id", all.x = T, all.y = F)
-eventLocRegDist = merge(eventLocReg, dataCombined$district, by.x =  "district_id", by.y = "district_id", all.x = T, all.y = F)
-eventLocRegDistParticipant = merge(eventLocRegDist, dataCombined$eventParticipant, by.x =  "event_id", by.y = "event_id", all.x = T, all.y = F)
+eventLoc = base::merge(dataCombined$event, dataCombined$location, by.x =  "eventlocation_id", by.y = "location_id", all.x = T, all.y = F)
+eventLocReg = base::merge(eventLoc, dataCombined$region, by.x =  "region_id", by.y = "region_id", all.x = T, all.y = F)
+eventLocRegDist = base::merge(eventLocReg, dataCombined$district, by.x =  "district_id", by.y = "district_id", all.x = T, all.y = F)
+eventLocRegDistParticipant = base::merge(eventLocRegDist, dataCombined$eventParticipant, by.x =  "event_id", by.y = "event_id", all.x = T, all.y = F)
 
  
 # loading shapfiles for France
