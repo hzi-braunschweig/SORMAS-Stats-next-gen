@@ -1142,10 +1142,19 @@ shinyServer(
     ## plotting case pyramid ########
     output$casePyramidPlot <- renderPlotly({
       temp = casePersonFilter()
-      print(
-        ggplotly(
-          pyramidPlotFunction(data = temp)
-        ))
+      if(input$sexCategoryUi == "Male X Female")
+      {
+        fg =  pyramidPlotFunction(data = temp, sexCat = "MaleFemale")
+      }
+      if(input$sexCategoryUi == "Male X Others")
+      {
+        fg =  pyramidPlotFunction(data = temp, sexCat = "MaleOther")
+      }
+      if(input$sexCategoryUi == "Female X Others")
+      {
+        fg = pyramidPlotFunction(data = temp, sexCat = "FemaleOther")
+      }
+      return(fg)
     })
 
    #### Plotting time series plot for cases ###
