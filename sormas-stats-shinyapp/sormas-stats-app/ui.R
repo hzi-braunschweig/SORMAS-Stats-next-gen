@@ -374,7 +374,9 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                             checkboxInput(inputId = "byRegiontimeUnitUi", label = "Cases by region", value =F),
                                             checkboxInput(inputId = "cumRegionUi", label = "Cummulative cases by region", value =F)
                                             ),
-                           conditionalPanel(condition = "input.tabs1==3", h4(" ")),
+                           conditionalPanel(condition = "input.tabs1==3", h4(" "),
+                                            radioButtons("sexCategoryUi","Choose sex category",  choices = c("Male X Female","Male X Others", "Female X Others"),selected = c("Male X Female"))
+                                            ),
                            conditionalPanel(condition = "input.tabs1==4",
                                             radioButtons("caseMapshapesUi","Map shapes",  choices = c("By region","By district"),selected = c("By region")),
                                             radioButtons("caseleafletMapUi","Map type",  choices = c("Shapfiles","Leaflet"),selected = c("Shapfiles")),
@@ -496,7 +498,14 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                        ,
                                        tabPanel("Time series plot", value = 2, plotlyOutput("caseTimeSeriesPlot", width = "100%", height = "80vh"))
                                        ,
-                                       tabPanel("Case Pyramid",  value = 3,  plotlyOutput("casePyramidPlot", width = "80%", height = "80vh") )
+                                       tabPanel("Case Pyramid",  value = 3,
+                                                wellPanel(
+                                                  h4(helpText("Case pyramid by Sex and Age")) , 
+                                                  #plotOutput("casePyramidPlot", width = "100%", height = "auto")
+                                                  plotlyOutput("casePyramidPlot", width = "90%", height = "85vh"),
+                                                  style = "background: white"
+                                                ) 
+                                                )
                                        ,
                                        tabPanel("Administrative map", value = 4, plotOutput("regionMapCaseCount", width = "100%", height = "80vh"))
                                        ,

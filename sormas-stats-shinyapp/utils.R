@@ -1728,39 +1728,51 @@ contIdsForSingleChain = function(elist, uuid_node)
   return(contId)
 }
 save(contIdsForSingleChain, file = "contIdsForSingleChain.R")
-##
-pyramidPlotFunction = function(data)
-{
+## 
+pyramidPlotFunction = function(data, sexCat = "MaleFemale"){
+  # default sexCat is MaleFemale, possible values are: MaleOther, FemaleOther
+  # sexCat defined the categories of sex to use
   data$sex = as.character(data$sex)
   # deleting casas with missing velues fro age and gender
   data$sex[data$sex == ""] = NA # assignning "" as missing
-  pyramidData = data %>% drop_na(sex,age)   # dropping missing values of age and sex
-  pyramidData = pyramidData[pyramidData$sex %in% c("MALE", "FEMALE"),] # retain mele and female only fro now
+  pyramidData = data %>% tidyr::drop_na(sex,age)   # dropping missing values of age and sex
+  pyramidData = pyramidData[pyramidData$sex %in% c("MALE", "FEMALE", "OTHER"),] # retain mele and female only fro now
   ## cut the age variable into age groups with 5-year intervals
   pyramidData$ageCat = cut(pyramidData$age, breaks = seq(0, 100, 5), right = FALSE) 
-  pyramidData$population = 1
+  pyramidData$count = 1
   ## aggregate the data by gender and age group
-  pyramidData <- aggregate(formula = population ~ sex + ageCat, data = pyramidData, FUN = sum)
-  
-  
+  pyramidData <- aggregate(formula = count ~ sex + ageCat, data = pyramidData, FUN = sum)
   
   ## sort data by first by gender, then by age groups
   pyramidData <- with(pyramidData, pyramidData[order(sex,ageCat),])
-  pyramidData$caseCount <- ifelse(pyramidData$sex == "MALE", -1*pyramidData$population, pyramidData$population)
-  
-  pyramitPlot = ggplot(data = pyramidData, 
-                       mapping = aes(x = ageCat, y = caseCount, fill = sex)) + 
+  if(sexCat == "MaleFemale"){
+    pyramidData = dplyr::filter(pyramidData, sex %in% c("MALE", "FEMALE") )
+    pyramidData$caseCount <- ifelse(pyramidData$sex == "MALE", -1*pyramidData$count, pyramidData$count)
+  }
+  if(sexCat == "MaleOther"){
+    pyramidData = dplyr::filter(pyramidData, sex %in% c("MALE", "OTHER") )
+    pyramidData$caseCount <- ifelse(pyramidData$sex == "MALE", -1*pyramidData$count, pyramidData$count)
+  }
+  if(sexCat == "FemaleOther"){
+    pyramidData = dplyr::filter(pyramidData, sex %in% c("FEMALE", "OTHER") )
+    pyramidData$caseCount <- ifelse(pyramidData$sex == "FEMALE", -1*pyramidData$count, pyramidData$count)
+  }
+  pyramidData = pyramidData %>%  
+    dplyr::rename(Sex = sex) 
+  pyramitPlot = ggplot(data = pyramidData, mapping = aes(x = ageCat, y = caseCount, fill = Sex)) + 
     geom_col() +
     coord_flip() +
-    scale_y_continuous(labels = abs, limits = max(pyramidData$population) * c(-1,1)) +
-    labs(y = "Case count", x = "Age group")
-  
-  #print(pyramitPlot)
+    scale_y_continuous(labels = abs, limits = max(pyramidData$count) * c(-1,1)) +
+    labs(y = "Case count", x = "Age group") +
+    theme(axis.text=element_text(size=12), axis.title=element_text(size=16), legend.title = element_text(size=14)  )
+  #pyramitPlot =  ggplotly(pyramitPlot) %>% layout(legend = list(orientation = "h", x = 0.1, y = -0.1)) # x and y determine legend position 
+  pyramitPlot =  ggplotly(pyramitPlot) %>% layout(legend = list(orientation = "v", x = 1, y = 1)) # x and y determine legend position
   return(pyramitPlot)
 }
-save(pyramidPlotFunction, file = "pyramidPlotFunction.R")
+# pyramidPlotFunctionMaleOther(data = casePersonRegionDist, sexCat = "MaleFemale")
+save(pyramidPlotFunction, file = "./utils/pyramidPlotFunction.R")
 ##
-## Time series plotting functions for cases count
+## Time series plotting functions for cases count 
 timeSeriesPlotDay = function(data, cum){
   #defining legends
   f <- list(
