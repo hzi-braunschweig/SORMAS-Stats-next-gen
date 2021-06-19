@@ -497,14 +497,6 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
     toDate = as.character(Sys.Date()) 
   }
   # connecting to sormas db and reading data needed by sormas-stats
-  # reading cases
-  queryCase <- paste0("SELECT  id AS caze_id, uuid AS uuid_case, disease AS disease_case, reportdate AS reportdate_case, person_id AS person_idcase,
-  region_id AS region_idcase, district_id AS district_idcase, caseclassification AS caseclassification_case, outcome AS outcome_case, epidnumber, 
-  symptoms_id AS symptoms_idcase
-                          FROM public.cases 
-                          WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "' ")
-  case = dbGetQuery(sormas_db,queryCase)
-  
   ## reading contact data ###
   queryContact <- paste0("SELECT id, uuid, caze_id, district_id, region_id, person_id,reportdatetime, lastcontactdate, disease,
                     contactclassification,contactproximity,resultingcase_id, followupstatus, followupuntil, contactstatus,
@@ -513,10 +505,14 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
                           WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   contact = dbGetQuery(sormas_db,queryContact)
   
-  ### reading person data  ###
-  person = dbGetQuery(sormas_db,"SELECT  id AS id_person, uuid AS uuid_person, sex 
-                               from public.person
-                               ") 
+  # reading cases
+  queryCase <- paste0("SELECT  id AS caze_id, uuid AS uuid_case, disease AS disease_case, reportdate AS reportdate_case, person_id AS person_idcase,
+  region_id AS region_idcase, district_id AS district_idcase, caseclassification AS caseclassification_case, outcome AS outcome_case, epidnumber,
+  symptoms_id AS symptoms_idcase
+                          FROM public.cases
+                          WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "' ")
+  case = dbGetQuery(sormas_db,queryCase)
+  
   # reading region
   region = dbGetQuery(sormas_db,"SELECT  id AS region_id, name AS region_name
                                from public.region
@@ -528,9 +524,11 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
                                where archived = FALSE
                                ")
   #loading symptom data
-  symptoms = dbGetQuery(sormas_db,"SELECT id, onsetdate
-                               from public.symptoms
-                              ")
+  querySymptom <- sprintf("SELECT id, onsetdate
+                        FROM public.symptoms
+                        WHERE id  in (%s)", paste("'", case$symptoms_idcase, "'",collapse=",") ) # only symtoms linkded to selected cases
+  symptoms = dbGetQuery(sormas_db, querySymptom)
+  
   # reading event
   queryEvent <- paste0("SELECT id AS event_id, uuid AS uuevent_id, reportdatetime AS reportdatetime_event, eventstatus, disease AS disease_events,
   typeofplace, eventlocation_id, archived, risklevel AS risklevel_event
@@ -539,15 +537,25 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   events = dbGetQuery(sormas_db,queryEvent)
   
   ## reading event participants
-  eventsParticipant = dbGetQuery(sormas_db,"SELECT id AS id_eventparticipant, uuid AS uuid_eventparticipant, event_id, person_id AS person_id_eventparticipant,
+  queryEventPart <- sprintf("SELECT id AS id_eventparticipant, uuid AS uuid_eventparticipant, event_id, person_id AS person_id_eventparticipant,
   resultingcase_id AS resultingcase_id_eventparticipant
-                               from public.eventParticipant
-                               WHERE deleted = FALSE"
-  )
+                        FROM public.eventParticipant
+                        WHERE deleted = FALSE and event_id  in (%s)", paste("'", events$event_id, "'",collapse=",") ) # only ep linkded to selected events
+  eventsParticipant = dbGetQuery(sormas_db, queryEventPart)
+  
   ## reading location
-  queryLocation <- paste0("SELECT  id, district_id, region_id
-                          FROM public.location")
+  queryLocation <- sprintf("SELECT id, district_id, region_id
+                        FROM public.location
+                        WHERE id  in (%s)", paste("'", na.omit(events$eventlocation_id), "'",collapse=",") ) # only locations linked to events
   location = dbGetQuery(sormas_db,queryLocation)
+  
+  ### reading person data  ###
+  # only persons linkded to cases, contacts or eps
+  queryPerson <- sprintf("SELECT id AS id_person, uuid AS uuid_person, sex 
+                        FROM public.person
+                        WHERE id  in (%s)", paste("'", base::unique(c(case$person_idcase, contact$person_id, eventsParticipant$person_id_eventparticipant )), "'",collapse=",") ) 
+  person = dbGetQuery(sormas_db, queryPerson)
+  
   
   # merging cases with CONFIRMED_UNKNOWN_SYMPTOMS and  CONFIRMED_NO_SYMPTOMS as confirmed 
   case$caseclassification_case[case$caseclassification_case == "CONFIRMED_NO_SYMPTOMS" ] = "CONFIRMED"
@@ -735,7 +743,7 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
 }
 save(mergingDataFromDB, file = "./utils/mergingDataFromDB.R")
 
-
+ 
 mergingDataFromDB_210617 = function(sormas_db, fromDate, toDate, uniquePersonPersonContact = TRUE)
 { 
   ## computing default time based on 90 days in the past if  not provided by user
@@ -1250,11 +1258,12 @@ eventExport = function(sormas_db, fromDate, toDate){
       dplyr::summarise(eventPart_sum = n(),
                        resulting_case_sum = sum(!is.na(resultingcase_id_eventpart) )
                        ) %>% # counting number of ep and resulting cases per event
-    dplyr::left_join(., event, c("event_id_eventpart" = "id_event") )  # merging with event
+    dplyr::right_join(., event, c("event_id_eventpart" = "id_event") ) %>% # merging with event, use right join to keep events with no ep
+    tidyr::replace_na(list(eventPart_sum = 0, resulting_case_sum = 0)) # replacing na with 0
   
   return(event_data = eventPartEvent)  
 }
-save(eventExport, file = "eventExport.R")
+save(eventExport, file = "./utils/eventExport.R")
 eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
 ### end of event export
 
