@@ -1,15 +1,11 @@
 
-
 ## Extracting eventData -----
-dw <- config::get(file = file.path("./db_connection_settings/sormas-stats_config.yml"), value = "sormas_datawarehouse", config = "default")
-sormas_db = DBI::dbConnect(PostgreSQL(), user= dw$uid,  dbname=dw$database, password = dw$pwd, host=dw$server, port=dw$port)
-#sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
+sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
 eventData = eventExport(sormas_db,fromDate = event_fromDate, toDate = event_toDate)
 
 ## Extracting infectorInfecteeData -----
 infectorInfecteeData = infectorInfecteeExport(sormas_db, fromDate = fromDate, toDate = toDate)
- 
-## The code below would need to be transformed in to independent functions later
+
 
 ## Extracting contact data ----
 # mergingDataFromDB extracts network data, default contact data and serial interval data
@@ -20,19 +16,7 @@ nodeLineList = importDataFrontEndOutput$nodeLineList  # id here is person id
 elist = importDataFrontEndOutput$elist  # id here is contact id
 siDat = importDataFrontEndOutput$siDat
 
-##loading and cleaning shap files for Nigeria----
-# You can download shapfiles for your country at https://www.diva-gis.org/datadown
-# This cleaning will depend on the country and the source of teh shap file, thus codes needto be adjusted in this section.
-# This default code uses the shapfile for Nigeria
-# districtShapes <- rgdal::readOGR(dsn = "shapefiles", layer = "LGAs_Aug28")
-districtShapes <- rgdal::readOGR(dsn = file.path("./data/shapefiles"), layer = "LGAs_Aug28")
-regionShapes <- rgdal::readOGR(dsn = file.path("./data/shapefiles"), layer = "State_Aug28") 
-# renaming region names to match shapfiles, do this for all names that are not the same
-regionShapes@data$StateName = as.character(regionShapes@data$StateName)
-regionShapes@data$StateName[regionShapes@data$StateName == "Fct, Abuja"] = "FCT"
-regionShapes@data$StateName[regionShapes@data$StateName == "Akwa Ibom"] = "Akwa-Ibom"
-
-
+## The code below would need to be transformed in to independent functions later
 #### loading case -----
 ## reading raw data from db based on time (fromDate, toDate) specified
 dataCombined = ImportingUnformatedDataFromDB(sormas_db, fromDate, toDate)
@@ -49,7 +33,6 @@ person = rbind(perTemp, perTemp2)
 
 personVar=c( "person_id", "sex","occupationtype","presentcondition", "birthDate")  
 person = person[, colnames(person) %in% personVar]
-
 
 ## mergig case and person table
 casePerson = base::merge(dataCombined$case , person, by=  "person_id",  all.x = T, all.y = F ) # to ge the casevaraibles of contacts. Contacts that
@@ -78,24 +61,36 @@ eventLocReg = base::merge(eventLoc, dataCombined$region, by.x =  "region_id", by
 eventLocRegDist = base::merge(eventLocReg, dataCombined$district, by.x =  "district_id", by.y = "district_id", all.x = T, all.y = F)
 eventLocRegDistParticipant = base::merge(eventLocRegDist, dataCombined$eventParticipant, by.x =  "event_id", by.y = "event_id", all.x = T, all.y = F)
 
+##loading and cleaning shap files for Nigeria----
+# You only need to load one set of shap files for your country. 
+# You can download shapfiles for your country at https://www.diva-gis.org/datadown
+# This cleaning will depend on the country and the source of teh shap file, thus codes needto be adjusted in this section.
+# This default code uses the shapfile for Nigeria
+# districtShapes <- rgdal::readOGR(dsn = "shapefiles", layer = "LGAs_Aug28")
+districtShapes <- rgdal::readOGR(dsn = file.path("./data/shapefiles"), layer = "LGAs_Aug28")
+regionShapes <- rgdal::readOGR(dsn = file.path("./data/shapefiles"), layer = "State_Aug28") 
+# renaming region names to match shapfiles, do this for all names that are not the same
+regionShapes@data$StateName = as.character(regionShapes@data$StateName)
+regionShapes@data$StateName[regionShapes@data$StateName == "Fct, Abuja"] = "FCT"
+regionShapes@data$StateName[regionShapes@data$StateName == "Akwa Ibom"] = "Akwa-Ibom"
  
 # loading shapfiles for France
-# You only need to load one set of shap files for your country. 
 # This is a general version of the app and that is whdy we load shapfiles from different countries
 regionShapesFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), layer = "a_reg2019")
 departementShapesFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), layer = "a_dep_2019")
 CommuneFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), layer = "a_arm2020")
-#renaming region names. This is needed to be done to the districts also
-temp = regionShapesFrance@data
-temp$libgeo = as.character(temp$libgeo)
-temp$libgeo[temp$libgeo == "Bourgogne-Franche-Comt\xe9" ] = "Bourgogne-Franche-Comte"
-temp$libgeo[temp$libgeo == "Provence-Alpes-C\xf4te d'Azur" ] = "Provence-Alpes-d'Azur"
-temp$libgeo[temp$libgeo == "\xcele-de-France" ] = "xcele-de-France"
-temp$libgeo[temp$libgeo == "La R\xe9union" ] = "La Reunion"
-regionShapesFrance@data = temp
+#renaming region and district names.
+# exporting data to correct names or regions, districts and community
+# library("rio")
+# export(regionShapesFrance@data, "regionFrance.csv")
+# export(departementShapesFrance@data, "departementFrance.csv")
+# export(CommuneFrance@data, "CommuneFrance.csv")
 
-# renaming districts   to be added
-#
+# Replaceing names in shapfile with correct names from data earlier exported
+regionShapesFrance@data = read.csv2( file = file.path("./data/shapefiles_france/regionFrance.csv"), sep = "," )
+departementShapesFrance@data = read.csv2( file = file.path("./data/shapefiles_france/departementFrance.csv"), sep = "," )
+CommuneFrance@data = read.csv2( file = file.path("./data/shapefiles_france/CommuneFrance.csv"), sep = "," )
+
 # adding random lat, lng, and ep to event to event data
 #  to be added to event data export later
 eventData = eventData %>%

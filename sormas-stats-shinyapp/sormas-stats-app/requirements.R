@@ -50,7 +50,7 @@ install.packages('fitdistrplus', version='1.1-5', repos='http://cran.us.r-projec
 install.packages('leaflet', version='2.0.4.1', repos='http://cran.us.r-project.org')
 install.packages('igraph', version='1.2.6', repos='http://cran.us.r-project.org')
 install.packages('RPostgreSQL', version='0.6-2', repos='http://cran.us.r-project.org')
-install.packages('config', version='0.3.1', repos='https://cran.r-project.org')
+#install.packages('config', version='0.3.1', repos='https://cran.r-project.org')
 
 
 

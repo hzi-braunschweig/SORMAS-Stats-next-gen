@@ -1251,6 +1251,7 @@ shinyServer(
     })  
     
     output$rtPlot <- renderPlot({
+      # preparing si_data data 
       dateSumCase = aggregate(total ~ reportdate, data = casePersonFilter(), sum, na.rm = F)
       # completting missing dates
       dateSumCase =  dateSumCase %>%
@@ -1259,7 +1260,7 @@ shinyServer(
       dateSumCase = dateSumCase[,c(1,3)] # dropping old ulcompletted date
       colnames(dateSumCase) = c("dates","I")
       temp = siDatRtDiseaseRegionDistFilter()
-      temp = temp[temp$si > 0,]  # deleting pairs with si = 0, this is needed for downtream analysis
+      temp = temp[temp$si > 0 & temp$si <= input$siUi,]  # deleting pairs with si < 0 or too large, this is needed for downtream analysis
       n = nrow(temp)
       si_data = data.frame(matrix(0,n,5))
       si_data[,2] = 1
@@ -1267,13 +1268,14 @@ shinyServer(
       si_data[,4] = temp$si
       colnames(si_data) =  c("EL", "ER", "SL", "SR", "type")
       si_data[,-5] = apply(si_data[,-5], 2, as.integer) # all columns except type should be integer
-
+      
+      #estimation and plotting
       if(input$rtMethodUi == "Parametric-Gamma"){
-        fig = RtPlot(mean_si = 5.2, std_si = 2.3, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase, si_data = si_data, rsi = input$rsiUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
-      }
+        fig = RtPlot(mean_si = input$mean_siUI, std_si = input$std_siUI, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase, si_data = si_data, rsi = input$rsiUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
+        }
       if(input$rtMethodUi == "Transmission data" ){
         fig =  RtPlot(dateSumCase = dateSumCase, method = "si_from_data",  burnin = 1000,  si_data = si_data, rsi = input$rsiUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
-      }
+        }
       return(fig)
 
     })
