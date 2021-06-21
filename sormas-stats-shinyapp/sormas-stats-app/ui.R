@@ -379,12 +379,32 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                             ),
                            conditionalPanel(condition = "input.tabs1==4",
                                             radioButtons("caseMapshapesUi","Map shapes",  choices = c("By region","By district"),selected = c("By region")),
-                                            radioButtons("caseleafletMapUi","Map type",  choices = c("Shapfiles","Leaflet"),selected = c("Shapfiles")),
-                                            radioButtons("caseIndicatorTypeMapUi","Indicator type",  choices = c("Count","Proportion", "Incidence proportion / 100,000"),selected = c("Incidence proportion / 100,000"))
-                                           ),
+                                            #radioButtons("caseleafletMapUi","Map type",  choices = c("Shapfiles","Leaflet"),selected = c("Shapfiles")),
+                                            radioButtons("caseIndicatorTypeMapUi","Indicator type",  choices = c("Count","Proportion", "Incidence proportion / 100,000"),selected = c("Incidence proportion / 100,000")),
+                                            # filter map by Region of case
+                                            # Only shapes of the selected regions would be plotted
+                                            pickerInput(
+                                              inputId = "regionCaseMapUi",
+                                              label = 'Choose region to plot shapes',
+                                              choices = sort(levels(as.factor(casePersonRegionDist$region_name))),
+                                              options = list(
+                                                `actions-box` = TRUE,
+                                                size = 12
+                                              ),
+                                              selected = NULL,
+                                              multiple = TRUE
+                                            )
+                                            ),
                            conditionalPanel(condition = "input.tabs1==5",
+                                            span(tags$i(h6("Estimation methods for Rt, t = week. We first need to estimate the serial interval (SI) and use it to estimate Rt. 
+                                                           SI can be estimated parametrically by specifying the mean and std for SI OR by using the observed tramission network data.")), style="color:#045a8d"),
                                             radioButtons("rtMethodUi","SI estimation method ",  choices = c("Parametric-Gamma","Transmission data"),selected = c("Parametric-Gamma")),
-                                            radioButtons("rsiUi","Ploting parameters",  choices = c("all","R","SI"),selected = c("R"))
+                                            
+                                            numericInput("mean_siUI", label = h5("Specify SI mean"), value = 5.2),
+                                            numericInput("std_siUI", label = h5("Specify SI statndart Std Dev"), value = 2.3 ),
+                                            sliderInput("siUi", label = "Choose serial interval maximum value", min = 0, 
+                                                        max = 30, step = 1, value = 14),
+                                            radioButtons("rsiUi","Ploting parameters",  choices = c("all","R","SI"), selected = c("R"), inline = TRUE)
                                             ),
                            conditionalPanel(condition = "input.tabs1==6",
                                             pickerInput("diseaseCaseUi", "Disease", 
@@ -396,7 +416,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                            max = NULL, format = "dd-mm-yyyy", startview = "month",
                                                            weekstart = 0, language = "en", separator = " to ", width = NULL,
                                                            autoclose = TRUE),
-                                            # filter by Region of event                 
+                                            # filter by Region of case                 
                                             pickerInput(
                                               inputId = "regionCaseUi",
                                               label = 'Region of case',
@@ -509,9 +529,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                        ,
                                        tabPanel("Administrative map", value = 4, plotOutput("regionMapCaseCount", width = "100%", height = "80vh"))
                                        ,
-                                       tabPanel("Reproduction number (Rt)", value = 5, plotOutput("rtPlot", width = "80%", height = "80vh"))
-                                       , 
-                                       tabPanel("Superspreading and individual varaince (k)", value = 7,
+                                       tabPanel("Superspreading (k)", value = 7,
                                                 fluidRow( width = 10,
                                                           column(6,
                                                                  wellPanel(
@@ -540,7 +558,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                           ,
                                                           column(6,
                                                                  wellPanel(
-                                                                   h4(helpText("Distributions of bumber of infectee per infector")),
+                                                                   h4(helpText("Distributions of number of infectee per infector")),
                                                                    fluidRow(
                                                                      width = 12,
                                                                      plotOutput("distribution_k_plot", width = "100%", height = "40vh")
@@ -564,6 +582,8 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                 ) 
                                      )
                                      ,
+                                     tabPanel("Reproduction number (Rt)", value = 5, plotOutput("rtPlot", width = "90%", height = "85vh"))
+                                     , 
                                      tabPanel("Basisc Export",
                                                        numericInput("maxrowsCase", "Rows to show", 20),
                                                        verbatimTextOutput("casebyRegionVarTable"),
@@ -796,7 +816,7 @@ fluidRow(
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
-         p(tags$em("Last updated: May 05, 2021"), style = 'font-size:75%'))
+         p(tags$em("Last updated: June 21, 2021"), style = 'font-size:75%'))
   ,
   column(3, align = "right",
          p('Powered by:', tags$a(href = " ", target = '_blank'), '', style = "font-size: 85%"),

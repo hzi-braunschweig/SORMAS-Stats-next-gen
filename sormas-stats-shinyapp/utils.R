@@ -1959,6 +1959,7 @@ districtMapPlot = function(data , districtShapes){
 save(districtMapPlot, file = "districtMapPlot.R")
 ###
 ## Function to plot Rt
+# weekly estimate of Rt, week is default but can be latered in config
 RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSumCase, si_data, rsi="all") # rsi = "all","R", "SI"
 {
   if(method == "parametric_si")
@@ -1983,16 +1984,8 @@ RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSu
                       config = config)
   }
   return(plot(res, rsi, legend = T))
-  # if(rsi !="all")
-  # {
-  #   return(plot(res, rsi = rsi, legend = T))
-  # }else{
-  #   return(plot(res, rsi = rso, legend = T))
-  # }
-  
-  
 }
-save(RtPlot, file = "RtPlot.R")
+save(RtPlot, file = "./utils/RtPlot.R")
 
 ##### Table of case count by regions and other case variables: classification, outcome, quarantine, etc
 #functions here uses casePersonRegionDist as input data
