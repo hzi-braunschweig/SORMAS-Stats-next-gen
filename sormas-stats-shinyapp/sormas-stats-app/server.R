@@ -648,9 +648,9 @@ shinyServer(
     # Begin exportation of  data
     # cotactRegionDist export
     conRegionDistExp = reactive({
-      data.frame(contactReportDate =as.character( d()$reportdatetime),  caseID= d()$caze_id, contactID =  d()$id, contactProximity = d()$contactproximity, contactClassification = d()$contactclassification,
-                 caseClassification = d()$caseclassificationCase, disease = d()$disease, caseOutcome = d()$outcomeCase, contactRegion = d()$region_name,
-                 contactDistrict = d()$district_name)
+      data.frame(contactReportDate =as.character( d()$reportdatetime),  caseID= d()$caze_id, contactID =  d()$id, contactProximity = d()$contactproximity,
+                 contactClassification = d()$contactclassification, caseClassification = d()$caseclassification_case, disease = d()$disease, 
+                 caseOutcome = d()$outcome_case, contactRegion = d()$region_name, contactDistrict = d()$district_name)
     })
     # output to download data
     output$conRegionDistExpCsv <- downloadHandler(
