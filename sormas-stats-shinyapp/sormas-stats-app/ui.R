@@ -312,11 +312,6 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                           ,
                           tabPanel("Contacts per case", plotOutput("plotContPerCase", width = "100%", height = "90vh"),  downloadButton("downloadContPerCasePlot", "Download this plot"), tags$br(),tags$br(),
                                    " Contact per case."),
-                          tabPanel("Detailed contact export",
-                                   numericInput("maxrows", "Rows to show", 20),
-                                   verbatimTextOutput("conRegionDistExpTable"),
-                                   downloadButton("conRegionDistExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                   "Each row in this data is a contact between a case person and a contact person. The data was obtained by merging contacts and their cases, thus the columns contains variables for contacts and cases"),
                           tabPanel("Contacts per case export",
                                    numericInput("maxrows", "Rows to show", 20),
                                    verbatimTextOutput("conPerCaseExpTable"),
@@ -329,9 +324,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                    "Each row in this data is a region with corresponding number of contacts.
                                          The data was obtained by summing the number of contacts in each region.
                                          The resgion of the source case was used in case the region of the contact was missing."
-
                           ),
-                          
                           tabPanel("Serial Interval Export", icon = icon("table"),
                                    width = 10,
                                   mainPanel(width=12,
@@ -353,7 +346,13 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                          Only contacts that resulted to a case were cosidered."
                                                )
                                              ))
-                          )
+                          ),
+                          tabPanel("Detailed contact export",
+                                   numericInput("maxrows", "Rows to show", 20),
+                                   verbatimTextOutput("conRegionDistExpTable"),
+                                   downloadButton("conRegionDistExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                                   "Each row in this data is a contact between a case person and a contact person. The data was obtained by merging contacts and their cases, thus the columns contains variables for contacts and cases.",
+                                   "Contacts wihout source cases or cases without contacts are not included in this section of contact data analysis")
                           )
                         , width = 10)
               )
