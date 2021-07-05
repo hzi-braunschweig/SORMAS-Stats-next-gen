@@ -1,12 +1,6 @@
 # SORMAS-Stats-next-gen
 SORMAS-Stats contain functions to analyze and visualize surveillance data collected by SORMAS.
 
-## sormas-stats-shinyapp folder
-- `sormas-stats-shinyapp`
-    - `app.R`
-    - `utils/`
-    - `demo-data/`
-
 ## Run docker container
 
 ### Prerequisites
@@ -20,12 +14,46 @@ SORMAS-Stats contain functions to analyze and visualize surveillance data collec
 ```
 docker pull hzibraunschweig/sormas-stats:latest
 ```
+I you like to pull an image built from development branch, you need to pull the tag 'developemnt'. 
 
 (2) Run the image
 
 ```
-docker run hzibraunschweig/sormas-stats:latest
+docker run -p 0.0.0.0:3838:3838 hzibraunschweig/sormas-stats:latest
 ```
+The app will listen on port 3838. You can map this port to any port on the server. 
+
+```
+docker run -p 0.0.0.0:3838:3838 -v /local_path_to_app/shiny-server.conf:/etc/shiny-server/shiny-server.conf hzibraunschweig/sormas-stats:latest
+```
+If you like to provide a custom shiny-server.conf you can map this as a volume. Example shiny-server.conf:
+ 
+ ```
+ # Instruct Shiny Server to run applications as the user "shiny"
+run_as shiny;
+
+# Define a server that listens on port 3838
+server {
+  listen 3838 0.0.0.0;
+
+  # Define a location at the base URL
+  location / {
+
+    # Host the directory of Shiny Apps stored in this directory
+    site_dir /srv/shiny-server;
+
+    # Log all Shiny output to files in this directory
+    log_dir /var/log/shiny-server;
+
+    # When a user visits the base URL rather than a particular application,
+    # an index of the applications available in this directory will be shown.
+    directory_index on;
+  }
+}
+ 
+ ```
+
+Please refer to the documentation of R shiny [https://docs.rstudio.com/shiny-server/#default-configuration](https://docs.rstudio.com/shiny-server/#default-configuration)
 
 ### Environment parameters
 
@@ -59,8 +87,8 @@ services:
       - DB_PORT="5432"
       - DB_NAME="sormas"
     volumes: 
-      - {{ stats.path}}/shiny-server.conf:/etc/shiny-server/shiny-server.conf
-    restart: {{ stats.restart }}
+      - /path_to_shiny_app/shiny-server.conf:/etc/shiny-server/shiny-server.conf
+    restart: always
 ```
 
 ## Run locally
