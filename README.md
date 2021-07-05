@@ -8,19 +8,60 @@ SORMAS-Stats contain functions to analyze and visualize surveillance data collec
     - `demo-data/`
 
 ## Run docker container
-(1) Start your docker daemon
 
-(2) Call Docker Compose
+### Prerequisites
 
-```bash
-docker-compose build
-docker-compose up
+(1) You need to install a container engine (e.g. Docker) 
+
+### Run container
+
+(1) Pull the latests version from hub.docker.com
+
+```
+docker pull hzibraunschweig/sormas-stats:latest
 ```
 
-(3) Check in your browser if the tracking server is up and running
+(2) Run the image
 
-[http://localhost](http://localhost)
+```
+docker run hzibraunschweig/sormas-stats:latest
+```
 
+### Environment parameters
+
+After starting the container, the application tries to connect to a SORMAS database. 
+The container uses these environment parameters for configuration:
+
+ | Parameter | default | accepted values |
+ |-----------|---------|-----------------|
+ | SHINY_LOG_STDERR| | 0 or 1 to log output of the app to stderr (needed to display via docker-logs)|
+ | DB_USER | "sormas_user" | username for sormas databse |
+ | DB_PASS | "password" | password of database user |
+ | DB_HOST | 127.0.0.1 | IP-Adress of SORMAS database to connect to |
+ | DB_PORT | 5432 | SORMAS database port |
+ | DB_NAME | "sormas" | name of sormas database |
+
+### Docker compose
+You can use a docker-compose file to start the application: 
+
+```
+version: "3"
+services: 
+  sormas-stats:
+    ports: 
+      - "0.0.0.0:3838:3838"
+    image: {{ stats.image }}      
+    environment: 
+      - SHINY_LOG_STDERR=1
+      - DB_USER="sormas_user"
+      - DB_PASS="{{ sormas.postgres.password }}"
+      - DB_HOST="{{ ansible_default_ipv4.address }}"
+      - DB_PORT="5432"
+      - DB_NAME="sormas"
+    volumes: 
+      - {{ stats.path}}/shiny-server.conf:/etc/shiny-server/shiny-server.conf
+    restart: {{ stats.restart }}
+```
 
 ## Run locally
 (1) Set the R PATH to
@@ -32,110 +73,3 @@ setwd("SORMAS-Stats/shinyapp")
 (2) Run app using the command `shiny::runApp()`
 
 
-# Installation for VMs hosted by HZI RZ
-
-## SSH Login into the VM
-Login into the VM from your Computer via ssh
-
-```bash
-ssh yourusername@sormas-stats.helmholtz-hzi.de
-```
-
-
-## Activate IPv6 (HZI specific)
-The default VMs by HZI RZ might have IPv6 disabled.
-You need to activate IPv6 in order to run the Docker service properly.
-
-(1) Open
-```bash
-sudo -s
-nano /etc/default/grub
-```
-
-(2) Change the line
-
-```
-GRUB_CMDLINE_LINUX_DEFAULT="ipv6.disable=1"
-```
-
-to
-
-```
-GRUB_CMDLINE_LINUX_DEFAULT=""
-```
-
-(3) Update the GRUB menu
-```bash
-update-grub
-```
-
-(4) Reboot the VM
-```bash
-reboot
-```
-
-
-## Install software
-Make sure git and docker is installed
-
-```bash
-sudo -s
-apt install git docker docker-compose
-```
-
-## Change some docker configs (HZI specific)
-Open
-```bash
-nano /etc/docker/daemon.json
-```
-
-and add
-
-```
-{
-  "default-address-pools":[ {"base":"172.17.252.192/27","size":28} ]
-}
-```
-
-run 
-
-```bash
-service docker restart
-```
-
-
-
-## Download the repo
-```bash
-sudo -s
-cd /root
-git clone https://github.com/bernardsilenou/SORMAS-Stats.git
-cd SORMAS-Stats
-```
-
-## Build the image and start container
-```bash
-docker-compose build
-docker-compose up
-```
-
-You can also run
-
-```bash
-bash install.sh
-```
-
-This script contains additional clean up commands.
-
-
-## cron job to update the deployment
-```bash
-sudo -s
-crontab -e
-```
-
-and add the following line
-
-```
-45 2 * * *  (cd /root/SORMAS-Stats/  && bash install.sh)
-```
