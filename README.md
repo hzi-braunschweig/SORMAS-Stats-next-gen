@@ -78,7 +78,7 @@ services:
   sormas-stats:
     ports: 
       - "0.0.0.0:3838:3838"
-    image: {{ stats.image }}      
+    image: hzibraunschweig/sormas-stats:latest      
     environment: 
       - SHINY_LOG_STDERR=1
       - DB_USER="sormas_user"
