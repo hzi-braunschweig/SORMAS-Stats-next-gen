@@ -400,25 +400,16 @@ shinyServer(
     net = graphObject()
     temp = as.data.frame(table(V(net)$group))
     temp = temp %>% rename("Node classification" = Var1, Total = Freq)
-      res =  DT::datatable(
-        temp,
-        # extensions = c('Buttons', 'Scroller'),  # to hide top icon to download table
-        options = list(
-          # scrollY = 200,
-          #              scrollX = 500,
-          #              deferRender = TRUE,
-          #              scroller = TRUE,
-          #              # paging = TRUE,
-                       # pageLength = 25,
-                      buttons = list(c('excel','csv'),
-                                     list(extend = 'colvis', targets = 0, visible = FALSE)),
-                      dom = 'lBfrtip',
-                       fixedColumns = TRUE,
-                       autoWidth = TRUE,
-                       columnDefs = list(list(className = 'dt-center', targets = "_all")),
-                       searching = FALSE
-        ), 
-        rownames = FALSE)
+    res =  DT::datatable(
+      temp,
+      options = list(
+        dom = 't',
+        fixedColumns = TRUE,
+        #autoWidth = TRUE,
+        columnDefs = list(list(className = 'dt-center', targets = "_all")),
+        searching = FALSE
+      ), 
+      rownames = FALSE)
       
    # }
     return(res)
@@ -1270,14 +1261,16 @@ shinyServer(
       si_data[,-5] = apply(si_data[,-5], 2, as.integer) # all columns except type should be integer
       
       #estimation and plotting
-      if(input$rtMethodUi == "Parametric-Gamma"){
-        fig = RtPlot(mean_si = input$mean_siUI, std_si = input$std_siUI, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase, si_data = si_data, rsi = input$rsiUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
+      if(input$rtMethodUi == "Parametric distribution"){
+        distVec = c(Gamma = "G", Weibull = "W", Lognormal = "L") 
+        distUI = distVec[names(distVec) == input$si_rt_UI] # getting shrt form of distribution name to be used in modelling
+        fig = RtPlot(mean_si = input$mean_siUI, std_si = input$std_siUI, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase,
+                     si_data = si_data, rsi = input$rsiUi, dist = distUI) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
         }
       if(input$rtMethodUi == "Transmission data" ){
         fig =  RtPlot(dateSumCase = dateSumCase, method = "si_from_data",  burnin = 1000,  si_data = si_data, rsi = input$rsiUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
         }
       return(fig)
-
     })
     
     ## superspreading analysis
@@ -1289,27 +1282,90 @@ shinyServer(
       } else{
         infectorInfecteeData[((infectorInfecteeData$region_infector %in% input$regionCaseUi) & (infectorInfecteeData$disease_infector == input$diseaseCaseUi) & (infectorInfecteeData$report_date_infector >= (min(input$reportdateCaseUi) )  ) & (infectorInfecteeData$report_date_infector <= (max(input$reportdateCaseUi) ))),]
       }
-      
     })
     
-    # fiter by district of case
+    # fiter by district of case and serial_interval
     infectorInfecteeDataDiseaseRegionDistFilter = reactive({
       if(is.null(input$districtCaseUi))
       {
-        temp = infectorInfecteeDataDiseaseRegionFilter()
+        temp = infectorInfecteeDataDiseaseRegionFilter() %>%
+          dplyr::filter(., serial_interval %in% c(input$serialIntervalRangeUi[1] : input$serialIntervalRangeUi[2]))  # filter by SI range
       } else{
         temp = infectorInfecteeDataDiseaseRegionFilter() %>%
-          dplyr::filter(district_infector %in% input$districtCaseUi)
+          dplyr::filter(district_infector %in% input$districtCaseUi)%>%
+          dplyr::filter(serial_interval %in% c(input$serialIntervalRangeUi[1] : input$serialIntervalRangeUi[2]))  # filter by SI range
       }
       return(temp)
     })
     
- # fiting normal, weibull, gamma, lnorm distributions to serial intervals 
+    # model selection for SI   
+    # fiting normal, weibull, gamma, lnorm distributions to serial intervals 
+    output$si_model_fitTable <- DT::renderDataTable({
+      temp = fit_distribution(serial_interval = infectorInfecteeDataDiseaseRegionDistFilter()$serial_interval)
+      res = DT::datatable(temp,
+        options = list(
+          dom = 't',
+          fixedColumns = TRUE,
+          #autoWidth = TRUE,
+          columnDefs = list(list(className = 'dt-center', targets = "_all")),
+          searching = FALSE
+        ), 
+        rownames = FALSE )
+      return(res)
+    })
+    
+    # summary statistics for SI
+    output$si_summaryTable <- renderPrint({
+      temp = summary_statistics(x = infectorInfecteeDataDiseaseRegionDistFilter()$serial_interval)
+      print(temp, row.names = FALSE) 
+    })
+    
+    # plotting distributions for model selection
+    # plotting distribution of data
+    output$SI_hist_model_plot <- renderPlot({
+      temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistFilter()$serial_interval)
+      temp$density
+    })
+    #qq plot for si
+    output$SI_model_qq_plot <- renderPlot({
+      temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistFilter()$serial_interval)
+      temp$qq
+    })
+    
+    #cdf plot for si
+    output$SI_model_cdf_plot <- renderPlot({
+      temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistFilter()$serial_interval)
+      temp$cdf
+    })
+    
+    # computing mean CI based on user specified distribution
+    output$si_mean_CI_table <- DT::renderDataTable({
+      #temp = infectorInfecteeDataDiseaseRegionDistFilter()
+      ret_mean_CI = serial_interval_mean_CI(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDistFilter(),
+                                            distr = input$siDistMethodUi, input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2]) 
+      res = DT::datatable(
+        ret_mean_CI,
+        options = list(
+          dom = 't',
+          fixedColumns = TRUE,
+          #autoWidth = TRUE,
+          columnDefs = list(list(className = 'dt-center', targets = "_all")),
+          searching = FALSE
+        ), 
+        rownames = FALSE)
+      
+      # }
+      return(res)
+    })
+    
+    # fitting user chosen distribution to SI
     siRet <- reactive({
       temp = infectorInfecteeDataDiseaseRegionDistFilter()
-      siRet = serialIntervalPlot(infectorInfecteePair = temp,  distr = input$siDistMethodUi, minSi = input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2] ) 
+      siRet = serialIntervalPlot(infectorInfecteePair = temp,  distr = input$siDistMethodUi, niter = input$niter_SI_UI,
+                                 minSi = input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2] ) 
       return(siRet)
     })
+    
     # plotting SI
     output$distribution_SI_plot <- renderPlot({
       temp = siRet()
@@ -1325,7 +1381,7 @@ shinyServer(
     # Offspring distribution plot, dispersion parameter k
     kRet <- reactive({
       temp = infectorInfecteeDataDiseaseRegionDistFilter()
-      kRet = offspringDistPlot(infectorInfecteePair = temp)
+      kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_SI_UI)
       return(kRet)
     })
     # plotting k
@@ -1340,8 +1396,6 @@ shinyServer(
     })
     
     ## end of case data analysis ##
-
-
      ##### EVETN DATA ANALYSIS  ##################
     eventLocRegDistFilter = reactive({
       if(input$regionUi == "All regions")

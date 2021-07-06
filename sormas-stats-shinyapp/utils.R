@@ -1960,8 +1960,10 @@ save(districtMapPlot, file = "districtMapPlot.R")
 ###
 ## Function to plot Rt
 # weekly estimate of Rt, week is default but can be latered in config
-RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSumCase, si_data, rsi="all") # rsi = "all","R", "SI"
+RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSumCase, si_data, rsi="all", dist = "G") # rsi = "all","R", "SI"
 {
+  #the parametric distribution to use when estimating the serial interval from data on dates of 
+  #symptoms of pairs of infector/infected individuals dist = "G", "G" (Gamma), "W" (Weibull), "L" (Lognormal) 
   if(method == "parametric_si")
   {
     res <- estimate_R(dateSumCase,method="parametric_si", config = make_config(list(mean_si = mean_si, std_si = std_si))) 
@@ -1972,7 +1974,7 @@ RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSu
     overall_seed <- 2
     mcmc_control <- make_mcmc_control(seed = MCMC_seed, 
                                       burnin = burnin)
-    dist <- "G" # fitting a Gamma dsitribution for the SI
+    #dist <- "G" # fitting a Gamma dsitribution for the SI
     config <- make_config(list(si_parametric_distr = dist,
                                mcmc_control = mcmc_control,
                                seed = overall_seed, 
@@ -2261,16 +2263,19 @@ fixContactJurisdiction = function(contCase){
 save(fixContactJurisdiction, file = "fixContactJurisdiction.R")
 
 ###########  serialIntervalPlot ##############
-serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi = NULL, maxSi = NULL){ 
+# infectorInfecteePair = infectorInfecteeData
+serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi = NULL, maxSi = NULL, niter = 51){ 
   # distr = "eibull", "gamma", "lnorm", "norm"  
   # minSi and maxSi are the min and max user specified values of si to be used for the analysis
   # fiting normal, weibull, gamma, lnorm distributions to serial intervals 
+  # niter	=   The number of samples drawn by bootstrap, this 
   
   # filtering based on user specified min and max values of serial interval.
   if(any(is.null(c(minSi, maxSi)))) {
     minSi = min(infectorInfecteePair$serial_interval, na.rm = T)
     maxSi = max(infectorInfecteePair$serial_interval, na.rm = T)
   }
+  n = nrow(infectorInfecteePair)
   siVector = c(minSi: maxSi)
   selData <- infectorInfecteePair %>%
     dplyr::filter(serial_interval != 'NA' & serial_interval %in% siVector)
@@ -2283,7 +2288,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # Estimating CI for mean and standard deviation by bootstrap method 
     #  1001 were used by default for bootstraping, Add a parameter for this at front end later if needed
-    fit_boot <- summary(fitdistrplus::bootdist(fit))  
+    fit_boot <- summary(fitdistrplus::bootdist(fit, niter = niter))  
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
@@ -2313,7 +2318,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # Estimating CI for mean and standard deviation by bootstrap method 
     #  1001 were used by default for bootstraping, Add a parameter for this at front end later if needed
-    fit_boot <- summary(fitdistrplus::bootdist(fit))  
+    fit_boot <- summary(fitdistrplus::bootdist(fit, niter = niter))  
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
@@ -2342,7 +2347,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # Estimating CI for mean and standard deviation by bootstrap method 
     #  1001 were used by default for bootstraping, Add a parameter for this at front end later if needed
-    fit_boot <- summary(fitdistrplus::bootdist(fit))  
+    fit_boot <- summary(fitdistrplus::bootdist(fit, niter = niter))  
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
@@ -2371,7 +2376,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # Estimating CI for mean and standard deviation by bootstrap method 
     #  1001 were used by default for bootstraping, Add a parameter for this at front end later if needed
-    fit_boot <- summary(fitdistrplus::bootdist(fit))  
+    fit_boot <- summary(fitdistrplus::bootdist(fit, niter = niter))  
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
@@ -2392,10 +2397,206 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
   
   return(ret) #return a list object: table of estimates and image
 }
-save(serialIntervalPlot, file = "serialIntervalPlot.R")
+save(serialIntervalPlot, file = "./utils/serialIntervalPlot.R")
+# bak = serialIntervalPlot(infectorInfecteePair = infectorInfecteeData)
+##
+## fit_distribution 
+# function that fit 4 distributions to a numeric vector
+# This functon can be used to fit a normal, lognormal, wribull and gamma distributions to serial_interval or incubarion period
+fit_distribution = function(serial_interval){
+  # serial_interval can be any numeric varaible
+  serial_interval = serial_interval[is.na(serial_interval) == FALSE] # dropping NA
+  #fitting normal dist
+  # Parameter1 = mean, Parameter2 = sd
+  nfit  = fitdistrplus::fitdist(data = serial_interval, distr = 'norm')  # fit a normal distribution to the data
+  ## fitting log normal dist
+  # Parameter1 = meanlog, Parameter2 = sdlog
+  lnfit  = serial_interval[serial_interval > 0]  %>%  # lnorm can not be used to describe a random varaible with negative or 0 values
+    fitdistrplus::fitdist(data = ., distr = "lnorm")  
+  # fitting a Weibull distribution
+  # Parameter1 = shape, Parameter2 = scale
+  wfit  = serial_interval[serial_interval > 0]  %>% # weibull can not be used to describe a random varaible with negative or 0 values
+    fitdistrplus::fitdist(data = ., distr = "weibull")  
+  # fitting gamma dist
+  # Parameter1 = shape, Parameter2 = rate
+  gfit  = serial_interval[serial_interval > 0]  %>% # gamma can not be used to describe a random varaible with negative or 0 values
+    fitdistrplus::fitdist(data = ., distr = "gamma") 
+  ### extracting model parameters: model with smaller AIC has better fit to the data
+  normal_estimates =  data.frame(Distribution = "Normal", Parameter1 = nfit$estimate[1], Parameter2 = nfit$estimate[2],
+                                 AIC = nfit$aic, BIC = nfit$bic, Kolmogorov = gofstat(nfit)$ks, Cramer = gofstat(nfit)$cvm ,
+                                 Anderson =  gofstat(nfit)$ad )
+  #Goodness-of-fit statistics:  ks = Kolmogorov-Smirnov, cvm = Cramer-von Mises, ad = Anderson-Darling
+  # Goodness-of-fit criteria: AIC = Akaike's Information Criterion, BIC = Bayesian Information Criterion
+  
+  lognormal_estimates =  data.frame(Distribution = "Lognormal", Parameter1 = lnfit$estimate[1], Parameter2 = lnfit$estimate[2],
+                                    AIC = lnfit$aic, BIC = lnfit$bic, Kolmogorov = gofstat(lnfit)$ks, Cramer = gofstat(lnfit)$cvm,
+                                    Anderson =  gofstat(lnfit)$ad )
+  weibull_estimates =  data.frame(Distribution = "Weibull", Parameter1 = wfit$estimate[1], Parameter2 = wfit$estimate[2],
+                                  AIC = wfit$aic, BIC = wfit$bic, Kolmogorov = gofstat(wfit)$ks, Cramer = gofstat(wfit)$cvm,
+                                  Anderson =  gofstat(wfit)$ad )
+  gamma_estimates =  data.frame(Distribution = "Gamma", Parameter1 = gfit$estimate[1], Parameter2 = gfit$estimate[2],
+                                AIC = gfit$aic, BIC = gfit$bic, Kolmogorov = gofstat(gfit)$ks, Cramer = gofstat(gfit)$cvm,
+                                Anderson =  gofstat(gfit)$ad)
+  dist_estimates = rbind(normal_estimates, lognormal_estimates, weibull_estimates, gamma_estimates)
+  rownames(dist_estimates) = NULL
+  dist_estimates = dplyr::arrange(dist_estimates, AIC, Kolmogorov, BIC ) # sorting with smaller AIC on first row
+  dist_estimates[,-1] = round(dist_estimates[,-1], 4)
+  
+  return(dist_estimates)
+}
+save(fit_distribution, file = "./utils/fit_distribution.R")
+#ben = fit_distribution(serial_interval = serial_interval)
+
+###  fitdist_plot #########
+fitdist_plot = function(x){
+  # x is a numeric vertor (eg serial interval, incubation period, etc) to fit distributions and plot the cdf
+  # fitting models. All compared fits must have been obtained with the same dataset, thus we drop all records <=0
+  x = x[is.na(x) == FALSE] ## lnorm, gamma, weibull can not be used to describe a random varaible with negative or 0 values
+  x = x[x > 0]
+  nfit  = fitdistrplus::fitdist(data = x, distr = 'norm')  # fit a normal distribution to the data
+  # Parameter1 = meanlog, Parameter2 = sdlog
+  lnfit  = fitdistrplus::fitdist(data = x, distr = "lnorm")  
+  # Parameter1 = shape, Parameter2 = scale
+  wfit  = fitdistrplus::fitdist(data = x, distr = "weibull")  
+  # Parameter1 = shape, Parameter2 = rate
+  gfit  = fitdistrplus::fitdist(data = x, distr = "gamma") 
+  # plotting cdf, # main = Empirical and theoretical CDFs
+  cdfcomp(list(wfit, gfit, lnfit, nfit), legendtext=c("Weibull", "gamma", "lognormal", "normal"),
+          main = NULL, fitlwd = 2) 
+  cdf <- recordPlot() # saving immage
+  plot.new() ## clean up device
+  # plotting histrogram and theretical densities
+  denscomp(list(wfit, gfit, lnfit, nfit), legendtext=c("Weibull", "gamma", "lognormal", "normal"),
+           main = NULL, probability = FALSE, fitlwd = 2 )
+  density <- recordPlot() # saving immage
+  plot.new() ## clean up device
+  # plotting Q-Q plot
+  qqcomp(list(wfit, gfit, lnfit, nfit), legendtext=c("Weibull", "gamma", "lognormal", "normal"),
+         main = NULL, fitlwd = 2)
+  qq <- recordPlot() # saving immage
+  plot.new() ## clean up device
+  return(list(cdf = cdf, density = density, qq = qq))
+}
+save(fitdist_plot, file = "./utils/fitdist_plot.R")
+#bak = fitdist_plot(x = serial_interval)
+# bak$cdf
+# bak$density
+# bak$qq
+
+## summary statistics of observed data 
+summary_statistics = function(x){
+  # compute and retun the summary stattistics of the numeric variable x in a dataframe format
+  # x can be serial interval, incubation period, etc
+  x = x[is.na(x) == FALSE]  # dropping NA
+  temp = summary(x)
+  summary_temp = data.frame(t( round(data.frame(x=matrix(temp),row.names=names(temp)), 2 ))) # convert summary output to dataframe
+  row.names(summary_temp) = NULL
+  # compute nunber and proportion of records <=0
+  n = length(x)
+  n_asymp_trans = length(x[x<=0])
+  p_asymp_trans = round(n_asymp_trans/n*100, 2)
+  ret = data.frame(n, summary_temp, n_asymp_trans, p_asymp_trans)
+  ret = ret %>%
+    dplyr::rename(N = n, Minimum = Min., Maximum = Max.,  Quart.1 = X1st.Qu., Quart.3 = X3rd.Qu., "n_value <= 0" = n_asymp_trans, "prop_value <= 0" = p_asymp_trans)
+  return(ret)
+}
+save(summary_statistics, file = "./utils/summary_statistics.R")
+#ben = summary_statistics(x = serial_interval)
+
+#fit distributions specofied by user to serial intervals and compute CI for sample mean
+serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = NULL, maxSi = NULL){ 
+  # This function fit the specified distribution to seriel interval (infectorInfecteePair) and comput CI of the mean usig pivote method
+  # distr can be Normal, Weibull, Gamma, Lognormal
+  # distr = "eibull", "gamma", "lnorm", "norm"  
+  # minSi and maxSi are the min and max user specified values of si to be used for the analysis
+  # fiting Normal, Weibull, Gamma, Lognormal distributions to serial intervals 
+  
+  # filtering based on user specified min and max values of serial interval.
+  if(any(is.null(c(minSi, maxSi)))) {
+    minSi = min(infectorInfecteePair$serial_interval, na.rm = T)
+    maxSi = max(infectorInfecteePair$serial_interval, na.rm = T)
+  }
+  siVector = c(minSi: maxSi)
+  selData <- infectorInfecteePair %>%
+    dplyr::filter(serial_interval != 'NA' & serial_interval %in% siVector)
+  
+  x = selData$serial_interval
+  x = x[is.na(x) == FALSE]  # dropping NA
+  ## normal distribution
+  if(distr == "Normal"){
+    fit  = fitdistrplus::fitdist(data = x, distr = 'norm')  # fit a normal distribution to the data
+    # Computing 95% CI using pivot method
+    n = fit$n # number of data points used to fit the model
+    mean_si = fit$estimate[1] # the sample mean
+    sd_mean = fit$estimate[2]
+    # 95% CI
+    ll = mean_si - 1.96*sd_mean/sqrt(n)
+    ul = mean_si + 1.96*sd_mean/sqrt(n) # this can also be computed using  confint(fit, level = 0.95)
+    ret = data.frame(Distribution = distr, Mean = round(mean_si, 2), round(ll,2),  round(ul, 2) )
+    colnames(ret) = c("Distribution", "Mean", "2.5% CI", "97.5% CI")
+  }
+  
+  ## log normal
+  if(distr == "Lognormal"){
+    fit  = x[x > 0]  %>%  # lnorm can not be used to describe a random varaible with negative or 0 values
+      fitdistrplus::fitdist(data = ., distr = "lnorm")  
+    # Computing 95% CI using pivot method. converting meanlog and sdlog to mean and sd and computing CI
+    n = fit$n # number of data points used to fit the model
+    mu = fit$estimate[1] # mean in log scale ie meanlog
+    sigma = fit$estimate[2]  # # sd in log scale ie sdlog
+    mean_si = exp(mu + sigma^2/2 ) # mean = exp (mu + sigma^2/2)
+    Varaince_mean_si = (exp(sigma^2) -1 ) * exp(2*mu + sigma^2) # varaince  = (exp(sigma^2) -1) * ( exp(2*mu+sigma^2))
+    sd_mean = sqrt(Varaince_mean_si)
+    # 95% CI
+    ll = mean_si - 1.96*sd_mean/sqrt(n)
+    ul = mean_si + 1.96*sd_mean/sqrt(n) # this can also be computed using  confint(fit, level = 0.95)
+    ret = data.frame(Distribution = distr, Mean = round(mean_si, 2), round(ll,2),  round(ul, 2)  )
+    colnames(ret) = c("Distribution", "Mean", "2.5% CI", "97.5% CI")
+  }
+  
+  ## Weibull
+  if(distr == "Weibull"){
+    fit  = x[x > 0]  %>%  # weibull can not be used to describe a random varaible with negative or 0 values
+      fitdistrplus::fitdist(data = ., distr = "weibull")  
+    # Computing 95% CI using pivot method. converting meanlog and sdlog to mean and sd and computing CI
+    n = fit$n # number of data points used to fit the model
+    shape = fit$estimate[1]
+    scale = fit$estimate[2]
+    mean_si = scale*gamma(1+1/shape)  #lambda*Gamma(1+1/k)\,
+    sd_mean = sqrt(scale^2 * (gamma(1+2/shape) - (gamma(1+1/shape))^2) ) # sqrt(varaince)
+    # 95% CI
+    ll = mean_si - 1.96*sd_mean/sqrt(n)
+    ul = mean_si + 1.96*sd_mean/sqrt(n) # this can also be computed using  confint(fit, level = 0.95)
+    ret = data.frame(Distribution = distr, Mean = round(mean_si, 2), round(ll,2),  round(ul, 2)  )
+    colnames(ret) = c("Distribution", "Mean", "2.5% CI", "97.5% CI")
+  }
+  
+  ## Gamma
+  if(distr == "Gamma"){
+    fit  = x[x > 0]  %>%  # gamma can not be used to describe a random varaible with negative or 0 values
+      fitdistrplus::fitdist(data = ., distr = "gamma")  
+    # Computing 95% CI using pivot method. converting meanlog and sdlog to mean and sd and computing CI
+    n = fit$n # number of data points used to fit the model
+    shape = fit$estimate[1]
+    rate = fit$estimate[2]
+    mean_si = shape/rate
+    sd_mean = sqrt(shape/rate^2) # sqrt(varaince)
+    # 95% CI
+    ll = mean_si - 1.96*sd_mean/sqrt(n)
+    ul = mean_si + 1.96*sd_mean/sqrt(n) # this can also be computed using  confint(fit, level = 0.95)
+    ret = data.frame(Distribution = distr, Mean = round(mean_si, 2), round(ll,2),  round(ul, 2) )
+    colnames(ret) = c("Distribution", "Mean", "2.5% CI", "97.5% CI")
+  }
+  rownames(ret) = NULL
+  ret = ret %>%
+    dplyr::rename(Distribution = Distribution, Mean = Mean, "2.5% CI" = "2.5% CI", "97.5% CI" = "97.5% CI") # this kelps to maintain the same name in shinyapp
+  return(ret)
+}
+save(serial_interval_mean_CI, file = "./utils/serial_interval_mean_CI.R")
+#serial_interval_mean_CI( infectorInfecteePair = infectorInfecteeData, distr = "Normal", minSi = NULL, maxSi = NULL )
 
 ## offspringDistPlot ------
-offspringDistPlot = function(infectorInfecteePair){ 
+offspringDistPlot = function(infectorInfecteePair, niter = 51){ 
   #counting the number of offsprings per infector
   offspring <- infectorInfecteePair %>%
     dplyr::select(case_id_infector) %>%
@@ -2436,7 +2637,7 @@ offspringDistPlot = function(infectorInfecteePair){
     fitdistrplus::fitdist(., distr = 'nbinom')
   
   # Estimating CI by bootstrap method 
-  fit_boot <- summary(fitdistrplus::bootdist(fit))  
+  fit_boot <- summary(fitdistrplus::bootdist(fit, niter = niter))  
   
   # extracting estimates
   rkEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
@@ -2463,7 +2664,7 @@ offspringDistPlot = function(infectorInfecteePair){
   ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot)  # list object: table of estimates and image
   
 }
-save(offspringDistPlot, file = "offspringDistPlot.R")
+save(offspringDistPlot, file = "./utils/offspringDistPlot.R")
 #retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
 
 

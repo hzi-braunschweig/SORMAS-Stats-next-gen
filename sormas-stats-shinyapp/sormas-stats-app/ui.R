@@ -22,10 +22,10 @@ shinyUI(bootstrapPage(
                                        selected = c("CORONAVIRUS"),
                                        multiple = FALSE),
                            #br(),
-                           dateRangeInput("reportdateUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-30, end = Sys.Date(), min = NULL,
+                           dateRangeInput("reportdateUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
                                           max = NULL, format = "dd-mm-yyyy", startview = "month",
                                           weekstart = 0, language = "en", separator = " to ", width = NULL,
-                                          autoclose = TRUE),
+                                          autoclose = TRUE),  # replace start = Sys.Date()-30 in case you need to show default statistics for last 30 days only
 
                           # filter by Region
                           pickerInput(
@@ -42,7 +42,7 @@ shinyUI(bootstrapPage(
                           # filter by district
                           uiOutput('pickerInputDistrict2'),
                           # checkboc to plot notwork diagram
-                          checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", FALSE),
+                          checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", TRUE),
                           
                           # filter by entity type
                           pickerInput(
@@ -207,7 +207,7 @@ shinyUI(bootstrapPage(
                                               status ="primary", #  "success", # or "warning", 
                                               solidHeader = FALSE,
                                               collapsible = TRUE,
-                                              collapsed = FALSE,
+                                              collapsed = TRUE,
                                               width = 15,
                                               #height = 142, # 118, # 142,
                                               verbatimTextOutput("nodeBetweenessSummary")
@@ -232,7 +232,7 @@ shinyUI(bootstrapPage(
                                               status ="primary", #  "success", # or "warning", 
                                               solidHeader = FALSE,
                                               collapsible = TRUE,
-                                              collapsed = FALSE,
+                                              collapsed = TRUE,
                                               width = 15,
                                              #height = 142, # 118, # 142,
                                               verbatimTextOutput("nodeDegreeSummary")
@@ -258,7 +258,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                       selected = c("CORONAVIRUS"),
                                       multiple = FALSE),
                           #br(),
-                          dateRangeInput("reportdateContactUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-30, end = Sys.Date(), min = NULL,
+                          dateRangeInput("reportdateContactUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
                                          max = NULL, format = "dd-mm-yyyy", startview = "month",
                                          weekstart = 0, language = "en", separator = " to ", width = NULL,
                                          autoclose = TRUE),
@@ -397,13 +397,30 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                            conditionalPanel(condition = "input.tabs1==5",
                                             span(tags$i(h6("Estimation methods for Rt, t = week. We first need to estimate the serial interval (SI) and use it to estimate Rt. 
                                                            SI can be estimated parametrically by specifying the mean and std for SI OR by using the observed tramission network data.")), style="color:#045a8d"),
-                                            radioButtons("rtMethodUi","SI estimation method ",  choices = c("Parametric-Gamma","Transmission data"),selected = c("Parametric-Gamma")),
+                                            radioButtons("rtMethodUi", h5("SI estimation method"),  choices = c("Parametric distribution","Transmission data"),
+                                                         selected = c("Parametric distribution")),
                                             
+                                           # numericInput("si_rt_UI", label = h5("Specify SI mean"), value = 5.2),
+                                            # serial interval distribution to use in estimating Rt
+                                            pickerInput(
+                                              inputId = "si_rt_UI",
+                                              label = h5('Choose distribution for SI'),
+                                              choices = c( "Gamma", "Lognormal", "Weibull" ), # dist = "G" (Gamma), "W" (Weibull), "L" (Lognormal) 
+                                              options = list(
+                                                `actions-box` = TRUE,
+                                                title = "Select distribution for SI",
+                                                header = "only select if SI estimation method is parametric",
+                                                maxOptions = 1,
+                                                size = 12
+                                              ),
+                                              selected = "Gamma",
+                                              multiple = FALSE
+                                            ),
                                             numericInput("mean_siUI", label = h5("Specify SI mean"), value = 5.2),
-                                            numericInput("std_siUI", label = h5("Specify SI statndart Std Dev"), value = 2.3 ),
-                                            sliderInput("siUi", label = "Choose serial interval maximum value", min = 0, 
+                                            numericInput("std_siUI", label = h5("Specify SI Std Dev"), value = 2.3 ),
+                                            sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 0, 
                                                         max = 30, step = 1, value = 14),
-                                            radioButtons("rsiUi","Ploting parameters",  choices = c("all","R","SI"), selected = c("R"), inline = TRUE)
+                                            radioButtons("rsiUi", h5("Ploting parameters"),  choices = c("all","R","SI"), selected = c("R"), inline = TRUE)
                                             ),
                            conditionalPanel(condition = "input.tabs1==6",
                                             pickerInput("diseaseCaseUi", "Disease", 
@@ -411,7 +428,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                                     "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
                                                         selected = c("CORONAVIRUS"),
                                                         multiple = FALSE),
-                                            dateRangeInput("reportdateCaseUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-30, end = Sys.Date(), min = NULL,
+                                            dateRangeInput("reportdateCaseUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
                                                            max = NULL, format = "dd-mm-yyyy", startview = "month",
                                                            weekstart = 0, language = "en", separator = " to ", width = NULL,
                                                            autoclose = TRUE),
@@ -432,10 +449,31 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                             radioButtons("caseByRegionIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion", "Incidence Proportion / 100,000"),selected = c("Count"))
                                             ),
                            conditionalPanel(condition = "input.tabs1==7",
-                                            radioButtons("siDistMethodUi","Serial interval distribution fit ",  choices = c("Lognormal","Normal", "Weibull", "Gamma"),selected = c("Lognormal"))
-                                            ,
-                                            sliderInput("serialIntervalRangeUi", label = "Choose the serial interval range", min = -30, 
-                                                        max = 50, step = 1, value = c(0, 50))
+                                            sliderInput("serialIntervalRangeUi", label = h5("Choose the serial interval range"), min = -30, 
+                                                        max = 50, step = 1, value = c(0, 30)),
+                                            pickerInput(
+                                              inputId = "siDistMethodUi", 
+                                              label = h5('Choose distribution with best fit'),
+                                              choices = c("Lognormal","Normal", "Weibull", "Gamma"),
+                                              selected = "Lognormal",
+                                              multiple = FALSE,
+                                              options = pickerOptions(
+                                                actionsBox = TRUE,
+                                                header = "Distributiohn with best fit has smallest AIC or BIC",
+                                                #title = "Only one distribution can be selected",
+                                                maxOptions = 2
+                                              )
+                                            ),
+                                            #checkboxInput("boot_CI_SI_UI", h5("Compute 95% CI of model parameters by bootstrap ?"), FALSE),
+                                            numericInput("niter_SI_UI", label = h5("Specify number of bootstrap iteration"), value = 51),
+                                            checkboxInput("showModelDiagnosticsPanel_SI",  "Show model disgnostics plots", FALSE),
+                                            br(),
+                                            span(tags$i(h5(" This section estimates the serial interval (SI), and superspreading parameter (k). 
+                                                           Different distributions are fitted to the observed SI. After choosing the distribution with best fit based on smallest AIC, 
+                                                           the system would then estimate the mean SI and 95% CI. The 95% percentile confidence in interval of the chosen model is 
+                                                           estimated by bootstrap. A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
+                                                           The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the superspreading parameter (k).")), style="color:#045a8d"),
+                                            
                            ),
                                             width = 2),
                          mainPanel( 
@@ -528,14 +566,91 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                        ,
                                        tabPanel("Administrative map", value = 4, plotOutput("regionMapCaseCount", width = "100%", height = "80vh"))
                                        ,
-                                       tabPanel("Superspreading (k)", value = 7,
+                                       tabPanel("Serial interval analysis", value = 7,
+                                                fluidRow( width = 10,
+                                                          column(12,
+                                                                 wellPanel(
+                                                                   h4(helpText("Medel selection: Goodness-of-fit criteria and statistics.  
+                                                                                     Model with smallest values correspond to distribtion with best fit." )),
+                                                                   div( DT::dataTableOutput("si_model_fitTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
+                                                                 )
+                                                          )
+                                                ), ## end of flud row
+                                                fluidRow( width = 10,                                                         
+                                                          column(6,
+                                                                 conditionalPanel(condition = 'input.showModelDiagnosticsPanel_SI',
+                                                                 wellPanel(
+                                                                   h4(helpText("Empirical and theoretical CDFs")),
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     plotOutput("SI_model_cdf_plot", width = "100%", height = "60vh")
+                                                                   )
+                                                                 )
+                                                          )
+                                                                 
+                                                          ),
+                                                          column(6,
+                                                                 conditionalPanel(condition = 'input.showModelDiagnosticsPanel_SI',
+                                                                 wellPanel(
+                                                                   h4(helpText("Q-Q plot")),
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     plotOutput("SI_model_qq_plot", width = "100%", height = "60vh")
+                                                                   )
+                                                                 )
+                                                          )
+                                                          )
+                                                ), ## end of flud row
+                                                
                                                 fluidRow( width = 10,
                                                           column(6,
                                                                  wellPanel(
-                                                                   h4(helpText("Distributions of serial interval")),
+                                                                   h4(helpText("Empirical and theoretical density")),
                                                                    fluidRow(
                                                                      width = 12,
-                                                                     plotOutput("distribution_SI_plot", width = "100%", height = "40vh")
+                                                                     plotOutput("SI_hist_model_plot", width = "100%", height = "60vh")
+                                                                     # plotOutput(" ", width = "100%", height = "40vh")
+                                                                   )
+                                                                 )
+                                                          ),
+                                                          column(6,
+                                                                 wellPanel(
+                                                                    h4(helpText("Meam estimate and 95% CI for serial interval based on distribtion with best fit to the data" )),
+                                                                   # div( DT::dataTableOutput("si_mean_CI_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     div( DT::dataTableOutput("si_mean_CI_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
+                                                                   ),
+                                                                   br(),
+                                                                   hr(),
+                                                                   hr(),
+                                                                   
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     box(
+                                                                       h4(helpText("Summary statistics for observed serial interval")),
+                                                                       #footer = "Node degree",
+                                                                       status ="primary", #  "success", # or "warning", 
+                                                                       solidHeader = FALSE,
+                                                                       collapsible = TRUE,
+                                                                       collapsed = FALSE,
+                                                                       width = 15,
+                                                                       # height = 148, # 118, # 142,
+                                                                       verbatimTextOutput("si_summaryTable"),
+                                                                       h6(helpText("n_value <= 0: number of records with negative of zero serial interval. This corresponds to assymptomatic transmissiion.
+                                                                                    prop_value <= 0: Proportion of  assymptomatic transmissiion pairs"))
+                                                                     )
+                                                                   )
+                                                                   )
+                                                          )
+                                                ), ## end of flud row
+                                                fluidRow( width = 10,
+                                                          column(6,
+                                                                 wellPanel(
+                                                                   h4(helpText("Serial interval and fitted distribtion")),
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     plotOutput("distribution_SI_plot", width = "100%", height = "60vh")
                                                                    )
                                                                    ,
                                                                    fluidRow(
@@ -546,10 +661,13 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                                        status ="primary", #  "success", # or "warning", 
                                                                        solidHeader = FALSE,
                                                                        collapsible = TRUE,
-                                                                       collapsed = FALSE,
+                                                                       collapsed = TRUE,
                                                                        width = 15,
                                                                       # height = 148, # 118, # 142,
-                                                                       verbatimTextOutput("SI_estimate")
+                                                                       verbatimTextOutput("SI_estimate"),
+                                                                      h6(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
+                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
+                                                                                  to complete."))
                                                                      )
                                                                    )
                                                                  )
@@ -560,7 +678,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                                    h4(helpText("Distributions of number of infectee per infector")),
                                                                    fluidRow(
                                                                      width = 12,
-                                                                     plotOutput("distribution_k_plot", width = "100%", height = "40vh")
+                                                                     plotOutput("distribution_k_plot", width = "100%", height = "60vh")
                                                                    ),
                                                                    fluidRow(
                                                                      width = 12,
@@ -570,18 +688,28 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                                        status ="primary", #  "success", # or "warning", 
                                                                        solidHeader = FALSE,
                                                                        collapsible = TRUE,
-                                                                       collapsed = FALSE,
+                                                                       collapsed = TRUE,
                                                                        width = 15,
                                                                        #height = 158, # 118, # 142,
-                                                                       verbatimTextOutput("k_estimate")
+                                                                       verbatimTextOutput("k_estimate"),
+                                                                       h6(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
+                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
+                                                                                  to complete."))
                                                                      )
                                                                    )
                                                                  )
                                                           )
-                                                ) 
+                                                ) ## end of flud row
                                      )
                                      ,
-                                     tabPanel("Reproduction number (Rt)", value = 5, plotOutput("rtPlot", width = "90%", height = "85vh"))
+                                     tabPanel("Reproduction number (Rt)", value = 5, 
+                                              wellPanel(
+                                                h4(helpText("Weekly reproduction number estimate")) , 
+                                                #plotOutput("eventBarplotUi", width = "100%", height = "auto")
+                                                plotOutput("rtPlot", width = "90%", height = "85vh"),
+                                                style = "background: white"
+                                              )
+                                              )
                                      , 
                                      tabPanel("Basisc Export",
                                                        numericInput("maxrowsCase", "Rows to show", 20),
@@ -607,7 +735,7 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                           selected = c("CORONAVIRUS"),
                           multiple = FALSE),
               
-              dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date()-30, end = Sys.Date(), min = NULL,
+              dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date()- event_delay, end = Sys.Date(), min = NULL,
                              max = NULL, format = "dd-mm-yyyy", startview = "month",
                              weekstart = 0, language = "en", separator = " to ", width = NULL,
                              autoclose = TRUE),
