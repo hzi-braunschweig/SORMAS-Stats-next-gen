@@ -14,7 +14,7 @@ SORMAS-Stats contain functions to analyze and visualize surveillance data collec
 ```
 docker pull hzibraunschweig/sormas-stats:latest
 ```
-I you like to pull an image built from development branch, you need to pull the tag 'developemnt'. 
+If you like to pull an image built from development branch, you need to pull the tag 'developemnt'. 
 
 (2) Run the image
 
@@ -26,7 +26,7 @@ The app will listen on port 3838. You can map this port to any port on the serve
 ```
 docker run -p 0.0.0.0:3838:3838 -v /local_path_to_app/shiny-server.conf:/etc/shiny-server/shiny-server.conf hzibraunschweig/sormas-stats:latest
 ```
-If you like to provide a custom shiny-server.conf you can map this as a volume. Example shiny-server.conf:
+If you like to provide a custom shiny-server.conf you can map this as a volume. For example shiny-server.conf:
  
  ```
  # Instruct Shiny Server to run applications as the user "shiny"
@@ -92,7 +92,7 @@ services:
 ```
 
 ## Run locally
-(1) Set the R PATH to
+(1) Set the R PATH to where the `example-app.Rproj` is saved on your sytem. You can also double click on `example-app.Rproj` to launch R and this would automatically set the PATH.
 
 ```r
 setwd("SORMAS-Stats/shinyapp")
