@@ -7,13 +7,14 @@ shinyUI(bootstrapPage(
              # theme = shinytheme("darkly"),
              collapsible = TRUE,
              inverse = FALSE,
-             "SORMAS Stats",
+             "SORMAS Stats", 
              id="nav",
              tabPanel( "Transmission Network", 
                        icon = icon("project-diagram"), # icon("filter"),
                        sidebarLayout(
-                         div( id ="Sidebar",
+                         #div( id ="Sidebar",
                          sidebarPanel(
+                           
                            # Filter specific to network diagram only
                            span(tags$i(h6("Filter options for network diagram. Please filter by region, district and click on Visualize network diagram to plot network diagram.")), style="color:#045a8d"),
                            pickerInput("diseaseUi", "Disease", 
@@ -105,21 +106,27 @@ shinyUI(bootstrapPage(
                         
                         textInput("visSingleNodeUi", label = h5("Only contacts of this ID"),
                                   value = "", placeholder = "Enter uuid of node ..." ),
-                          
+                        # add logout button to UI
+                        shinyauthr::logoutUI(id = "logout"),
                           br(),
-                          #hr(),
+                          hr(),
                          
                           h6("Powered by:"),
                           tags$img(src = "HZI_Logo.jpg", height = 50, width = 200)
                            ,
-                          width = 2)
-                         ),
+                          width = 2),
+                         #), #end of div to activate option to dis sidebar panel 
                          
                          mainPanel(
-                           width = 10, 
-                           actionButton("toggleSidebar", "Toggle sidebar"),
-                                   fluidRow(
-                                     visNetworkOutput("transChain", width = "100%", height = "100vh"), width=12 )
+                           width = 10,
+                           # add login panel UI function
+                           shinyauthr::loginUI(id = "login", title = "Please authenticate to visualize results"),
+                           # add logout button to UI
+                           # div(class = "pull-right", shinyauthr::logoutUI(id = "logout")), # can also be "pull-left" or "pull-middle"
+                           
+                           #actionButton("toggleSidebar", "Toggle sidebar"), # removed from app
+                          fluidRow(
+                                  visNetworkOutput("transChain", width = "100%", height = "100vh"), width=12 )
                            ,
                            hr(style = "border-color: #cbcbcb;"),
                            
@@ -318,7 +325,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                    downloadButton("conPerCaseExpCsv", "Download as CSV"),tags$br(),tags$br(),
                                    "Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table"),
                           tabPanel("Contact by region export",
-                                   numericInput("maxrows", "Rows to show", 20),
+                                   numericInput("maxrowsContByRegion", "Rows to show", 20),
                                    verbatimTextOutput("conPerGerionExpTable"),
                                    downloadButton("conPerGerionExpCsv", "Download as CSV"),tags$br(),tags$br(),
                                    "Each row in this data is a region with corresponding number of contacts.
@@ -338,7 +345,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                )
                                                ,
                                                dashboardBody(
-                                                 numericInput("maxrows", "Rows to show", 20),
+                                                 numericInput("maxrowsContSI", "Rows to show", 20),
                                                  verbatimTextOutput("siExpTable"),
                                                  downloadButton("siExpCsv", "Download as CSV"),tags$br(),tags$br(),
                                                  "Each row in this data is a contact between a case person and a contact person.
@@ -348,7 +355,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                              ))
                           ),
                           tabPanel("Detailed contact export",
-                                   numericInput("maxrows", "Rows to show", 20),
+                                   numericInput("maxrowsContactDetailed", "Rows to show", 20),
                                    verbatimTextOutput("conRegionDistExpTable"),
                                    downloadButton("conRegionDistExpCsv", "Download as CSV"),tags$br(),tags$br(),
                                    "Each row in this data is a contact between a case person and a contact person. The data was obtained by merging contacts and their cases, thus the columns contains variables for contacts and cases.",
@@ -711,7 +718,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                               )
                                               )
                                      , 
-                                     tabPanel("Basisc Export",
+                                     tabPanel("Basic export",
                                                        numericInput("maxrowsCase", "Rows to show", 20),
                                                        verbatimTextOutput("casebyRegionVarTable"),
                                                        downloadButton("caseRegionVarExpCsv", "Download as CSV"),tags$br(),tags$br(),

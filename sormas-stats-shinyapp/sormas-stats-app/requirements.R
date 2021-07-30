@@ -53,6 +53,12 @@ install.packages('leaflet', version='2.0.4.1', repos='http://cran.us.r-project.o
 install.packages('igraph', version='1.2.6', repos='http://cran.us.r-project.org')
 install.packages('RPostgreSQL', version='0.6-2', repos='http://cran.us.r-project.org')
 #install.packages('config', version='0.3.1', repos='https://cran.r-project.org')
+install.packages('sodium', version='1.1', repos='https://cran.r-project.org')
+install.packages('shinyauthr', version='1.0.0', repos='https://cran.r-project.org')
+# install.packages("shinyauthr") # this may not work on ubuntu adn may give errors like:
+# ERROR: dependency ‘sodium’ is not available for package ‘shinyauthr’
+# To solve this, install libsodium-dev on your ubuntu. Add this in the docker file also.
+# sudo apt install libsodium-dev  # After installing this, then  go back to R and  run: install.packages("shinyauthr")
 
 
 

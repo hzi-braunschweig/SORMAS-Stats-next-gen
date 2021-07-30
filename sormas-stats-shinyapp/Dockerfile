@@ -39,6 +39,7 @@ RUN apt-get update \
        libgdal-dev \
        perl \ 
        libcompress-raw-zlib-perl \
+       libsodium-dev \
  && apt-get -y autoremove \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*		

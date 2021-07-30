@@ -507,7 +507,7 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   
   # reading cases
   queryCase <- paste0("SELECT  id AS caze_id, uuid AS uuid_case, disease AS disease_case, reportdate AS reportdate_case, person_id AS person_idcase,
-  region_id AS region_idcase, district_id AS district_idcase, caseclassification AS caseclassification_case, outcome AS outcome_case, epidnumber,
+  responsibleregion_id AS region_idcase, responsibledistrict_id AS district_idcase, caseclassification AS caseclassification_case, outcome AS outcome_case, epidnumber,
   symptoms_id AS symptoms_idcase
                           FROM public.cases
                           WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "' ")
@@ -1267,6 +1267,30 @@ save(eventExport, file = "./utils/eventExport.R")
 eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
 ### end of event export
 
+## User export ----
+#sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
+userExport = function(sormas_db){
+# This function get the user table in sormas, Hashing Passwords with sodium and export 
+# This username with hased passwords are then used for autentification in sormas-stats  
+# refs: 
+# https://paulc91.github.io/shinyauthr/
+# https://doc.libsodium.org/password_hashing/
+
+#loading user table
+  queryUsers <- paste0("SELECT uuid, username, firstname, lastname
+                        FROM public.users
+                       WHERE active = TRUE")
+  users = dbGetQuery(sormas_db,queryUsers)
+  
+  ret = users %>%
+    dplyr::mutate(password = purrr::map_chr(substr(uuid,1,13), sodium::password_store),  .keep = "unused") # hassing
+  return(ret)
+}
+save(userExport, file = "./utils/userExport.R")
+#users = userExport(sormas_db=sormas_db)
+# ent of user export
+
+
 ## 
 # 2by2 function table. This method takes a dataframe and any user specified 2 columns and returned a 2x2 table -----
 twoByTwoTablefunction = function(data,Var1, Var2, spread=FALSE, Proportion = FALSE)
@@ -1582,8 +1606,8 @@ ImportingUnformatedDataFromDB = function(sormas_db, fromDate, toDate)
   
   # reading unique cases based on all varaibles. 
   # use  where deleted = FALSE  and caseclassification != 'NO_CASE'  in case you want to eliminate not a cases
-  queryCase <- paste0("SELECT  DISTINCT id, disease, reportdate, creationdate, person_id,region_id,district_id, caseclassification, epidnumber, symptoms_id, healthfacility_id,
-                         outcome,caseorigin,quarantine
+  queryCase <- paste0("SELECT  DISTINCT id, disease, reportdate, creationdate, person_id, responsibleregion_id AS region_id, responsibledistrict_id AS district_id, 
+  caseclassification, epidnumber, symptoms_id, healthfacility_id, outcome,caseorigin,quarantine
                           FROM public.cases 
                           WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ")
   case = dbGetQuery(sormas_db,queryCase)
@@ -1682,7 +1706,7 @@ ImportingUnformatedDataFromDB = function(sormas_db, fromDate, toDate)
   
   return(list(case = case, contact = contact, person = person, region = region, district = district, event = event, eventParticipant=eventParticipant, location=location))
 }
-save(ImportingUnformatedDataFromDB, file = "ImportingUnformatedDataFromDB.R")
+save(ImportingUnformatedDataFromDB, file = "./utils/ImportingUnformatedDataFromDB.R")
 
 ##
 
