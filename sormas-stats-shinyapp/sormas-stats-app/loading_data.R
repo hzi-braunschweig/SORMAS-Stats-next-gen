@@ -1,6 +1,11 @@
 
-## Extracting eventData -----
+# connect to sormas_db
 sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
+
+# Extracting user data, Hashing Passwords with sodium
+users = userExport(sormas_db=sormas_db)
+
+## Extracting eventData -----
 eventData = eventExport(sormas_db,fromDate = event_fromDate, toDate = event_toDate)
 
 ## Extracting infectorInfecteeData -----

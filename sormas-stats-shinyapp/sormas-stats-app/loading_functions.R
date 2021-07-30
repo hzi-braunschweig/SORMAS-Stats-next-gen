@@ -38,6 +38,7 @@ base::load(file.path("./utils","fit_distribution.R"))
 base::load(file.path("./utils","fitdist_plot.R"))
 base::load(file.path("./utils","summary_statistics.R"))
 base::load(file.path("./utils","serial_interval_mean_CI.R"))
+base::load(file.path("./utils","userExport.R"))
 
 
 

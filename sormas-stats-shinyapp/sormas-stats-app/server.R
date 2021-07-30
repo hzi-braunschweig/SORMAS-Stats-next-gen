@@ -2,12 +2,30 @@
 
 #####  server function #######
 shinyServer(
-  function(input, output,session) {
+  function(input, output,session) { 
+    # call login module supplying data frame, 
+    # username and password cols and reactive trigger
+    credentials <- shinyauthr::loginServer(
+      id = "login",
+      data = users,
+      user_col = username,
+      pwd_col = password,
+      sodium_hashed = TRUE,
+      log_out = reactive(logout_init())
+    )
+    
+    # call the logout module with reactive trigger to hide/show
+    logout_init <- shinyauthr::logoutServer(
+      id = "logout",
+      active = reactive(credentials()$user_auth)
+    )
+    ########################################"
    
-     ### toggling sidebar panel
-    observeEvent(input$toggleSidebar, {
-      shinyjs::toggle(id = "Sidebar")
-    })
+    ### toggling sidebar panel
+    # Can be activated by uncommenting this code ans also in ui file
+    # observeEvent(input$toggleSidebar, {
+    #   shinyjs::toggle(id = "Sidebar")
+    # })
     
     # ui element to filter trensmisson chenin by disdrict based of users delected region 
     output$pickerInputDistrict2 <- renderUI({
@@ -139,6 +157,7 @@ shinyServer(
 
   # further filtering based on resultingCaseOnlyUi, activeEventsOnlyUi, visSingleChainUi
   elistSel2ResCaseSourseCase  = reactive({ 
+  req(credentials()$user_auth)
   elistSel <- elist[elist$id %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy()$id, ]
   #Filter elist based on resulting cases varaible
   if(input$resultingCaseOnlyUi == FALSE){
@@ -272,6 +291,7 @@ shinyServer(
   
 ### Computing network parameters using igraph----
   graphObject <- reactive({
+    req(credentials()$user_auth)
     elistSel = elistSel2ResCaseSourseCase()
     elistSel = elistSel %>%
       dplyr::distinct_at(., vars(from, to), .keep_all = FALSE)
@@ -291,6 +311,7 @@ shinyServer(
  
   # computing summary of node degree 
   output$nodeDegreeSummary <- renderPrint({
+    req(credentials()$user_auth)
     net = graphObject()
     deg <- degree(net, mode="all") # 
     summary(deg)  # output
@@ -298,12 +319,14 @@ shinyServer(
   
   # computing summary of node betweeness
   output$nodeBetweenessSummary <- renderPrint({
+    req(credentials()$user_auth)
     net = graphObject()
     summary(betweenness(net, directed=F)) 
   })
   
   # degree histogram
   output$nodeDegreeHist <- renderPlot({
+    req(credentials()$user_auth)
     net = graphObject()
     deg <- degree(net, mode="all") # 
     hist(deg, breaks=20, xlim = c(1, max(deg)), main = NULL, xlab = "Contacts per case", col = "grey") # breaks=1:vcount(net)-1
@@ -311,6 +334,7 @@ shinyServer(
   })	
   # Betweeness histogram
   output$nodeBetweenessHist <- renderPlot({
+    req(credentials()$user_auth)
     net = graphObject()
     betweenness_score = betweenness(net, directed=F, weights=NA)
     hist(betweenness_score,  breaks=20, xlim = c(0, max(betweenness_score) + 2),main = NULL, col = "grey", xlab = "Betweeness score" )
@@ -318,6 +342,7 @@ shinyServer(
   
   # Edge density: The proportion of present edges from all possible edges in the network.
   output$edgeDensity <- renderInfoBox({
+    req(credentials()$user_auth)
     net = graphObject()
     edge_density = round(edge_density(net, loops=F), 2)
     infoBox(
@@ -330,6 +355,7 @@ shinyServer(
   
   # Diameter: longest geodesic distance ie longest undirected chain, thus extract the source case
   output$diameterDirected <- renderInfoBox({
+    req(credentials()$user_auth)
     net = graphObject()
     temp = diameter(net, directed=TRUE) # # number of contact in longest chain of infector-infectee pairs
     infoBox(
@@ -340,6 +366,7 @@ shinyServer(
     )
   }) 
   output$diameterUndirected <- renderInfoBox({
+    req(credentials()$user_auth)
     net = graphObject()
     temp = diameter(net, directed=FALSE) # # number of contact in longest undirected chain
     infoBox(
@@ -351,6 +378,7 @@ shinyServer(
   }) 
   ## summary of source/ infector nodes for cases and evnet
   output$totInfectorCaseEventNodes <- renderInfoBox({
+    req(credentials()$user_auth)
     temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$sum_caseEvent_nodes
     infoBox(
       title = "∑ Infector", value = temp,
@@ -360,6 +388,7 @@ shinyServer(
   }) 
   #
   output$totSourceInfectorCaseEventNodes <- renderInfoBox({
+    req(credentials()$user_auth)
     temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$sum_missing_source_case_nodes
     infoBox(
       title = "∑ Source Infectors", value = temp,
@@ -369,6 +398,7 @@ shinyServer(
   }) 
   ##
   output$propInfectorCaseEventNodes <- renderInfoBox({
+    req(credentials()$user_auth)
     temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$prop_missing_source_case_nodes
     infoBox(
       title = "% Source Infector", value = temp,
@@ -379,12 +409,14 @@ shinyServer(
   
   # summary pronting uuid of app parant nodes
   output$sourceNodeUUID <- renderPrint({
+    req(credentials()$user_auth)
     temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$source_node_uuid
     cat(temp)
   })
   
   ##
   output$transitivityScore <- renderInfoBox({
+    req(credentials()$user_auth)
     net = graphObject()
     temp = round(transitivity(net), 2)
     infoBox(
@@ -396,7 +428,7 @@ shinyServer(
   
   # computing case counts by case classification from graphObject 
   output$nodeClassificationCountTable <- DT::renderDataTable({
-   
+    req(credentials()$user_auth)
     net = graphObject()
     temp = as.data.frame(table(V(net)$group))
     temp = temp %>% rename("Node classification" = Var1, Total = Freq)
@@ -414,42 +446,12 @@ shinyServer(
    # }
     return(res)
   })
-  
-  
-  
-  output$networkParameter2Table <- DT::renderDataTable({
-  
-    temp =  tail(cars, 6) 
-    #if(input$EventIndicatorTypeUi == "Count"){
-      res =  DT::datatable(
-        temp,
-       # filter = 'top', 
-       extensions = c('Buttons', 'Scroller'),
-        options = list(
-          # scrollY = 200,
-          #              scrollX = 500,
-          #              deferRender = TRUE,
-          #              scroller = TRUE,
-          #              # paging = TRUE,
-          # pageLength = 25,
-          buttons = list(c('excel','csv'),
-                         list(extend = 'colvis', targets = 0, visible = FALSE)),
-          dom = 'lBfrtip',
-          fixedColumns = TRUE,
-          autoWidth = TRUE,
-          columnDefs = list(list(className = 'dt-center', targets = "_all")),
-          searching = FALSE
-        ), 
-        rownames = FALSE)
-      
-   # }
-    return(res)
-  })
 ## end of transmission network analysis
 
 ## CONTACT DATA ANALYSIS-----
     #d render contact table based on region district time and disease
     d = reactive({
+      req(credentials()$user_auth)
       if(is.null(input$regionContactUi))
       {
         contRegionDist[((contRegionDist$disease == input$diseaseContactUi) & (contRegionDist$reportdatetime >= (min(input$reportdateContactUi))) & (contRegionDist$reportdatetime <= (max(input$reportdateContactUi)) )), ]
@@ -581,7 +583,6 @@ shinyServer(
     })
     ## max contacte per case
     output$maxConPerCase = renderInfoBox({
-
       infoBox("",  max(p()$Freq)   , icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Max cont-per-case"
       )
     })
@@ -628,6 +629,7 @@ shinyServer(
     ## serial interval
     #selecting siDat baed on disease, time; regiion and district just as in d
     siD = reactive({
+      req(credentials()$user_auth)
       if(is.null(input$regionContactUi) )
       {
         siDat[((siDat$disease == input$diseaseContactUi) & (siDat$reportdatetime >= (min(input$reportdateContactUi))) & (siDat$reportdatetime <= (max(input$reportdateContactUi)) )), ]
@@ -657,7 +659,7 @@ shinyServer(
       # print(tail(cv_cases %>% select(c(country, date, cases, new_cases, deaths, new_deaths,
       #                                  recovered, new_recovered, active_cases,
       #                                  per100k, newper100k, activeper100k, deathsper100k, newdeathsper100k)), input$maxrows), row.names = FALSE)
-      print(head(conRegionDistExp(), input$maxrows), row.names = FALSE)
+      print(head(conRegionDistExp(), input$maxrowsContactDetailed), row.names = FALSE)
       options(orig)
     })
 
@@ -699,7 +701,7 @@ shinyServer(
     )
     output$siExpTable <- renderPrint({
       orig <- options(width = 1000)
-      print(head(siExp(), input$maxrows), row.names = FALSE)
+      print(head(siExp(), input$maxrowsContSI), row.names = FALSE)
       options(orig)
     })
 
@@ -721,12 +723,11 @@ shinyServer(
     )
     output$conPerGerionExpTable <- renderPrint({
       orig <- options(width = 1000)
-      print(head(conPerGerionExp(), input$maxrows), row.names = FALSE)
+      print(head(conPerGerionExp(), input$maxrowsContByRegion), row.names = FALSE)
       options(orig)
     })
 
   ## end exportation of data
-
     
   #### CASE DATA ANALYSIS  #################
     # ui element to filter casePersonRegionDist by disdrict based of users selected region 
@@ -764,6 +765,7 @@ shinyServer(
   
     # fiter by district of cose
     casePersonFilter = reactive({
+      req(credentials()$user_auth)
       if(is.null(input$districtCaseUi))
       {
         temp = casePersonRegionFilter()
@@ -774,7 +776,6 @@ shinyServer(
       return(temp)
       
     })
-      
     
     #### case KPI ################
     # case classification
@@ -1276,6 +1277,7 @@ shinyServer(
     ## superspreading analysis
     # Filtering by disease and region of infector case
     infectorInfecteeDataDiseaseRegionFilter = reactive({
+      req(credentials()$user_auth)
       if(is.null(input$regionCaseUi))
       {
         infectorInfecteeData[((infectorInfecteeData$disease_infector == input$diseaseCaseUi) & (infectorInfecteeData$report_date_infector >= (min(input$reportdateCaseUi))) & (infectorInfecteeData$report_date_infector <= (max(input$reportdateCaseUi)) )), ]
@@ -1454,6 +1456,7 @@ shinyServer(
    
    # renaming selected data to eventDataDiseaseRegionTimeFilter  
     eventDataDiseaseRegionTimeFilter = reactive({
+      req(credentials()$user_auth)
       selEventRegionDistUi()
     })
     
@@ -1932,6 +1935,7 @@ shinyServer(
 
 ### event map by administrative area ----
     output$eventMapUi <- renderPlot({
+      req(credentials()$user_auth)
       map_text_size = input$eventMapTextSizeUi
       if(input$eventMapShapesUi == "Region")
       {
@@ -1958,16 +1962,19 @@ shinyServer(
     #https://github.com/atmajitg/bloodbanks  to get sample app
     # Reactive expression for the data subsetted to what the user selected
     filteredData <- reactive({
+      req(credentials()$user_auth)
       eventData[eventData$n_ep >= input$range[1] & eventData$n_ep <= input$range[2],]
     })
     
     # This reactive expression represents the palette function,
     # which changes as the user makes selections in UI.
     colorpal <- reactive({
+      req(credentials()$user_auth)
       colorNumeric(input$colors, eventData$n_ep)
     })
     
     output$map <- renderLeaflet({
+      req(credentials()$user_auth)
       # Use leaflet() here, and only include aspects of the map that
       # won't need to change dynamically (at least, not unless the
       # entire map is being torn down and recreated).
