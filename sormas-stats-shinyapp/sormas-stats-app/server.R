@@ -1595,8 +1595,6 @@ shinyServer(
     
     ## evnet status by type of place
     output$eventCuntbytyplaceTable <- DT::renderDataTable({
-     
-      # temp = twoByTwoTablefunction(data = eventDataDiseaseRegionTimeFilter() , Var1 = "eventstatus", Var2 = "typeofplace_event", spread = TRUE, Proportion = FALSE)
       if(input$EventIndicatorTypeUi == "Count"){
         temp = twoByTwoTablefunction(data = eventDataDiseaseRegionTimeFilter() , Var1 = "eventstatus", Var2 =  "typeofplace_event", spread = TRUE, Proportion = FALSE)
         res =  DT::datatable(
@@ -1616,12 +1614,10 @@ shinyServer(
                          columnDefs = list(list(className = 'dt-center', targets = "_all"))
           ), 
           rownames = FALSE)
-        
       }
       if(input$EventIndicatorTypeUi == "Proportion"){
         temp = twoByTwoTablefunction(data = eventDataDiseaseRegionTimeFilter() , Var1 = "eventstatus", Var2 = "typeofplace_event", spread = TRUE, Proportion = TRUE)
         res =  DT::datatable(
-          # proportionByregion(data = eventCuntbytyplaceTable),
           temp,
           filter = 'top', extensions = c('Buttons', 'Scroller'),
           options = list(scrollY = 200,
@@ -1668,7 +1664,6 @@ shinyServer(
       if(input$EventIndicatorTypeUi == "Proportion"){
         temp = twoByTwoTablefunction(data = eventDataDiseaseRegionTimeFilter() , Var1 = "eventstatus", Var2 = "eventmanagementstatus", spread = TRUE, Proportion = TRUE)
         res =  DT::datatable(
-          # proportionByregion(data = eventCuntbytyplaceTable),
           temp,
           filter = 'top', extensions = c('Buttons', 'Scroller'),
           options = list(scrollY = 200,
@@ -1691,9 +1686,6 @@ shinyServer(
     
     # event status by risklevel_event -----
     output$eventStatusByRisklevelTable <- DT::renderDataTable({
-  
-      #tempData = data.frame(eventDataDiseaseRegionTimeFilter())
-      #temp = twoByTwoTablefunction(data = eventDataDiseaseRegionTimeFilter() , Var1 = "eventstatus", Var2 = "risklevel_event", spread = TRUE, Proportion = FALSE)
       if(input$EventIndicatorTypeUi == "Count"){
         temp = twoByTwoTablefunction(data = eventDataDiseaseRegionTimeFilter() , Var1 = "eventstatus", Var2 = "risklevel_event", spread = TRUE, Proportion = FALSE)
         res = DT::datatable(
@@ -1718,7 +1710,6 @@ shinyServer(
       if(input$EventIndicatorTypeUi == "Proportion"){
         temp = twoByTwoTablefunction(data = eventDataDiseaseRegionTimeFilter() , Var1 = "eventstatus", Var2 = "risklevel_event", spread = TRUE, Proportion = TRUE)
         res =  DT::datatable(
-          # proportionByregion(data = eventCuntbytyplaceTable),
           temp,
           filter = 'top', extensions = c('Buttons', 'Scroller'),
           options = list(scrollY = 200,
@@ -1748,48 +1739,56 @@ shinyServer(
       if( length(input$twoByTwotableEventVariblesUi) == 2 ){
         temp = temp[ , (colnames(temp) %in% input$twoByTwotableEventVariblesUi) ]
       } else {
-        temp = temp[, (colnames(temp) %in% c("eventinvestigationstatus","eventstatus")) ]
+        temp = temp[, (colnames(temp) %in% c("location_category","eventstatus")) ]
       }
         rowVar = colnames(temp)[1]
         colVar = colnames(temp)[2]
         
       # computing table values
       if(input$EventIndicatorTypeUi == "Count"){
-        temp = twoByTwoTablefunction(data = temp , Var1 = rowVar, Var2 = colVar, spread = TRUE, Proportion = FALSE)
+        if(input$transpose2x1TableEventUi == TRUE){
+          tempCount = twoByTwoTablefunction(data = temp , Var1 = rowVar, Var2 = colVar, spread = TRUE, Proportion = FALSE, spreadVar = "Var1" )
+        } else{
+          tempCount = twoByTwoTablefunction(data = temp , Var1 = rowVar, Var2 = colVar, spread = TRUE, Proportion = FALSE ) # spreadVar = "Var2" is the default
+        }
         res = DT::datatable(
-          temp,
-          filter = 'top', extensions = c('Buttons', 'Scroller'), # filter = 'none',
-          options = list(scrollY = 400,
-                         scrollX = 800,
+          data.frame(tempCount, Total = rowSums(tempCount[,-1], na.rm = TRUE)), # computing row sum
+          filter = 'top',   # filter = 'none',
+          extensions = c('Buttons', 'Scroller'),
+          options = list(scrollY = '50vh',  #400
+                         scrollX = TRUE, # 800
                          deferRender = TRUE,
                          scroller = TRUE,
                          # paging = TRUE,
                          # pageLength = 25,
                          buttons = list(c('excel','csv'),
-                                        list(extend = 'colvis', targets = 0, visible = FALSE)),
-                         dom = 'lBfrtip',
+                                        list(extend = 'colvis', targets = 0, visible = FALSE)
+                                        ),
+                         dom = 'lBfrtip',  #dom = 'lrtip'
                          fixedColumns = TRUE,
                          autoWidth = TRUE,
                          columnDefs = list(list(className = 'dt-center', targets = "_all", searchable = TRUE))
-          ), 
+          ),
           rownames = FALSE)
-        
       }
       if(input$EventIndicatorTypeUi == "Proportion"){
-        temp = twoByTwoTablefunction(data = temp, Var1 = rowVar, Var2 = colVar, spread = TRUE, Proportion = TRUE)
+        if(input$transpose2x1TableEventUi == TRUE){
+          tempProp = twoByTwoTablefunction(data = temp, Var1 = rowVar, Var2 = colVar, spread = TRUE, Proportion = TRUE, spreadVar = "Var1")
+        } else{
+          tempProp = twoByTwoTablefunction(data = temp, Var1 = rowVar, Var2 = colVar, spread = TRUE, Proportion = TRUE) # spreadVar = "Var2" is the default
+        }
         res =  DT::datatable(
-          # proportionByregion(data = eventCuntbytyplaceTable),
-          temp,
+          data.frame(tempProp, Total = rowSums(tempProp[,-1], na.rm = TRUE)), # computing row sum
           filter = 'top', extensions = c('Buttons', 'Scroller'),
-          options = list(scrollY = 200,
-                         scrollX = 500,
+          options = list(scrollY = '50vh',  #400
+                         scrollX = TRUE,  #800
                          deferRender = TRUE,
                          scroller = TRUE,
                          # paging = TRUE,
                          # pageLength = 25,
                          buttons = list(c('excel','csv'),
                                         list(extend = 'colvis', targets = 0, visible = FALSE)),
-                         dom = 'lBfrtip',
+                         dom = 'lBfrtip', #, use #dom = 'lrtip',
                          fixedColumns = TRUE,
                          autoWidth = TRUE,
                          columnDefs = list(list(className = 'dt-center', targets = "_all"))
@@ -1798,7 +1797,6 @@ shinyServer(
       }
       return(res)
     })
-    
     
     # event status pie chart ----- 
     output$pieCdhartEventStatusUi <- renderPlotly({
@@ -1820,7 +1818,6 @@ shinyServer(
     
 #### dynamic pie chart based on user specified varaible -----
     output$pieCdhartEventUi <- renderPlotly({
-      #if piechartEventVaribleUi
       if(input$piechartEventVaribleUi == "Event Status"){
         fg =  pieChartPlot(variable = eventDataDiseaseRegionTimeFilter()$eventstatus)
       } else{
@@ -1828,11 +1825,35 @@ shinyServer(
         temp = eventDataDiseaseRegionTimeFilter()
         pieVar = as.character(temp[, colnames(temp) == pieVar])
         fg =  pieChartPlot(variable = pieVar )
-        
       }
       return(fg)
     })
-
+    
+# dynamic bar chart ----
+    output$barChartEventUi <- renderPlotly({
+      if(input$EventIndicatorTypeUi == "Count"){ 
+        if(input$barplotEventVaribleUi != "Location category"){
+          barVar = input$barplotEventVaribleUi
+          temp = eventDataDiseaseRegionTimeFilter()
+          barVar = as.character(temp[, colnames(temp) == barVar])
+          fg = univariate_barplot(var = barVar, count=TRUE )
+        } else{
+          fg = univariate_barplot(var = eventDataDiseaseRegionTimeFilter()$location_category, count=TRUE )
+        }
+      }
+      if(input$EventIndicatorTypeUi == "Proportion"){ 
+        if(input$barplotEventVaribleUi != "Location category"){
+          barVar = input$barplotEventVaribleUi
+          temp = eventDataDiseaseRegionTimeFilter()
+          barVar = as.character(temp[, colnames(temp) == barVar])
+          fg = univariate_barplot(var = barVar, count=FALSE)
+        } else{
+          fg = univariate_barplot(var = eventDataDiseaseRegionTimeFilter()$location_category, count=FALSE)
+        }
+      }
+      return(fg)
+    })  
+    
 ## event count by jurisdiction -----
     output$eventCountbyJurisdictionTable <- DT::renderDataTable({
       eventVarSelUi =  event_variable_data %>%

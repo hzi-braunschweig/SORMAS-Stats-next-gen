@@ -1208,7 +1208,7 @@ eventExport = function(sormas_db, fromDate, toDate){
       creationdate AS creationdate_event, enddate AS enddate_event, startdate AS startdate_event, archived AS archived_event, nosocomial AS nosocomial_event,
       srctype AS srctype_event, risklevel AS risklevel_event,  eventlocation_id, eventmanagementstatus, eventtitle
                         FROM public.events
-                        WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+                        WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   event = dbGetQuery(sormas_db,queryEvent)
   
   ## reading event participants data that are in events only; this is needed to compute the number of ep per events
@@ -1267,6 +1267,63 @@ save(eventExport, file = "./utils/eventExport.R")
 eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
 ### end of event export
 
+# # compute_eventlocation_category
+# # This function takes the event data exported by the eventExport function and compute the 
+# the location_category (or collectivité) varaible
+compute_eventlocation_category= function(eventData){
+  # This function takes the event data exported by the eventExport function
+  # Add a varible to this data based on type of place and facility
+  # These categories are based on France recommendaton. For another country, you just need to edit the code below
+  # main issue: https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen/issues/35
+  ret =  eventData %>%	#je ne me rappelle plus du nom exact de ta table - à vérifier
+    dplyr::mutate(
+      location_category = case_when (
+        typeofplace_event =='FACILITY' & facilitytype_location =='ASSOCIATION' ~ 'ASSOCIATION',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'THEATER' ~ 'THEATER',
+        typeofplace_event == 'FACILITY' & facilitytype_location %in% c('SCHOOL', "KINDERGARTEN", "AFTER_SCHOOL") ~ 'SCHOOL',
+        typeofplace_event == 'FACILITY' & facilitytype_location %in% c('HOSPITAL',  "DAY_HOSPITAL") ~ 'HOSPITAL',
+        typeofplace_event == 'FACILITY' & facilitytype_location %in% c('MOBILE_NURSING_SERVICE', "DISABLED_PERSON_HABITATION", "ELDERLY_DAY_CARE" ) ~ 'MO_DIS_ELDER',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'UNIVERSITY' ~ "UNIVERSITY",
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'OTHER_MEDICAL_FACILITY' ~ "OTH_MED_FACILITY", 
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'BUSINESS' ~ 'BUSINESS',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'HOTEL' ~ 'HOTEL',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'CANTINE' ~ 'CANTINE',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'RESTAURANT' ~ 'RESTAURANT',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'CHILDRENS_DAY_CARE' ~ 'CHILDRENS_DAY_CARE',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'BAR' ~ 'BAR',
+        typeofplace_event == 'FACILITY' & facilitytype_location %in% c('OTHER_RESIDENCE', "HOMELESS_SHELTER", "RETIREMENT_HOME", "REFUGEE_ACCOMMODATION") ~ 'OTHER_RESIDENCE',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'CORRECTIONAL_FACILITY' ~ 'CORRECTIONAL_FACILITY',
+        typeofplace_event == 'FACILITY' & facilitytype_location == 'CHILDRENS_HOME' ~ 'CHILDRENS_HOME',
+        typeofplace_event == 'MEANS_OF_TRANSPORT'  ~ 'MEANS_OF_TRANSPORT',
+        typeofplace_event == 'HOME'  ~ 'HOME',
+        typeofplace_event == 'PUBLIC_PLACE'  ~ 'PUBLIC_PLACE',
+        TRUE ~ 'UNDEFINED')) %>%  # renaming french categories
+    dplyr::mutate(location_category_fr = case_when(
+      location_category == "ASSOCIATION" ~  'ACES', #  #ACES - Activité ou évènement sportif
+      location_category == "THEATER" ~  'ACEC',   #  'ACEC - Activité ou évènement culturel'
+      location_category == "SCHOOL" ~ "SCOL" ,  #SCOL - Évènement ou situation en milieu scolaire
+      location_category == "HOSPITAL" ~ "ESPP", # ESPP – Etablissements de santé publics ou privés
+      location_category == "MO_DIS_ELDER" ~ "EMES" ,
+      location_category == "UNIVERSITY"  ~ "UNIV" , # 'UNIV - Évènement ou situation en établissement d_enseignement supérieur'
+      location_category == "OTH_MED_FACILITY" ~ "AUTR_ESPP", #'AUTR - Autres lieu ou évènement sans respect des gestes barrières', should this be other in sromas or other not mentioned in your type of medical facility
+      location_category == "BUSINESS" ~ "RAEP" ,    # 'RAEP - Rassemblement ou évènement en lien avec une activité professionnelle', Can there not be more options here?
+      location_category == "HOTEL" ~ "TOUR", # TOUR- Structure d_hébergement touristique
+      location_category == "CANTINE" ~ "RCMP" ,  # RCMP - Restauration collective en milieu  professionnel
+      location_category == "RESTAURANT" ~ "REST" ,
+      location_category == "CHILDRENS_DAY_CARE" ~ "CRCH" ,  #CRCH  - Structure accueil du jeune enfant
+      location_category == "BAR" ~ "BAR" ,
+      location_category == "OTHER_RESIDENCE" ~ "FROP", # FROP - Foyer de résidence ou pensionnat (jeunes, travailleurs) 
+      location_category == "CORRECTIONAL_FACILITY" ~ "EPEN" , # EPEN - Établissement pénitentiaire
+      location_category == "CHILDRENS_HOME" ~ "HPJJ" ,    #HPJJ  -  Structure accueil et hébergement relevant de la PJJ
+      location_category == "MEANS_OF_TRANSPORT" ~ "PPTC" ,  # PPTC - présence prolongée dans un transport collectif
+      location_category == "HOME" ~ "RPFA" ,   # RPFA - Réunions privées dans un cadre familial, amical ou autre
+      location_category == "PUBLIC_PLACE" ~ "AUTR" ,
+      location_category == "UNDEFINED" ~  'INDEFINIE'))
+  return(ret)
+}
+save(compute_eventlocation_category, file = "./utils/compute_eventlocation_category.R")
+#ret = compute_eventlocation_category(eventData)
+
 ## User export ----
 #sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
 userExport = function(sormas_db){
@@ -1293,12 +1350,12 @@ save(userExport, file = "./utils/userExport.R")
 
 ## 
 # 2by2 function table. This method takes a dataframe and any user specified 2 columns and returned a 2x2 table -----
-twoByTwoTablefunction = function(data,Var1, Var2, spread=FALSE, Proportion = FALSE)
+twoByTwoTablefunction = function(data,Var1, Var2, spread=FALSE, Proportion = FALSE,  spreadVar = "Var2")
 {
   data = data[,colnames(data) %in% c(Var1,Var2 )]
   colnames(data) = c("Var1", "Var2")
   data = data %>%
-    dplyr::mutate(across(everything(), as.character))
+    dplyr::mutate(across(everything(), as.character)) # converting all varaibles to characters
   temp = data %>% 
     dplyr::group_by(Var1, Var2 )  %>% 
     dplyr::summarise( n = n(), sort = TRUE) %>%
@@ -1308,11 +1365,11 @@ twoByTwoTablefunction = function(data,Var1, Var2, spread=FALSE, Proportion = FAL
       ret = temp %>%
         dplyr::mutate(Prop = round(n/sum(n)*100 , 2) ) %>%
         dplyr::select(-n) %>%
-        tidyr::spread(Var2, Prop)
+        tidyr::spread(spreadVar, Prop)
       #ret[is.na(ret)] = 0  or  ret2 = ret %>% replace(is.na(.), 0) # It is not needed to replace NA with 0
     }else{ 
       ret =  temp %>%
-        tidyr::spread(Var2, n)
+        tidyr::spread(spreadVar, n)
       #ret[is.na(ret)] = 0
     }
   } else{
@@ -1327,8 +1384,8 @@ twoByTwoTablefunction = function(data,Var1, Var2, spread=FALSE, Proportion = FAL
   ret = as.data.frame(ret)
   return(ret)
 }
-save(twoByTwoTablefunction, file = "twoByTwoTablefunction.R")
-#twoByTwoTablefunction(data = eventData, Var1 = "eventstatus", Var2 = "eventmanagementstatus", spread = FALSE, Proportion = FALSE)
+save(twoByTwoTablefunction, file = "./utils/twoByTwoTablefunction.R")
+#twoByTwoTablefunction(data = eventData, Var1 = "eventstatus", Var2 = "eventmanagementstatus", spread = TRUE, Proportion = FALSE, spreadVar = "Var2")
 ## end of twoByTwoTablefunction
 
 ## Adding pie chart to events
@@ -1370,6 +1427,41 @@ barplotEventStatusByJurisdiction  = function(data, Var1, count = TRUE){
 }
 save(barplotEventStatusByJurisdiction, file = "barplotEventStatusByJurisdiction.R")
 # end of event bar plot 
+
+
+
+# univariabte bar plot
+univariate_barplot = function(var, count=FALSE){
+  # This function takes a varaible and return a simple bar plot
+  df = as.data.frame(table(as.character(var), useNA = "ifany"))
+  colnames(df) = c("Variable", "Count") 
+  if(count == FALSE){
+    fig = df %>%
+      dplyr::mutate(Percent = prop.table(Count)) %>%
+      ggplot(aes(x=Variable, y=Percent, fill = Variable, label = scales::percent(Percent)  )) +
+      geom_col(position = 'dodge') + 
+      geom_text(position = position_dodge(width = .9),    # move to center of bars
+                vjust = -0.5,    # nudge above top of bar
+                size = 3) + 
+      theme_classic() +  # use white background ie classic theme
+      theme(legend.title = element_blank()) +
+      scale_y_continuous(labels = scales::percent)
+  }else{
+    fig = ggplot(data=df, aes(x=Variable, y=Count, fill = Variable, label = Count )) +
+      geom_col(position = 'dodge') + 
+      geom_text(position = position_dodge(width = .9),    # move to center of bars
+                vjust = -0.5,    # nudge above top of bar
+                size = 3) +
+      theme_classic() + # use white background ie classic theme
+      theme(legend.title = element_blank())   # remove lagend title
+      # geom_bar(stat="identity") +
+      # xlab(NULL) + ylab("Count") 
+  }
+  fig = ggplotly(fig)
+  return(fig)
+}
+save(univariate_barplot, file = "./utils/univariate_barplot.R")
+# univariate_barplot(var = eventData$eventstatus, count=TRUE )
 
 # table count of event by jurisdictiin and other varibales -----
 # region must not have NA for this method to work

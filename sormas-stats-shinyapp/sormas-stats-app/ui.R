@@ -777,13 +777,6 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                   header = "Choose variables to use for table columns",
                 )
               ),
-              
-              pickerInput(
-                "piechartEventVaribleUi", 'Choose variable to plot Pie chart',
-                choices = c("Event Status",levels(as.factor(colnames(eventData)))) ,
-                selected = "Event Status",
-                multiple = FALSE
-              ),
               pickerInput(
                 inputId = "twoByTwotableEventVariblesUi", 
                 label = 'Choose variables to plot 2X2 table',
@@ -795,6 +788,19 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                   header = "Only 2 variables can be selected",
                   maxOptions = 2
                 )
+              ),
+              checkboxInput("transpose2x1TableEventUi", "Transpose 2 X 2 table ?", TRUE),
+              pickerInput(
+                "piechartEventVaribleUi", 'Choose variable to plot Pie chart',
+                choices = c("Event Status",levels(as.factor(colnames(eventData)))) ,
+                selected = "Event Status",
+                multiple = FALSE
+              ),
+              pickerInput(
+                "barplotEventVaribleUi", 'Choose variable to plot bar graph',
+                choices = c("Location category",levels(as.factor(colnames(eventData)))) ,
+                selected = "Location category",
+                multiple = FALSE
               ),
               
               radioButtons("eventMapShapesUi","Choose map administrative area",  choices = c("Region","Departement", "Commune"),
@@ -870,16 +876,26 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
               ,
               tabPanel("Custom indicators",
                        wellPanel(
-                         h4(helpText("Pie chart")) ,
-                         div(plotlyOutput("pieCdhartEventUi", width = "95%", height = "50vh" ), style = "font-size: 100%; width: 95%" ) 
-                       ),
-                       wellPanel(
-                         h4(helpText("2 X 2 table")) ,
+                         h4(helpText("2 X 2 table. Click on 'Choose variables to plot 2X2 table' to generate the same table for other attributes.")) ,
                          DT::dataTableOutput("dynamic2x2TableEventUi")
-                       )
+                       ),
+                       fluidRow( width = 10,                                                         
+                                 column(6,                                                                
+                                        wellPanel(
+                                          h4(helpText("Dynamic pie chart: Click on 'Choose variable to plot Pie chart' to plot for another varaible.")) ,
+                                          div(plotlyOutput("pieCdhartEventUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
+                                        )
+                                 ),
+                                 column(6,                    
+                                        wellPanel(
+                                          h4(helpText("Dynamic bar graph: Click on 'Choose variable to plot bar graph' to plot for another varaible.")) ,
+                                          div(plotlyOutput("barChartEventUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
+                                        )              
+                                 )
+                       ), ## end of flud row
                        )
               ,
-              tabPanel("Event Time series" ),
+              tabPanel("Event time series" ),
               tabPanel("Shapfile map", plotOutput("eventMapUi", width = "100%", height = "95vh")),
               tabPanel("Leaflet map",     # leafletOutput("eventLeafletMapUi", width = "100%", height = 900)  
                        leafletOutput("map", width = "100%", height = 900),

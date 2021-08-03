@@ -8,6 +8,9 @@ users = userExport(sormas_db=sormas_db)
 ## Extracting eventData -----
 eventData = eventExport(sormas_db,fromDate = event_fromDate, toDate = event_toDate)
 
+# compute location_category varaible for events
+eventData = compute_eventlocation_category(eventData = eventData)
+
 ## Extracting infectorInfecteeData -----
 infectorInfecteeData = infectorInfecteeExport(sormas_db, fromDate = fromDate, toDate = toDate)
 
@@ -102,6 +105,7 @@ eventData = eventData %>%
   dplyr::mutate(n_ep = rep(5,nrow(eventData)), lat = 10.53128 + rnorm(nrow(eventData)), long = 52.21099 + nrow(eventData) ) %>%
   dplyr::select(-c(latitude, longitude ))
 
+eventData = as.data.frame(eventData)
 
 ## creating event_variable_data dateset that maps event variables to their categories. This mapping would be used for selecting columns on event table by jurisdiction
 event_variable_data = event_variable_category_maper(cuntbyRegionTableEvent = cuntbyRegionDistrictEvent(data = eventData , byRegion = TRUE ))
