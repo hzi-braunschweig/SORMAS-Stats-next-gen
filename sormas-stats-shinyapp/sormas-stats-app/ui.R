@@ -423,8 +423,15 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                               selected = "Gamma",
                                               multiple = FALSE
                                             ),
-                                            numericInput("mean_siUI", label = h5("Specify SI mean"), value = 5.2),
-                                            numericInput("std_siUI", label = h5("Specify SI Std Dev"), value = 2.3 ),
+                                           # Only show mean and sd when method == parametric
+                                           # ref: https://mran.microsoft.com/snapshot/2015-06-24/web/packages/shinyjs/README.html
+                                           shinyjs::hidden(
+                                             div(id = "showMeanSdSIUI",
+                                                 numericInput("mean_siUI", label = h5("Specify SI mean"), value = 5.2),
+                                                 numericInput("std_siUI", label = h5("Specify SI Std Dev"), value = 2.3 )
+                                             )
+                                           ), 
+                                           
                                             sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 0, 
                                                         max = 30, step = 1, value = 14),
                                             radioButtons("rsiUi", h5("Ploting parameters"),  choices = c("all","R","SI"), selected = c("R"), inline = TRUE)

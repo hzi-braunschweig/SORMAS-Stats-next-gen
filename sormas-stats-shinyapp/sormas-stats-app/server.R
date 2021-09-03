@@ -1242,6 +1242,18 @@ shinyServer(
       
     })  
     
+    #Rendering and showing ui element for mean and sd  based on user defined choice of "SI estimation method": parmetric or si_from_data
+    # Only show mean and sd when method == parametric
+    observe({
+          if(input$rtMethodUi == "Parametric distribution"){
+          shinyjs::show(id = "showMeanSdSIUI", anim = TRUE)
+        } 
+        else {
+          shinyjs::hide(id = "showMeanSdSIUI", anim = TRUE)
+        } 
+    })
+    
+    #plotting Rt
     output$rtPlot <- renderPlot({
       # preparing si_data data 
       dateSumCase = aggregate(total ~ reportdate, data = casePersonFilter(), sum, na.rm = F)

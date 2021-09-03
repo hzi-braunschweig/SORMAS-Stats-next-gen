@@ -2080,6 +2080,7 @@ RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSu
 {
   #the parametric distribution to use when estimating the serial interval from data on dates of 
   #symptoms of pairs of infector/infected individuals dist = "G", "G" (Gamma), "W" (Weibull), "L" (Lognormal) 
+  # dateSumCase is a datafram of 2 columens: date and number of cases
   if(method == "parametric_si")
   {
     res <- estimate_R(dateSumCase,method="parametric_si", config = make_config(list(mean_si = mean_si, std_si = std_si))) 
