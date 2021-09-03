@@ -201,8 +201,11 @@ shinyServer(
   ## total number of contacts
   output$totalEdges <- renderInfoBox({
     infoBox(
-      "∑ Contact", nrow(elistSel2ResCaseSourseCase() ),icon = icon("arrow-right"), 
-      color = "black", fill = FALSE, subtitle = "Contact & Ep"
+     title = NULL, 
+     value =  nrow(elistSel2ResCaseSourseCase() ),
+     icon = icon("arrow-right"), 
+     color = "black", fill = FALSE, 
+     subtitle = "∑ Contact & EP"
       )
   })  
   ## Total number of edges (contacts or event participants) resulting to cases
@@ -210,9 +213,10 @@ shinyServer(
     temp = elistSel2ResCaseSourseCase() %>%
       dplyr::filter(resultingcase_id != "NA")
     infoBox(
-      title = "∑ Converted", value = nrow(temp),
+      title = NULL, 
+      value = nrow(temp),
       icon = icon("arrow-right"), color = colCase, fill = FALSE,
-      subtitle = "Contact & Ep"
+      subtitle = "∑ contact & EP converted to case"
       
     )
   })   
@@ -220,10 +224,12 @@ shinyServer(
   ## total number of nodes: ie person and events
   output$totalNodes <- renderInfoBox({
     infoBox(
-      "∑ Person & Event", length(unique(c(elistSel2ResCaseSourseCase()$from_uuid_person, elistSel2ResCaseSourseCase()$to_uuid_person ))),
+      title = NULL, 
+      value = length(unique(c(elistSel2ResCaseSourseCase()$from_uuid_person, elistSel2ResCaseSourseCase()$to_uuid_person ))),
       #icon = icon("users")
       icon = icon("user-cog")
-      , color = "green", fill = FALSE, subtitle = "Node sum"
+      , color = "green", fill = FALSE, 
+      subtitle = "∑ Person & event (all nodes)"
       )
   }) 
   ## total number of event nodes
@@ -236,9 +242,10 @@ shinyServer(
        dplyr::summarise(n = n())
    )
     infoBox(
-      title ="∑ Event", value = temp,
+      title = NULL,
+      value = temp,
       icon = icon("cog"), color = colEvent, fill = FALSE,
-      subtitle = "Sum"
+      subtitle = "∑ Event"
       )
   }) 
   
@@ -246,9 +253,10 @@ shinyServer(
   output$totalPersonNodes <- renderInfoBox({
     id_vec = compute_person_node_uuid(elist = elistSel2ResCaseSourseCase())
     infoBox(
-      title ="∑ Persons", value = length(id_vec),
+      title =NULL, 
+      value = length(id_vec),
       icon = icon("user"), color = colPerson, fill = FALSE,
-      subtitle = "Case & Contact & Ep"
+      subtitle = "∑ Case & contact & EP person"
       )
   }) 
   ## Total number of nodes (persons) resulting to cases
@@ -257,9 +265,11 @@ shinyServer(
       dplyr::filter(resultingcase_id != "NA") %>%
       dplyr::distinct_at(., vars(to_uuid_person), .keep_all = TRUE) 
     infoBox(
-      title = "∑ Converted", value = nrow(temp),
+      #title = "∑ Converted", 
+      title = NULL, 
+      value = nrow(temp),
       icon = icon("user"), color = colCase, fill = FALSE,
-      subtitle = "Contact & Ep Person"
+      subtitle = "∑ Person converted to case"
       
     )
   })  
@@ -270,9 +280,11 @@ shinyServer(
     temp = elistSel2ResCaseSourseCase()
     temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = temp)$n_contact_ep_nodes)
     infoBox(
-      title = "∑ Person", value = temp,
+     # title = "∑ Person", 
+      title = NULL, 
+      value = temp,
       icon = icon("user"), color = colCont, fill = FALSE,
-      subtitle = "Contact & Ep"
+      subtitle = "∑ Contact & EP person"
       
     )
   })  
@@ -282,9 +294,11 @@ shinyServer(
     temp = elistSel2ResCaseSourseCase()
     temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = temp)$prop_converted)
     infoBox(
-      title = "% Converted", value = temp ,
+      #title = "% Converted", 
+      title = NULL,
+      value = temp ,
       icon = icon("user"), color = colCase, fill = FALSE,
-      subtitle = "Contact & Ep Person"
+      subtitle = "% Person converted to case"
       
     )
   }) 
@@ -346,9 +360,10 @@ shinyServer(
     net = graphObject()
     edge_density = round(edge_density(net, loops=F), 2)
     infoBox(
-      title = "Edge density", value = edge_density ,
+      title = NULL, 
+      value = edge_density ,
       icon = icon("arrow-right"), color = colEdge, fill = FALSE,
-      subtitle = "Contact & Ep"
+      subtitle = "Edge (contact & EP) density"
       
     )
   }) 
@@ -359,9 +374,10 @@ shinyServer(
     net = graphObject()
     temp = diameter(net, directed=TRUE) # # number of contact in longest chain of infector-infectee pairs
     infoBox(
-      title = "Longest chain", value = temp,
+      title = NULL, 
+      value = temp,
       icon = icon("arrow-right"), color = colEdge, fill = FALSE,
-      subtitle = "Directed edge"
+      subtitle = "Longest directed chain (edge)"
       
     )
   }) 
@@ -370,9 +386,10 @@ shinyServer(
     net = graphObject()
     temp = diameter(net, directed=FALSE) # # number of contact in longest undirected chain
     infoBox(
-      title = "Longest chain", value = temp,
+      title = NULL,
+      value = temp,
       icon = icon("arrows-alt-h"), color = colEdge, fill = FALSE,
-      subtitle = "Undirected edge"
+      subtitle = "Longest undirected chain (edge)"
       
     )
   }) 
@@ -381,9 +398,10 @@ shinyServer(
     req(credentials()$user_auth)
     temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$sum_caseEvent_nodes
     infoBox(
-      title = "∑ Infector", value = temp,
+      title = NULL, 
+      value = temp,
       icon = icon("user-cog"), color = colCase, fill = FALSE,
-      subtitle = "Case & Event nodes"
+      subtitle = "∑ Infector (case & event nodes)"
     )
   }) 
   #
@@ -391,9 +409,10 @@ shinyServer(
     req(credentials()$user_auth)
     temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$sum_missing_source_case_nodes
     infoBox(
-      title = "∑ Source Infectors", value = temp,
+      title = NULL,
+      value = temp,
       icon = icon("user-cog"), color = colCase, fill = FALSE,
-      subtitle = "Case & Event nodes"
+      subtitle = "∑ Source infector (case & event nodes)"
     )
   }) 
   ##
@@ -401,9 +420,10 @@ shinyServer(
     req(credentials()$user_auth)
     temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$prop_missing_source_case_nodes
     infoBox(
-      title = "% Source Infector", value = temp,
+      title = NULL, 
+      value = temp,
       icon = icon("user-cog"), color = colCase, fill = FALSE,
-      subtitle = "Case & Event nodes"
+      subtitle = "% Source infector (case & event nodes)"
     )
   }) 
   
@@ -414,15 +434,29 @@ shinyServer(
     cat(temp)
   })
   
+  # Sum of parent source nodes ie infectors (cases, event) with unknown infectors
+  output$transChainSumUI <- renderInfoBox({
+    req(credentials()$user_auth)
+    temp = length(prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$source_node_uuid)
+    infoBox(
+      #title = "∑ chains", 
+      title = NULL,
+      value = temp,
+      icon = icon("project-diagram"), color = colPerson, fill = FALSE,
+      subtitle = "∑ Transmission chains"
+    )
+  }) 
+  
   ##
   output$transitivityScore <- renderInfoBox({
     req(credentials()$user_auth)
     net = graphObject()
     temp = round(transitivity(net), 2)
     infoBox(
-      title = "Transiticity Score", value = temp,
+      title = NULL,
+      value = temp,
       icon = icon("project-diagram"), color = colPerson, fill = FALSE,
-      subtitle = "Clustering coefficient"
+      subtitle = "Transiticity score (clustering coefficient)"
     )
   }) 
   
