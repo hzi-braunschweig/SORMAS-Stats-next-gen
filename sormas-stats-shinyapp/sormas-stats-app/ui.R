@@ -166,7 +166,7 @@ shinyUI(bootstrapPage(
                                    column(2, infoBoxOutput("totalNodes", width = 12)),
                                    column(2, infoBoxOutput("totalEventNodes", width = 12)),
                                    column(2, infoBoxOutput("totalReultingcasesEdges", width = 12)),
-                                   column(2, infoBoxOutput("edgeDensity", width = 12)),
+                                   column(2, infoBoxOutput("transChainSumUI", width = 12)),
                                    column(2, infoBoxOutput("diameterDirected", width = 12))
                                  ),
                                  fluidRow(
@@ -183,7 +183,7 @@ shinyUI(bootstrapPage(
                                    column(2, infoBoxOutput("totSourceInfectorCaseEventNodes", width = 12)),
                                    column(2, infoBoxOutput("propInfectorCaseEventNodes", width = 12)),
                                    column(2, infoBoxOutput("tedfff", width = 12)),
-                                   column(2, infoBoxOutput("tedggg", width = 12)),
+                                   column(2, infoBoxOutput("edgeDensity", width = 12)),
                                    column(2, infoBoxOutput("transitivityScore", width = 12))
 
                                  )
