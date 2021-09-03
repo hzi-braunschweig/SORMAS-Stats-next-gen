@@ -107,12 +107,11 @@ shinyUI(bootstrapPage(
                         textInput("visSingleNodeUi", label = h5("Only contacts of this ID"),
                                   value = "", placeholder = "Enter uuid of node ..." ),
                         # add logout button to UI
-                        shinyauthr::logoutUI(id = "logout"),
-                          br(),
-                          hr(),
-                         
-                          h6("Powered by:"),
-                          tags$img(src = "HZI_Logo.jpg", height = 50, width = 200)
+                        shinyauthr::logoutUI(id = "logout")
+                          #br(),
+                          #hr(),
+                          #h6("Powered by:"),
+                          # tags$img(src = "HZI_Logo.jpg", height = 50, width = 200) #addtiing HZI logo to sidebar panel
                            ,
                           width = 2),
                          #), #end of div to activate option to dis sidebar panel 
@@ -131,7 +130,7 @@ shinyUI(bootstrapPage(
                            hr(style = "border-color: #cbcbcb;"),
                            
                            fluidRow(
-                             column(width = 5, align = "left",
+                             column(width = 6, align = "left",
                                     box(
                                       # title = "Summary of number of ontacts per node (Node degree)",
                                       h4(helpText("Source infector node ID. Use this ID to extract a single chain",  )),
@@ -146,12 +145,12 @@ shinyUI(bootstrapPage(
                                     )
                              )
                              ,
-                             column(width = 5, align = "left",
+                             column(width = 6, align = "left",
                                     p('* Zoom in the network diagram to see the contact categories and IDs for person and event nodes.', style = "font-size: 95%"),
+                                    p('* High risk => Type of contact is Face_to_face_long, Medical_unsave, Touched_fluid, Touched_cloth, Physical_contact, otherwise, Low risk', style = "font-size: 95%"),
                                     p('* Right click on the network diagram or legend to download or copy.', style = "font-size: 95%"),
-                                    p("* These filters are based on complete data, thus entities with missing values (NULL or UNKNOWN) for the variable used for filtering are droped.", style = "font-size: 95%"),
+                                    p("* The filters on the left panel are based on complete data, thus entities with missing values (NULL or UNKNOWN) for the variable used for filtering are dropped.", style = "font-size: 95%"),
                                     p('* All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://sormasorg.helmholtz-hzi.de/", 'SORMAS', target = '_blank'), '.', style = "font-size: 95%")
-                               
                                    )
                            )
                          ) # end of main panel
