@@ -505,6 +505,18 @@
       "Repository": "CRAN",
       "Hash": "df82a154b37aad59c6a9cc2b54614296"
     },
+    "fontawesome": {
+      "Package": "fontawesome",
+      "Version": "0.2.2.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "fontawesome",
+      "RemoteUsername": "rstudio",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "0de890f128e1bfa4637577beb6772fa01894433b",
+      "Hash": "99ebebf4278c61c41144842460ba009e"
+    },
     "forcats": {
       "Package": "forcats",
       "Version": "0.5.1",

@@ -193,7 +193,8 @@ shinyServer(
         dplyr::relocate(id, group, label,  value, shape,  code,  title)
       elistPlot = elistSel %>%
         dplyr::relocate(from, to)
-      plotNet(nodeLineList= nodeToPlot, elist = elistPlot, IgraphLayout= input$IgraphLayoutUi)
+      plotNet(nodeLineList= nodeToPlot, elist = elistPlot, IgraphLayout= input$IgraphLayoutUi) %>%
+      visNetwork::addFontAwesome() 
     } 
   })
 

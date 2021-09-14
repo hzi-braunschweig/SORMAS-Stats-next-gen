@@ -12,6 +12,7 @@ library(ggplot2)
 library(dplyr)
 library(plotly)
 library(extrafont)
+library(fontawesome)
 library(rpart)
 library(RColorBrewer)
 library(webshot) # for plot export
