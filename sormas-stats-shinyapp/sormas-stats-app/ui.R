@@ -972,12 +972,12 @@ fluidRow(
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
-         p(tags$em("Last updated: June 21, 2021"), style = 'font-size:75%'))
+         p(tags$em("Last updated: September 14, 2021"), style = 'font-size:75%'))
   ,
   column(3, align = "right",
          p('Powered by:', tags$a(href = " ", target = '_blank'), '', style = "font-size: 85%"),
          p(tags$a(href = "https://www.helmholtz-hzi.de/en/", 'HZI', target = '_blank'), '', style = "font-size: 85%"),
-         p(tags$a(href = "https://solidarites-sante.gouv.fr/systeme-de-sante-et-medico-social/e-sante/", 'E-santé', target = '_blank'), '', style = "font-size: 85%"),
+         p(tags$a(href = "https://www.bourgogne-franche-comte.ars.sante.fr/", 'ARS-BFC', target = '_blank'), '', style = "font-size: 85%"),
          p(tags$a(href = "https://www.vitagroup.ag/de_DE/Ueber-uns/symeda", 'vitagroup', target = '_blank'), '', style = "font-size: 85%"),
          p(tags$a(href = "https://www.giz.de/en/html/index.html", 'GIZ', target = '_blank'), '', style = "font-size: 85%")
   )

@@ -50,7 +50,7 @@ plotNet = function(nodeLineList, elist, IgraphLayout=TRUE)
       visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
       visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
       visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
-      addFontAwesome() %>%
+      visNetwork::addFontAwesome() %>% # addFontAwesome(name = "font-awesome-visNetwork") %>% # because shiny uses fontAwesome 5 and not 4
       visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.1, ncol = 1, stepX = 100, stepY = 100, main = "Legend") %>%  
       visPhysics(stabilization = F) %>%
       visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
@@ -70,14 +70,14 @@ plotNet = function(nodeLineList, elist, IgraphLayout=TRUE)
       visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
       visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
       visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
-      addFontAwesome() %>%
+      visNetwork::addFontAwesome() %>%
       visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.1, ncol = 1, stepX = 100, stepY = 100, main = "Legend") %>%  
       visPhysics(stabilization = F) %>%
       visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
   }
   print(g)
 }
-save(plotNet, file = "plotNet.R")
+save(plotNet, file = "./utils/plotNet.R")
 
 ## network indicators computation 
 # computinig vector of person nodeuuid only
