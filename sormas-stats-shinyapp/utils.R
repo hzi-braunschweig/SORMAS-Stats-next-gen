@@ -1282,10 +1282,10 @@ compute_eventlocation_category= function(eventData){
         typeofplace_event == 'FACILITY' & facilitytype_location == 'THEATER' ~ 'THEATER',
         typeofplace_event == 'FACILITY' & facilitytype_location %in% c('SCHOOL', "KINDERGARTEN", "AFTER_SCHOOL") ~ 'SCHOOL',
         typeofplace_event == 'FACILITY' & facilitytype_location %in% c('HOSPITAL',  "DAY_HOSPITAL") ~ 'HOSPITAL',
-        typeofplace_event == 'FACILITY' & facilitytype_location %in% c('MOBILE_NURSING_SERVICE', "DISABLED_PERSON_HABITATION", "ELDERLY_DAY_CARE" ) ~ 'MO_DIS_ELDER',
+        typeofplace_event == 'FACILITY' & facilitytype_location %in% c('MOBILE_NURSING_SERVICE', "DISABLED_PERSON_HABITATION", "ELDERLY_DAY_CARE", "ELDERLY_CARE_FACILITY" ) ~ 'MO_DIS_ELDER',
         typeofplace_event == 'FACILITY' & facilitytype_location == 'UNIVERSITY' ~ "UNIVERSITY",
         typeofplace_event == 'FACILITY' & facilitytype_location == 'OTHER_MEDICAL_FACILITY' ~ "OTH_MED_FACILITY", 
-        typeofplace_event == 'FACILITY' & facilitytype_location == 'BUSINESS' ~ 'BUSINESS',
+        typeofplace_event == 'FACILITY' & facilitytype_location %in% c('BUSINESS', 'OTHER_WORKING_PLACE') ~ 'BUSINESS',
         typeofplace_event == 'FACILITY' & facilitytype_location == 'HOTEL' ~ 'HOTEL',
         typeofplace_event == 'FACILITY' & facilitytype_location == 'CANTINE' ~ 'CANTINE',
         typeofplace_event == 'FACILITY' & facilitytype_location == 'RESTAURANT' ~ 'RESTAURANT',
@@ -1299,25 +1299,25 @@ compute_eventlocation_category= function(eventData){
         typeofplace_event == 'PUBLIC_PLACE'  ~ 'PUBLIC_PLACE',
         TRUE ~ 'UNDEFINED')) %>%  # renaming french categories
     dplyr::mutate(location_category_fr = case_when(
-      location_category == "ASSOCIATION" ~  'ACES', #  #ACES - Activité ou évènement sportif
-      location_category == "THEATER" ~  'ACEC',   #  'ACEC - Activité ou évènement culturel'
-      location_category == "SCHOOL" ~ "SCOL" ,  #SCOL - Évènement ou situation en milieu scolaire
-      location_category == "HOSPITAL" ~ "ESPP", # ESPP – Etablissements de santé publics ou privés
-      location_category == "MO_DIS_ELDER" ~ "EMES" ,
-      location_category == "UNIVERSITY"  ~ "UNIV" , # 'UNIV - Évènement ou situation en établissement d_enseignement supérieur'
-      location_category == "OTH_MED_FACILITY" ~ "AUTR_ESPP", #'AUTR - Autres lieu ou évènement sans respect des gestes barrières', should this be other in sromas or other not mentioned in your type of medical facility
-      location_category == "BUSINESS" ~ "RAEP" ,    # 'RAEP - Rassemblement ou évènement en lien avec une activité professionnelle', Can there not be more options here?
-      location_category == "HOTEL" ~ "TOUR", # TOUR- Structure d_hébergement touristique
-      location_category == "CANTINE" ~ "RCMP" ,  # RCMP - Restauration collective en milieu  professionnel
-      location_category == "RESTAURANT" ~ "REST" ,
-      location_category == "CHILDRENS_DAY_CARE" ~ "CRCH" ,  #CRCH  - Structure accueil du jeune enfant
-      location_category == "BAR" ~ "BAR" ,
-      location_category == "OTHER_RESIDENCE" ~ "FROP", # FROP - Foyer de résidence ou pensionnat (jeunes, travailleurs) 
-      location_category == "CORRECTIONAL_FACILITY" ~ "EPEN" , # EPEN - Établissement pénitentiaire
-      location_category == "CHILDRENS_HOME" ~ "HPJJ" ,    #HPJJ  -  Structure accueil et hébergement relevant de la PJJ
-      location_category == "MEANS_OF_TRANSPORT" ~ "PPTC" ,  # PPTC - présence prolongée dans un transport collectif
-      location_category == "HOME" ~ "RPFA" ,   # RPFA - Réunions privées dans un cadre familial, amical ou autre
-      location_category == "PUBLIC_PLACE" ~ "AUTR" ,
+      location_category == "ASSOCIATION" ~  'ACES-Act/Ev.sport', #  #ACES - Activité ou évènement sportif
+      location_category == "THEATER" ~  'ACEC-Act/Ev.cult',   #  'ACEC - Activité ou évènement culturel'
+      location_category == "SCHOOL" ~ "SCOL-Milieu.scol" ,  #SCOL - Évènement ou situation en milieu scolaire
+      location_category == "HOSPITAL" ~ "ESPP-Etab.sanit.", # ESPP – Etablissements de santé publics ou privés
+      location_category == "MO_DIS_ELDER" ~ "EMES-Etab.MS" ,
+      location_category == "UNIVERSITY"  ~ "UNIV-Ev/Sit.enseig.sup" , # 'UNIV - Évènement ou situation en établissement d_enseignement supérieur'
+      location_category == "OTH_MED_FACILITY" ~ "AUTR_ESPP-Aut.etab.sanit", #'AUTR - Autres lieu ou évènement sans respect des gestes barrières', should this be other in sromas or other not mentioned in your type of medical facility
+      location_category == "BUSINESS" ~ "RAEP-EV.act.prof" ,    # 'RAEP - Rassemblement ou évènement en lien avec une activité professionnelle', Can there not be more options here?
+      location_category == "HOTEL" ~ "TOUR-Hébergement.tour", # TOUR- Structure d_hébergement touristique
+      location_category == "CANTINE" ~ "RCMP-Rest.col.mil.prof)" ,  # RCMP - Restauration collective en milieu  professionnel
+      location_category == "RESTAURANT" ~ "REST-Restaurant" ,
+      location_category == "CHILDRENS_DAY_CARE" ~ "CRCH-Struct.acc.jeune.enf" ,  #CRCH  - Structure accueil du jeune enfant
+      location_category == "BAR" ~ "BARS" ,
+      location_category == "OTHER_RESIDENCE" ~ "FROP-Foyer.résid/pens", # FROP - Foyer de résidence ou pensionnat (jeunes, travailleurs) 
+      location_category == "CORRECTIONAL_FACILITY" ~ "EPEN-Étab.péni" , # EPEN - Établissement pénitentiaire
+      location_category == "CHILDRENS_HOME" ~ "HPJJ-Struct.relevant.PJJ" ,    #HPJJ  -  Structure accueil et hébergement relevant de la PJJ
+      location_category == "MEANS_OF_TRANSPORT" ~ "PPTC-transp.col" ,  # PPTC - présence prolongée dans un transport collectif
+      location_category == "HOME" ~ "RPFA-Réunions.famil/amic" ,   # RPFA - Réunions privées dans un cadre familial, amical ou autre
+      location_category == "PUBLIC_PLACE" ~ "AUTR-Autres" ,
       location_category == "UNDEFINED" ~  'INDEFINIE'))
   return(ret)
 }
@@ -1431,8 +1431,10 @@ save(barplotEventStatusByJurisdiction, file = "barplotEventStatusByJurisdiction.
 
 
 # univariabte bar plot
-univariate_barplot = function(var, count=FALSE){
+univariate_barplot = function(var, count=FALSE, x_verticalLayout = FALSE){
   # This function takes a varaible and return a simple bar plot
+  # count: to plot count or percentage
+  # x_verticalLayout: to aligne x axis names horizontally or vertically
   df = as.data.frame(table(as.character(var), useNA = "ifany"))
   colnames(df) = c("Variable", "Count") 
   if(count == FALSE){
@@ -1443,25 +1445,32 @@ univariate_barplot = function(var, count=FALSE){
       geom_text(position = position_dodge(width = .9),    # move to center of bars
                 vjust = -0.5,    # nudge above top of bar
                 size = 3) + 
-      theme_classic() +  # use white background ie classic theme
-      theme(legend.title = element_blank()) +
       scale_y_continuous(labels = scales::percent)
   }else{
     fig = ggplot(data=df, aes(x=Variable, y=Count, fill = Variable, label = Count )) +
       geom_col(position = 'dodge') + 
       geom_text(position = position_dodge(width = .9),    # move to center of bars
                 vjust = -0.5,    # nudge above top of bar
-                size = 3) +
-      theme_classic() + # use white background ie classic theme
-      theme(legend.title = element_blank())   # remove lagend title
-      # geom_bar(stat="identity") +
-      # xlab(NULL) + ylab("Count") 
+                size = 3) 
+  }
+  fig = fig + theme(axis.line=element_blank(),
+                    #axis.text.y=element_blank()
+                    #,axis.ticks=element_blank(),
+                    axis.title.x=element_blank(), # axis.title.y=element_blank(),
+                    legend.position="none",
+                    panel.background=element_blank(),
+                    #panel.border=element_blank(),
+                    panel.grid.major=element_blank(),
+                    panel.grid.minor=element_blank(),
+                    plot.background=element_blank())
+  if(x_verticalLayout == TRUE){
+    fig = fig + theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.5)) 
   }
   fig = ggplotly(fig)
   return(fig)
 }
 save(univariate_barplot, file = "./utils/univariate_barplot.R")
-# univariate_barplot(var = eventData$eventstatus, count=TRUE )
+# univariate_barplot(var = eventData$location_category_fr, count=FALSE, x_verticalLayout = TRUE)
 
 # table count of event by jurisdictiin and other varibales -----
 # region must not have NA for this method to work
