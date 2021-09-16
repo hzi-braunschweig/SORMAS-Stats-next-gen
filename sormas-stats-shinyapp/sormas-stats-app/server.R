@@ -1883,9 +1883,9 @@ shinyServer(
           barVar = input$barplotEventVaribleUi
           temp = eventDataDiseaseRegionTimeFilter()
           barVar = as.character(temp[, colnames(temp) == barVar])
-          fg = univariate_barplot(var = barVar, count=TRUE )
+          fg = univariate_barplot(var = barVar, count=TRUE, x_verticalLayout = TRUE )
         } else{
-          fg = univariate_barplot(var = eventDataDiseaseRegionTimeFilter()$location_category, count=TRUE )
+          fg = univariate_barplot(var = eventDataDiseaseRegionTimeFilter()$location_category, count=TRUE, x_verticalLayout = TRUE )
         }
       }
       if(input$EventIndicatorTypeUi == "Proportion"){ 
@@ -1893,9 +1893,9 @@ shinyServer(
           barVar = input$barplotEventVaribleUi
           temp = eventDataDiseaseRegionTimeFilter()
           barVar = as.character(temp[, colnames(temp) == barVar])
-          fg = univariate_barplot(var = barVar, count=FALSE)
+          fg = univariate_barplot(var = barVar, count=FALSE, x_verticalLayout = TRUE)
         } else{
-          fg = univariate_barplot(var = eventDataDiseaseRegionTimeFilter()$location_category, count=FALSE)
+          fg = univariate_barplot(var = eventDataDiseaseRegionTimeFilter()$location_category, count=FALSE, x_verticalLayout = TRUE)
         }
       }
       return(fg)
