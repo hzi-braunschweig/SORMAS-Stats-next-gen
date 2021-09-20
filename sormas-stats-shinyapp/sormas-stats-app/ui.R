@@ -181,7 +181,7 @@ shinyUI(bootstrapPage(
                                    column(2, infoBoxOutput("totInfectorCaseEventNodes", width = 12)),
                                    column(2, infoBoxOutput("totSourceInfectorCaseEventNodes", width = 12)),
                                    column(2, infoBoxOutput("propInfectorCaseEventNodes", width = 12)),
-                                   column(2, infoBoxOutput("tedfff", width = 12)),
+                                   column(2, infoBoxOutput("nodeVMR", width = 12)),
                                    column(2, infoBoxOutput("edgeDensity", width = 12)),
                                    column(2, infoBoxOutput("transitivityScore", width = 12))
 
