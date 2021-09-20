@@ -347,6 +347,20 @@ shinyServer(
     hist(deg, breaks=20, xlim = c(1, max(deg)), main = NULL, xlab = "Contacts per case", col = "grey") # breaks=1:vcount(net)-1
 
   })	
+  # variance-to-mean ratio (VMR) for node degree: 
+  # https://en.wikipedia.org/wiki/Index_of_dispersion
+  output$nodeVMR <- renderInfoBox({
+    req(credentials()$user_auth)
+    net = graphObject()
+    deg <- degree(net, mode="all") # extract degree
+    node_mvr = round(var(deg) / mean(deg), 2)
+    infoBox(
+      title = NULL, 
+      value = node_mvr,
+      icon = icon("arrows-alt-h"), color = colEdge, fill = FALSE,
+      subtitle = "Variance-to-mean ratio of node degree"
+    )
+  }) 
   # Betweeness histogram
   output$nodeBetweenessHist <- renderPlot({
     req(credentials()$user_auth)
@@ -377,7 +391,8 @@ shinyServer(
     infoBox(
       title = NULL, 
       value = temp,
-      icon = icon("arrow-right"), color = colEdge, fill = FALSE,
+      #icon = icon("arrow-right"), color = colEdge, fill = FALSE,
+      icon = icon("long-arrow-alt-right"), color = colEdge, fill = FALSE,
       subtitle = "Longest directed chain (edge)"
       
     )
@@ -389,7 +404,7 @@ shinyServer(
     infoBox(
       title = NULL,
       value = temp,
-      icon = icon("arrows-alt-h"), color = colEdge, fill = FALSE,
+      icon = icon("expand-alt"), color = colEdge, fill = FALSE,
       subtitle = "Longest undirected chain (edge)"
       
     )
