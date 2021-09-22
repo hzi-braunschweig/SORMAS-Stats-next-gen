@@ -2085,7 +2085,7 @@ save(districtMapPlot, file = "districtMapPlot.R")
 ###
 ## Function to plot Rt
 # weekly estimate of Rt, week is default but can be latered in config
-RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSumCase, si_data, rsi="all", dist = "G") # rsi = "all","R", "SI"
+RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSumCase, si_data, rsi="all", dist = "G", rt_legend = FALSE) # rsi = "all","R", "SI"
 {
   #the parametric distribution to use when estimating the serial interval from data on dates of 
   #symptoms of pairs of infector/infected individuals dist = "G", "G" (Gamma), "W" (Weibull), "L" (Lognormal) 
@@ -2111,8 +2111,11 @@ RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSu
                       si_data = si_data,
                       config = config)
   }
-  return(plot(res, rsi, legend = T))
+  rt_fig = plot(res, rsi, legend = rt_legend) # plot of rt
+  rt_mean = res$R$`Mean(R)` # vector containing average of estimated rt values
+  return(list(rt_fig = rt_fig, rt_mean = rt_mean))
 }
+#test_res = RtPlot(mean_si = 5, std_si = 2.5, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase, si_data = si_data,  dist = distUI)
 save(RtPlot, file = "./utils/RtPlot.R")
 
 ##### Table of case count by regions and other case variables: classification, outcome, quarantine, etc

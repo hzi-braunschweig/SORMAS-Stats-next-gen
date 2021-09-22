@@ -132,7 +132,6 @@ shinyUI(bootstrapPage(
                            fluidRow(
                              column(width = 6, align = "left",
                                     box(
-                                      # title = "Summary of number of ontacts per node (Node degree)",
                                       h4(helpText("Source infector node ID. Use this ID to extract a single chain",  )),
                                       #footer = "Node degree",
                                       status ="primary", #  "success", # or "warning", 
@@ -207,7 +206,6 @@ shinyUI(bootstrapPage(
                                           fluidRow(
                                             width = 12,
                                             box(
-                                              # title = "Summary of number of ontacts per node (Node degree)",
                                               h4(helpText("Summary of node betweeness")),
                                               #footer = "Node degree",
                                               status ="primary", #  "success", # or "warning", 
@@ -232,7 +230,6 @@ shinyUI(bootstrapPage(
                                           fluidRow(
                                             width = 12,
                                             box(
-                                             # title = "Summary of number of ontacts per node (Node degree)",
                                               h4(helpText("Summary of number of ontacts per node (Node degree)")),
                                               #footer = "Node degree",
                                               status ="primary", #  "success", # or "warning", 
@@ -433,7 +430,8 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                            
                                             sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 0, 
                                                         max = 30, step = 1, value = 14),
-                                            radioButtons("rsiUi", h5("Ploting parameters"),  choices = c("all","R","SI"), selected = c("R"), inline = TRUE)
+                                            radioButtons("rsiUi", h5("Ploting parameters"),  choices = c("all","R","SI"), selected = c("R"), inline = TRUE),
+                                            checkboxInput("rtLegandUi", label= h5("Show legend of estimatedRt plot?"), value = FALSE)
                                             ),
                            conditionalPanel(condition = "input.tabs1==6",
                                             pickerInput("diseaseCaseUi", "Disease", 
@@ -717,10 +715,27 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                      ,
                                      tabPanel("Reproduction number (Rt)", value = 5, 
                                               wellPanel(
-                                                h4(helpText("Weekly reproduction number estimate")) , 
-                                                #plotOutput("eventBarplotUi", width = "100%", height = "auto")
-                                                plotOutput("rtPlot", width = "90%", height = "85vh"),
+                                                h4(helpText("Estimate of time dependent reproduction number Rt")) ,
+                                                fluidRow(
+                                                  width = 12,
+                                                plotOutput("rtPlot", width = "90%", height = "80vh"),
                                                 style = "background: white"
+                                                ),
+                                                fluidRow(
+                                                  width = 12,
+                                                  box(
+                                                    h4(helpText("Summary of estimated mean time dependent reproduction number")),
+                                                    #footer = "Node degree",
+                                                    status ="primary", #  "success", # or "warning", 
+                                                    solidHeader = FALSE,
+                                                    collapsible = TRUE,
+                                                    collapsed = TRUE,
+                                                    width = 12,
+                                                    #height = 142, # 118, # 142,
+                                                    verbatimTextOutput("rtSummary")
+                                                  )
+                                                )
+                                                
                                               )
                                               )
                                      , 
@@ -972,7 +987,7 @@ fluidRow(
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
-         p(tags$em("Last updated: September 14, 2021"), style = 'font-size:75%'))
+         p(tags$em("Last updated: September 23, 2021"), style = 'font-size:75%'))
   ,
   column(3, align = "right",
          p('Powered by:', tags$a(href = " ", target = '_blank'), '', style = "font-size: 85%"),
