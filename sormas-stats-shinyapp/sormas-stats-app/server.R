@@ -204,7 +204,7 @@ shinyServer(
     infoBox(
      title = NULL, 
      value =  nrow(elistSel2ResCaseSourseCase() ),
-     icon = icon("arrow-right"), 
+     icon = icon("long-arrow-alt-right"), 
      color = "black", fill = FALSE, 
      subtitle = "∑ Contact & EP"
       )
@@ -216,11 +216,25 @@ shinyServer(
     infoBox(
       title = NULL, 
       value = nrow(temp),
-      icon = icon("arrow-right"), color = colCase, fill = FALSE,
-      subtitle = "∑ contact & EP converted to case"
+      icon = icon("long-arrow-alt-right"), color = colCase, fill = FALSE,
+      subtitle = "∑ Contact & EP converted to case"
       
     )
   })   
+  
+  ## Total number of unique infector-infectee pair
+  # this is the same as contacts resulting to cases
+  output$totalInfectorInfecteePair <- renderInfoBox({
+    temp = elistSel2ResCaseSourseCase() %>%
+      dplyr::filter(resultingcase_id != "NA")
+    # no need to count unique pairs of person since elist has unique pairs of nodes when exported from sormas db
+    infoBox(
+      title = NULL, 
+      value = nrow(temp),
+      icon = icon("people-arrows"), color = colCase, fill = FALSE,
+      subtitle = "∑ Infector-infectee pair"
+    )
+  })  
   
   ## total number of nodes: ie person and events
   output$totalNodes <- renderInfoBox({
@@ -260,7 +274,7 @@ shinyServer(
       subtitle = "∑ Case & contact & EP person"
       )
   }) 
-  ## Total number of nodes (persons) resulting to cases
+  ## Total number of nodes (persons) converted to cases
   output$totalReultingcasesNodes <- renderInfoBox({
     temp = elistSel2ResCaseSourseCase() %>%
       dplyr::filter(resultingcase_id != "NA") %>%
@@ -377,7 +391,7 @@ shinyServer(
     infoBox(
       title = NULL, 
       value = edge_density ,
-      icon = icon("arrow-right"), color = colEdge, fill = FALSE,
+      icon = icon("project-diagram"), color = colEdge, fill = FALSE,
       subtitle = "Edge (contact & EP) density"
       
     )
@@ -391,7 +405,6 @@ shinyServer(
     infoBox(
       title = NULL, 
       value = temp,
-      #icon = icon("arrow-right"), color = colEdge, fill = FALSE,
       icon = icon("long-arrow-alt-right"), color = colEdge, fill = FALSE,
       subtitle = "Longest directed chain (edge)"
       
@@ -458,7 +471,7 @@ shinyServer(
       #title = "∑ chains", 
       title = NULL,
       value = temp,
-      icon = icon("project-diagram"), color = colPerson, fill = FALSE,
+      icon = icon("project-diagram"), color = colCase, fill = FALSE,
       subtitle = "∑ Transmission chains"
     )
   }) 

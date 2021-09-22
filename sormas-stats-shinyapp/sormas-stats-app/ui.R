@@ -171,7 +171,7 @@ shinyUI(bootstrapPage(
                                  fluidRow(
                                    column(2, infoBoxOutput("totalPersonNodes", width = 12)),
                                    column(2, infoBoxOutput("totalContactEpPersonNodes", width = 12)),
-                                   column(2, infoBoxOutput("tot3", width = 12)),
+                                   column(2, infoBoxOutput("totalInfectorInfecteePair", width = 12)),
                                    column(2, infoBoxOutput("totalReultingcasesNodes", width = 12)),
                                    column(2, infoBoxOutput("propContactEpPersonConverted", width = 12)),
                                    column(2, infoBoxOutput("diameterUndirected", width = 12))
