@@ -1316,8 +1316,9 @@ shinyServer(
         } 
     })
     
-    #plotting Rt
-    output$rtPlot <- renderPlot({
+    #Preparing data and estimate rt
+    rt_data = reactive({
+      # This is a list of all the data needed to plot estimate rt
       # preparing si_data data 
       dateSumCase = aggregate(total ~ reportdate, data = casePersonFilter(), sum, na.rm = F)
       # completting missing dates
@@ -1336,17 +1337,26 @@ shinyServer(
       colnames(si_data) =  c("EL", "ER", "SL", "SR", "type")
       si_data[,-5] = apply(si_data[,-5], 2, as.integer) # all columns except type should be integer
       
-      #estimation and plotting
+      #estimating and computing summary of mean rt
       if(input$rtMethodUi == "Parametric distribution"){
         distVec = c(Gamma = "G", Weibull = "W", Lognormal = "L") 
         distUI = distVec[names(distVec) == input$si_rt_UI] # getting shrt form of distribution name to be used in modelling
-        fig = RtPlot(mean_si = input$mean_siUI, std_si = input$std_siUI, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase,
-                     si_data = si_data, rsi = input$rsiUi, dist = distUI) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
-        }
+        ret = RtPlot(mean_si = input$mean_siUI, std_si = input$std_siUI, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase,
+                          si_data = si_data, rsi = input$rsiUi, dist = distUI, rt_legend = input$rtLegandUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
+      }
       if(input$rtMethodUi == "Transmission data" ){
-        fig =  RtPlot(dateSumCase = dateSumCase, method = "si_from_data",  burnin = 1000,  si_data = si_data, rsi = input$rsiUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
-        }
+        ret =  RtPlot(dateSumCase = dateSumCase, method = "si_from_data",  burnin = 1000,  si_data = si_data, rsi = input$rsiUi, rt_legend = input$rtLegandUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
+      }
+      return(ret) # retuned vector of estimated rt and plot of estimated rt
+    }) 
+    #plotting Rt
+    output$rtPlot <- renderPlot({
+      fig = rt_data()$rt_fig # extracting figure component in rt_data
       return(fig)
+    })
+    # Computing summary stats for rt
+     output$rtSummary <- renderPrint({
+      round(summary(rt_data()$rt_mean), 2)# computing summary of extracted bootstrap means
     })
     
     ## superspreading analysis
