@@ -4,6 +4,7 @@ base::load(file.path("./utils", "dateTimeToDate.R"))
 base::load(file.path("./utils", "plotNet.R"))
 base::load(file.path("./utils","mergingDataFromDB.R"))
 base::load(file.path("./utils","contIdsForSingleChain.R"))
+base::load(file.path("./utils","contIdsForMultipleChains.R"))
 
 ## Functions for case data analysis ---- 
 base::load(file.path("./utils","ImportingUnformatedDataFromDB.R"))

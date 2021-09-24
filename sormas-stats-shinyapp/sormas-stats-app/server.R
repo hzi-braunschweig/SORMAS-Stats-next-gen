@@ -155,7 +155,7 @@ shinyServer(
     return(ret)
   })
 
-  # further filtering based on resultingCaseOnlyUi, activeEventsOnlyUi, visSingleChainUi
+  # further filtering based on resultingCaseOnlyUi, activeEventsOnlyUi
   elistSel2ResCaseSourseCase  = reactive({ 
   req(credentials()$user_auth)
   elistSel <- elist[elist$id %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy()$id, ]
@@ -165,7 +165,6 @@ shinyServer(
   } else{
     elistSel2ResCase =  elistSel[is.na(elistSel$resultingcase_id) == FALSE,]
   }
-  
   ##
   if(input$activeEventsOnlyUi == FALSE){
     elistSel2ResCaseArchived = elistSel2ResCase
@@ -174,8 +173,9 @@ shinyServer(
       dplyr::filter(archivedEvent == "f")
   }
   
-  if(input$visSingleChainUi != ""){
-    contIdTemp = contIdsForSingleChain(elist =  elistSel2ResCaseArchived, uuid_node = stri_replace_all_fixed(toupper(as.character(input$visSingleChainUi)), " ", "") ) # retain list of contact ids
+  # filter elist based on source nodes ids
+  if(!is.null(input$visSelectedChainsUi)){
+    contIdTemp = contIdsForMultipleChains(elist = elistSel2ResCaseArchived, uuid_vector = as.character(input$visSelectedChainsUi)) # retain list of contact ids
     ret = elistSel2ResCaseArchived[elistSel2ResCaseArchived$id %in% contIdTemp,]
   } else{
     ret <- elistSel2ResCaseArchived
@@ -183,18 +183,71 @@ shinyServer(
   return(ret)
   }) 
   
-  # pltting network using selElist
+  # plotting network using selElist
+  # Ordering column of elist to be plotted, this is needed to be in a specific order
+  elistPlot = reactive({ 
+    ret = elistSel2ResCaseSourseCase() %>%
+      dplyr::relocate(from, to)
+    return(ret)
+    })
+  ##
+  nodeToPlot = reactive({ 
+    nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel2ResCaseSourseCase()$from, elistSel2ResCaseSourseCase()$to)), ]
+    ret = nodeLineListSelResCase %>%
+      dplyr::relocate(id, label, group, value, shape,  code,  title)
+    return(ret)
+  })
+  ## plottint network
   output$transChain <- renderVisNetwork({ 
     if(input$visNetworkDiagramUi == TRUE){
-      elistSel =  elistSel2ResCaseSourseCase()
-      nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel$from, elistSel$to)), ]
-      # ordering colums, this is needed to be in a specific order
-      nodeToPlot = nodeLineListSelResCase %>%
-        dplyr::relocate(id, group, label,  value, shape,  code,  title)
-      elistPlot = elistSel %>%
-        dplyr::relocate(from, to)
-      plotNet(nodeLineList= nodeToPlot, elist = elistPlot, IgraphLayout= input$IgraphLayoutUi) %>%
-      visNetwork::addFontAwesome() 
+      #plotNet(nodeLineList= nodeToPlot(), elist = elistPlot(), IgraphLayout= input$IgraphLayoutUi) 
+      # IgraphLayout helps to reduce ploting time but the nodes are placed at fixed positions
+      defaultFont="font-family:'Open Sans', sans-serif, 'Source Sans Pro'"
+      mainStyle = paste(defaultFont, "color: #6591C4", ";font-weight: 600", "font-size: 1.6em", "text-align:center;", sep="; ")
+      submainStyle = paste(defaultFont, "text-align:center;", sep="; ")
+      footerStyle = defaultFont
+      addNodesS <- data.frame(label = c("Healthy","Not_classified" ,"Suspected", "Probable", "Confirmed", "Not case", "1 = High risk", "2 = Low risk", "Event"), shape = "icon",
+                              icon.code = c("f007", "f007", "f007", "f007", "f007","f007", "f178", "f178", "f013"),
+                              icon.size = c(25, 25, 25, 25, 25,25,25,25,25), icon.color = c("#17bd27", "#706c67", "#ffff00", "#ffa500", "#f70707","#99bd17", "#0d0c0c", "#0d0c0c", "#0000ff"))
+      if(input$IgraphLayoutUi ==FALSE){
+        visNetwork(nodes = nodeToPlot(), edges = elistPlot(),  main = list(text = "Disease network diagram", style = mainStyle),
+                      submain = list(text = "The arrows indicate the direction of transmission", style = submainStyle), 
+                      # footer = list(text = "Zoom in to see the IDs and contact category", style = footerStyle), 
+                      background = "white", annot = T, width = "100%", height = "100vh") %>%  
+          visEdges(arrows = "to", color = "black", smooth = FALSE) %>% 
+          visOptions(selectedBy = NULL,highlightNearest = TRUE, nodesIdSelection = FALSE) %>% 
+          visGroups(groupname = "SUSPECT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffff00")) %>%
+          visGroups(groupname = "PROBABLE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffa500")) %>%
+          visGroups(groupname = "CONFIRMED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#f70707")) %>%
+          visGroups(groupname = "NOT_CLASSIFIED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#706c67" )) %>%
+          visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
+          visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
+          visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
+          visNetwork::addFontAwesome() %>% # addFontAwesome(name = "font-awesome-visNetwork") %>% # because shiny uses fontAwesome 5 and not 4
+          visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.1, ncol = 1, stepX = 100, stepY = 100, main = "Legend") %>%  
+          visPhysics(stabilization = F) %>%
+          visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
+        
+      } else{
+        visNetwork(nodes = nodeToPlot(), edges = elistPlot(),  main = list(text = "Disease network diagram", style = mainStyle),
+                      submain = list(text = "The arrows indicate the direction of transmission", style = submainStyle), 
+                      # footer = list(text = "Zoom in to see the IDs and contact category", style = footerStyle), 
+                      background = "white", annot = T, width = "100%", height = "100vh") %>%
+          visIgraphLayout() %>%  # to improve performance ie reduce plotting time
+          visEdges(arrows = "to", color = "black", smooth = FALSE) %>% 
+          visOptions(selectedBy = NULL,highlightNearest = TRUE, nodesIdSelection = FALSE) %>% 
+          visGroups(groupname = "SUSPECT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffff00")) %>%
+          visGroups(groupname = "PROBABLE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffa500")) %>%
+          visGroups(groupname = "CONFIRMED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#f70707")) %>%
+          visGroups(groupname = "NOT_CLASSIFIED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#706c67" )) %>%
+          visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
+          visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
+          visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
+          visNetwork::addFontAwesome() %>%
+          visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.1, ncol = 1, stepX = 100, stepY = 100, main = "Legend") %>%  
+          visPhysics(stabilization = F) %>%
+          visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
+      }
     } 
   })
 

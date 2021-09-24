@@ -1,6 +1,7 @@
 
 shinyUI(bootstrapPage(
   useShinyjs(),
+  tags$style("@import url(https://use.fontawesome.com/releases/v5.7.2/css/all.css);"),
   navbarPage(
              # theme = shinytheme("flatly"),
               theme = shinytheme("cerulean"),  # to change theme
@@ -101,9 +102,13 @@ shinyUI(bootstrapPage(
                           checkboxInput("excludeHealthyEventPartUi", "Exclude healthy event participant ?", FALSE),
                           checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
                           checkboxInput("activeEventsOnlyUi", "Only chains with active events ?", FALSE),
-                         textInput("visSingleChainUi", label = h5("Only chain resulting from this ID"),
-                                   value = "", placeholder = "Enter uuid of node ..." ),
-                        
+                         selectizeInput(
+                           inputId = "visSelectedChainsUi"
+                           , label = h5("Source infector node IDs (comma delimited)")
+                           , choices = NULL
+                           , multiple = TRUE
+                           , options = list(create = TRUE)
+                         ),
                         textInput("visSingleNodeUi", label = h5("Only contacts of this ID"),
                                   value = "", placeholder = "Enter uuid of node ..." ),
                         # add logout button to UI
