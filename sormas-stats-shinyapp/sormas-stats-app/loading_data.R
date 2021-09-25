@@ -15,14 +15,14 @@ eventData = compute_eventlocation_category(eventData = eventData)
 infectorInfecteeData = infectorInfecteeExport(sormas_db, fromDate = fromDate, toDate = toDate)
 
 
-## Extracting contact data ----
+## Extracting contact data ---- 
 # mergingDataFromDB extracts network data, default contact data and serial interval data
 importDataFrontEndOutput = mergingDataFromDB(sormas_db = sormas_db, fromDate = fromDate, toDate = toDate , uniquePersonPersonContact = TRUE)
 
 contRegionDist = importDataFrontEndOutput$contRegionDist
 nodeLineList = importDataFrontEndOutput$nodeLineList  # id here is person id
 elist = importDataFrontEndOutput$elist  # id here is contact id
-siDat = importDataFrontEndOutput$siDat
+siDat = importDataFrontEndOutput$siDat 
 
 ## The code below would need to be transformed in to independent functions later
 #### loading case -----
