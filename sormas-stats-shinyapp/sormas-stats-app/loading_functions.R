@@ -42,6 +42,8 @@ base::load(file.path("./utils","serial_interval_mean_CI.R"))
 base::load(file.path("./utils","userExport.R"))
 base::load(file.path("./utils","compute_eventlocation_category.R"))
 base::load(file.path("./utils","univariate_barplot.R"))
+base::load(file.path("./utils","convertNetworkToGraph.R"))
+base::load(file.path("./utils","sourceNodeDegreeCounter.R"))
 
 
 

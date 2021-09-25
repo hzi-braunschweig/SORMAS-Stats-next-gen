@@ -98,7 +98,7 @@ shinyUI(bootstrapPage(
                             multiple = TRUE
                           ),
                           
-                          checkboxInput("resultingCaseOnlyUi", "Only chains with resulting cases ?", TRUE),
+                          checkboxInput("resultingCaseOnlyUi", "Only exposures with resulting cases ?", TRUE),
                           checkboxInput("excludeHealthyEventPartUi", "Exclude healthy event participant ?", FALSE),
                           checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
                           checkboxInput("activeEventsOnlyUi", "Only chains with active events ?", FALSE),
@@ -109,6 +109,7 @@ shinyUI(bootstrapPage(
                            , multiple = TRUE
                            , options = list(create = TRUE)
                          ),
+                         numericInput("nodeDegreeMinUi", h5("Minimum source infector node contact"), value = 1, min = 1),
                         textInput("visSingleNodeUi", label = h5("Only contacts of this ID"),
                                   value = "", placeholder = "Enter uuid of node ..." ),
                         # add logout button to UI

@@ -156,7 +156,7 @@ shinyServer(
   })
 
   # further filtering based on resultingCaseOnlyUi, activeEventsOnlyUi
-  elistSel2ResCaseSourseCase  = reactive({ 
+  elistSel2ResCaseSourseCaseArch  = reactive({ 
   req(credentials()$user_auth)
   elistSel <- elist[elist$id %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy()$id, ]
   #Filter elist based on resulting cases varaible
@@ -183,8 +183,35 @@ shinyServer(
   return(ret)
   }) 
   
-  # plotting network using selElist
-  # Ordering column of elist to be plotted, this is needed to be in a specific order
+  # Filtering elist by node degree
+  # filter  elist  by degree of source node and retain uuid of source nodes only
+  elistSel2ResCaseSourseCase = reactive({
+    elistSel = elistSel2ResCaseSourseCaseArch()
+    
+    ## computing node degree adn add it a column to dataframe
+    # For "from nodes" that are not source nodes, the degree would be NA
+    elistSel = sourceNodeDegreeCounter(elist=elistSel, nodeLineList = nodeLineList) %>% # Comput degree for source nodes for the complete network
+      # the source node degree would later be used to filter the network
+      dplyr::select(from_uuid_person, deg) %>%
+      dplyr::right_join(., elistSel,  c( "from_uuid_person" = "from_uuid_person"))
+    
+    # getting source nodes person uuid
+    if(!(is.na(input$nodeDegreeMinUi)) & input$nodeDegreeMinUi > 1){
+      sourceNodes_uuid = elistSel %>%
+        dplyr::filter(deg >= input$nodeDegreeMinUi) %>% # selecting only contacts with source node degree greater than or equal to nodeDegreeMinUi
+        dplyr::select(from_uuid_person) %>%
+        dplyr::distinct_at(., vars(from_uuid_person), .keep_all = TRUE) %>%
+        dplyr::pull(from_uuid_person)
+      # getting contact ids and use it to filter elist
+      contIdTemp = contIdsForMultipleChains(elist = elistSel, uuid_vector = as.character(sourceNodes_uuid)) # retain list of contact ids
+      ret = elistSel[elistSel$id %in% contIdTemp,]
+    }else{
+      ret = elistSel
+    }
+    return(ret)
+  })
+
+  # Ordering column of elist to be plotted, this is needed to be in this specific order
   elistPlot = reactive({ 
     ret = elistSel2ResCaseSourseCase() %>%
       dplyr::relocate(from, to)
@@ -197,7 +224,7 @@ shinyServer(
       dplyr::relocate(id, label, group, value, shape,  code,  title)
     return(ret)
   })
-  ## plottint network
+  ## plotting network
   output$transChain <- renderVisNetwork({ 
     if(input$visNetworkDiagramUi == TRUE){
       #plotNet(nodeLineList= nodeToPlot(), elist = elistPlot(), IgraphLayout= input$IgraphLayoutUi) 
@@ -370,24 +397,26 @@ shinyServer(
       
     )
   }) 
-  
+   
 ### Computing network parameters using igraph----
   graphObject <- reactive({
     req(credentials()$user_auth)
-    elistSel = elistSel2ResCaseSourseCase()
-    elistSel = elistSel %>%
-      dplyr::distinct_at(., vars(from, to), .keep_all = FALSE)
-    
-    nodeLineListSelResCase = nodeLineList %>%
-      dplyr::select(id, group) 
-    nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$id %in% unique(c(elistSel$from, elistSel$to)), ]
-    
-    # ordering colums, this is needed to be in a specific order for igraph
-    nodeToPlot = nodeLineListSelResCase %>%
-      dplyr::relocate(id, group)
-    elistPlot = elistSel %>%
-      dplyr::relocate(from, to)
-    net <- graph_from_data_frame(d=elistPlot, vertices = nodeToPlot, directed=T)
+    # elistSel = elistSel2ResCaseSourseCase()
+    # elistSel = elistSel %>%
+    #   dplyr::distinct_at(., vars(from, to), .keep_all = FALSE)
+    # 
+    # nodeLineListSelResCase = nodeLineList %>%
+    #   dplyr::select(id, group) 
+    # nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$id %in% unique(c(elistSel$from, elistSel$to)), ]
+    # 
+    # # ordering colums, this is needed to be in a specific order for igraph
+    # nodeToPlot = nodeLineListSelResCase %>%
+    #   dplyr::relocate(id, group)
+    # elistPlot = elistSel %>%
+    #   dplyr::relocate(from, to)
+    # net <- graph_from_data_frame(d=elistPlot, vertices = nodeToPlot, directed=T)
+    # 
+    net = convertNetworkToGraph(elist=elistSel2ResCaseSourseCase(), nodeLineList=nodeLineList) # converting network to graph object
     return(net)
   })
  

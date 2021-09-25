@@ -138,18 +138,62 @@ prop_missing_source_case_nodes = function(elist, nodeLineList){
     dplyr::filter( !(from %in% to) ) %>%  # keeping only parent case nodes that were not previousely known to be contact nodes,
     dplyr::distinct_at(., vars(from), .keep_all = TRUE)
   
+  source_node_data =  elist_case %>%  # data of source nodes id and corresponding uuid
+    dplyr::mutate(from = from, from_uuid_person = from_uuid_person, .keep = "none")
   source_node_uuid = sort(elist_case$from_uuid_person) # contains nodes for events and case person in case elist also had event nodes
-  
   sum_missing_source_case_nodes = length(source_node_uuid) 
   sum_caseEvent_nodes = nrow(nodeLineList)  # computing total case nodes
   prop_missing_source_case_nodes = round((sum_missing_source_case_nodes/sum_caseEvent_nodes)*100, 2)
   
-  return(list(source_node_uuid = source_node_uuid, sum_caseEvent_nodes=sum_caseEvent_nodes, 
+  return(list(source_node_uuid = source_node_uuid, source_node_data=source_node_data,
+              sum_caseEvent_nodes=sum_caseEvent_nodes, 
               prop_missing_source_case_nodes = prop_missing_source_case_nodes, 
               sum_missing_source_case_nodes = sum_missing_source_case_nodes ))
 }
-save(prop_missing_source_case_nodes, file = "prop_missing_source_case_nodes.R")
+save(prop_missing_source_case_nodes, file = "./utils/prop_missing_source_case_nodes.R")
 #prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)
+
+# Converting elist and nodeLinelist to graph object
+convertNetworkToGraph = function(elist, nodeLineList){
+  elistSel = elist %>%
+    dplyr::distinct_at(., vars(from_uuid_person, to_uuid_person), .keep_all = TRUE) %>% # filter records with unique personuuid
+    dplyr::select(from, to, from_uuid_person, to_uuid_person)
+  nodeLineListSelResCase = nodeLineList %>%
+    dplyr::select(id, group, label) 
+  #nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$id %in% unique(c(elistSel$from, elistSel$to)), ]
+  nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$label %in% unique(c(elistSel$from_uuid_person, elistSel$to_uuid_person)), ]
+  # # ordering of colums is to be respected, this is needed to be in a specific order for igraph
+  #  nodeToPlot = nodeLineListSelResCase %>%
+  #   dplyr::relocate(id, group)
+  #   elistPlot = elistSel %>%
+  #   dplyr::relocate(from, to)
+  net <- graph_from_data_frame(d=elistSel, vertices = nodeLineListSelResCase, directed=T)
+  return(net)
+}
+#networkGraphObject = convertNetworkToGraph(elist=elist, nodeLineList=nodeLineList) # converting network to graph object
+save(convertNetworkToGraph, file = "./utils/convertNetworkToGraph.R")
+
+# sourceNodeDegreeCounter comput degree for source nodes for complete network
+# This method should be called when app loads
+# the source node degree would later be used to filter the network
+sourceNodeDegreeCounter <- function(elist, nodeLineList){ 
+  # this function depends on two others: convertNetworkToGraph and prop_missing_source_case_nodes
+  networkGraphObject = convertNetworkToGraph(elist=elist, nodeLineList=nodeLineList) # converting network to graph object
+  sourceNodeData = prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)$source_node_data # computing source node data: node id and uuis
+  
+  deg <- degree(graph = networkGraphObject,  mode="all") #   deg <- degree(graph = networkGraphObject(), v = sourceNodes, mode="all")
+  ret = data.frame(deg, names(deg))
+  rownames(ret) = NULL
+  colnames(ret) = c("deg","from")
+  ret$from = as.numeric(as.character(ret$from))
+  ## Merging ret with sourceNodeData to keep only sorcse nodes and their degree
+  ret = ret %>%
+    dplyr::right_join(., sourceNodeData,  c( "from" = "from"))  %>%
+    distinct_at(., vars(from), .keep_all = TRUE) # source nodes and degree
+  return(ret)
+}
+#sourceNodeDegreeData = sourceNodeDegreeCounter(elist=elist, nodeLineList = nodeLineList)
+save(sourceNodeDegreeCounter, file = "./utils/sourceNodeDegreeCounter.R")
 
 ##
 mergingData = function(dataList)
