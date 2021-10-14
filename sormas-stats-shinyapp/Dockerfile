@@ -51,7 +51,8 @@ COPY /sormas-stats-app/renv.lock ./renv.lock
 COPY /sormas-stats-app ./app
 
 RUN mkdir -p /var/log/shiny-server \
-  && chown -R shiny.shiny /var/log/shiny-server
+  && chown -R shiny.shiny /var/log/shiny-server \
+  && chmod 664 /var/log/shiny-server
 
 # install renv & restore packages
 RUN Rscript -e 'install.packages("renv")'
