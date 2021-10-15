@@ -437,7 +437,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                             sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 0, 
                                                         max = 30, step = 1, value = 14),
                                             radioButtons("rsiUi", h5("Ploting parameters"),  choices = c("all","R","SI"), selected = c("R"), inline = TRUE),
-                                            checkboxInput("rtLegandUi", label= h5("Show legend of estimatedRt plot?"), value = FALSE)
+                                            checkboxInput("rtLegandUi", label= h5("Show legend of estimated Rt plot?"), value = FALSE)
                                             ),
                            conditionalPanel(condition = "input.tabs1==6",
                                             pickerInput("diseaseCaseUi", "Disease", 
@@ -678,7 +678,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                                        status ="primary", #  "success", # or "warning", 
                                                                        solidHeader = FALSE,
                                                                        collapsible = TRUE,
-                                                                       collapsed = TRUE,
+                                                                       collapsed = FALSE,
                                                                        width = 15,
                                                                       # height = 148, # 118, # 142,
                                                                        verbatimTextOutput("SI_estimate"),
@@ -692,7 +692,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                           ,
                                                           column(6,
                                                                  wellPanel(
-                                                                   h4(helpText("Distributions of number of infectee per infector")),
+                                                                   h4(helpText("Distributions of number of infectee per infector (offsping distribution)")),
                                                                    fluidRow(
                                                                      width = 12,
                                                                      plotOutput("distribution_k_plot", width = "100%", height = "60vh")
@@ -705,7 +705,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                                        status ="primary", #  "success", # or "warning", 
                                                                        solidHeader = FALSE,
                                                                        collapsible = TRUE,
-                                                                       collapsed = TRUE,
+                                                                       collapsed = FALSE,
                                                                        width = 15,
                                                                        #height = 158, # 118, # 142,
                                                                        verbatimTextOutput("k_estimate"),
@@ -735,7 +735,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                     status ="primary", #  "success", # or "warning", 
                                                     solidHeader = FALSE,
                                                     collapsible = TRUE,
-                                                    collapsed = TRUE,
+                                                    collapsed = FALSE,
                                                     width = 12,
                                                     #height = 142, # 118, # 142,
                                                     verbatimTextOutput("rtSummary")
@@ -944,7 +944,7 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
 ),
 
 ### Backward tracing including cases, contacts and events
-tabPanel("Backward tracing" ),
+# tabPanel("Backward tracing" ),
 
 # Model specification ----
 tabPanel("Model specification",
