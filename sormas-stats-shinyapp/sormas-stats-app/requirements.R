@@ -35,7 +35,7 @@ install.packages('tidyverse', version='1.3.1', repos='http://cran.us.r-project.o
 remotes::install_version(package = "XML", version = "3.99-0.3")
 devtools::install_github("rspatial/raster")  # dependency of tmap 
 install.packages('rgdal', version='1.5-21', repos='http://cran.us.r-project.org')
-#install.packages('rgdal', version='1.5-19', repos='http://cran.us.r-project.org')
+#install.packages("https://cran.r-project.org/src/contrib/Archive/rgdal/rgdal_1.5-19.tar.gz", repos=NULL, type="source") # France version 
 install.packages('maps', version='3.3.0', repos='http://cran.us.r-project.org')
 install.packages('maptools', version='1.1-1', repos='http://cran.us.r-project.org')
 install.packages('mapdata', version='2.3.0', repos='http://cran.us.r-project.org')
@@ -44,7 +44,7 @@ install.packages('sp', version='1.4-5', repos='http://cran.us.r-project.org')
 install.packages('broom', version='0.7.6', repos='http://cran.us.r-project.org')
 install.packages('ggmap', version='3.0.0', repos='http://cran.us.r-project.org')
 install.packages('rgeos', version='0.5-5', repos='http://cran.us.r-project.org')
-#install.packages('rgeos', version='0.5-3', repos='http://cran.us.r-project.org')
+#install.packages("https://cran.r-project.org/src/contrib/Archive/rgeos/rgeos_0.5-3.tar.gz", repos=NULL, type="source") # France version
 install.packages('tmap', version='3.3-1', repos='http://cran.us.r-project.org')
 install.packages('lattice', version='0.20-44', repos='http://cran.us.r-project.org')
 devtools::install_github("rstudio/fontawesome") # does not exist on cran thus installed from git repot
