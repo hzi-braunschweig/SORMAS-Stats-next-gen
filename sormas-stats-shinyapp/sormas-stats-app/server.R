@@ -1511,7 +1511,7 @@ shinyServer(
       # }
       return(res)
     })
-    
+     
     # fitting user chosen distribution to SI
     siRet <- reactive({
       temp = infectorInfecteeDataDiseaseRegionDistFilter()
@@ -1605,11 +1605,23 @@ shinyServer(
       return(temp)
       
     })
+    # fitering event by event identification source
+    selEventRegionDistIdentificationSourceUi = reactive({
+      if(is.null(input$eventIdentificationSourceUi))
+      {
+        temp = selEventRegionDistUi()
+      } else{
+        temp = selEventRegionDistUi() %>%
+          dplyr::filter(event_identification_source %in% input$eventIdentificationSourceUi)
+      }
+      return(temp)
+      
+    }) 
    
    # renaming selected data to eventDataDiseaseRegionTimeFilter  
     eventDataDiseaseRegionTimeFilter = reactive({
       # req(credentials()$user_auth)
-      selEventRegionDistUi()
+      selEventRegionDistIdentificationSourceUi()
     })
     
     ## event batplot

@@ -1272,7 +1272,7 @@ eventExport = function(sormas_db, fromDate, toDate){
   # leading event
   queryEvent <- paste0("SELECT uuid AS uuid_event, id AS id_event, eventinvestigationstatus, reportdatetime AS reportdatetime_event, eventstatus, disease AS disease_event, typeofplace AS typeofplace_event,
       creationdate AS creationdate_event, enddate AS enddate_event, startdate AS startdate_event, archived AS archived_event, nosocomial AS nosocomial_event,
-      srctype AS srctype_event, risklevel AS risklevel_event,  eventlocation_id, eventmanagementstatus, eventtitle
+      srctype AS srctype_event, risklevel AS risklevel_event,  eventlocation_id, eventmanagementstatus, eventidentificationsource AS  event_identification_source, eventtitle
                         FROM public.events
                         WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   event = dbGetQuery(sormas_db,queryEvent)
@@ -1325,12 +1325,12 @@ eventExport = function(sormas_db, fromDate, toDate){
                        resulting_case_sum = sum(!is.na(resultingcase_id_eventpart) )
                        ) %>% # counting number of ep and resulting cases per event
     dplyr::right_join(., event, c("event_id_eventpart" = "id_event") ) %>% # merging with event, use right join to keep events with no ep
-    tidyr::replace_na(list(eventPart_sum = 0, resulting_case_sum = 0)) # replacing na with 0
+    tidyr::replace_na(list(eventPart_sum = 0, resulting_case_sum = 0, event_identification_source = "MISSING" )) # replacing missing values (NA) with o or "MISSING"
   
   return(event_data = eventPartEvent)  
 }
 save(eventExport, file = "./utils/eventExport.R")
-eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
+# eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
 ### end of event export
 
 # # compute_eventlocation_category
