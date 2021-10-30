@@ -1,5 +1,27 @@
-# loading functions needed
 
+# listing tables in database
+tables = sort(dbListTables(sormas_db)) # sormas_db is the db connection
+
+# document statistics ----
+## load packages
+source(file.path(".", "loading_packages.R"))  
+# Defining connection to db
+DB_USER = "sormas_user"
+DB_PASS = "password"
+DB_HOST = "127.0.0.1"
+DB_PORT = "5432"
+DB_NAME= "sormas"
+sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
+# import document table
+queryDocs <- paste0("SELECT *
+                        FROM public.documents")
+documents = dbGetQuery(sormas_db,queryDocs)
+#explore document table
+nrow(documents)
+table(documents$relatedentity_type)
+table(documents$deleted)
+
+# loading functions needed ----
 importingData = function(mypath, sep){
   dataList = import.multiple.csv.files(mypath = mypath, mypattern = ".csv$", sep = ";")
   return(dataList)
@@ -2301,18 +2323,10 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
   # loading tables from sormas db
   # load cases
   queryCase <- paste0("SELECT  DISTINCT uuid AS case_uuid, id AS case_id, disease, reportdate AS report_date_case, creationdate AS creation_date_case, person_id AS person_id_case,
-    region_id AS region_id_case, district_id AS district_id_case, caseclassification AS case_classification, caseorigin AS case_origin, symptoms_id
+    responsibleregion_id AS region_id_case, responsibledistrict_id AS district_id_case, caseclassification AS case_classification, caseorigin AS case_origin, symptoms_id
                           FROM public.cases 
                           WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ")
   case = dbGetQuery(sormas_db,queryCase)
-  # 
-  # case = dbGetQuery(
-  #   sormas_db,
-  #   "SELECT uuid AS case_uuid, id AS case_id, disease, reportdate AS report_date_case, creationdate AS creation_date_case, person_id AS person_id_case,
-  #   region_id AS region_id_case, district_id AS district_id_case, caseclassification AS case_classification, caseorigin AS case_origin, symptoms_id
-  #   FROM cases
-  #   WHERE deleted = FALSE and caseclassification != 'NO_CASE' "
-  # )
   
   #load contacts
   queryContact <- paste0("SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
@@ -2321,17 +2335,6 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
                           FROM public.contact
                           WHERE deleted = FALSE and caze_id IS NOT NULL and contactclassification = 'CONFIRMED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   contact = dbGetQuery(sormas_db,queryContact)
-  # 
-  # contact = dbGetQuery(
-  #   sormas_db,
-  #   "SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
-  #   person_id AS person_id_contact, reportdatetime AS report_date_contact, creationdate AS creation_date_contact, lastcontactdate AS lastcontact_date_contact,
-  #   contactproximity AS contact_proximity, resultingcase_id, contactstatus, contactclassification
-  #   FROM public.contact
-  #   WHERE deleted = FALSE and caze_id IS NOT NULL and contactclassification = 'CONFIRMED'" 
-  #   # no need to add "unconfirmed" and  "not a contact" because our focus is only on contacts that resulted to cases
-  #   # only confirmed contacts are permitted to result to cases in app
-  # )
   
   #loading symptom data
   symptoms = dbGetQuery(
@@ -2437,7 +2440,7 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     )
   return(ret)
 }
-save(infectorInfecteeExport, file = "infectorInfecteeExport.R")
+save(infectorInfecteeExport, file = "./utils/infectorInfecteeExport.R")
 
 
 # fixContactJurisdiction, method assign the jurisdiction contacts with mission region and district using that of their source cases
