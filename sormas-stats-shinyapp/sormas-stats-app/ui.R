@@ -736,7 +736,7 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                sliderInput("eventMapTextSizeUi", label = "Choose text size for map", min = 0, 
                           max = 2, step = 0.2, value = 1.2)
               )               
-            ),
+            ), 
             
             mainPanel(width = 10,
                       fluidRow(
@@ -775,8 +775,8 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                                pickerInput(
                                  inputId = "eventIdentificationSourceUi",
                                  label = 'Identification source',
-                                 #choices = sort(levels(as.factor(eventData$event_identification,source))),
-                                 choices = sort(levels(as.factor( c("forward_tracing", "backward_tracing", "unknown", "NA")  ))),
+                                 choices = sort(levels(as.factor(eventData$event_identification_source))),
+                                 #choices = sort(levels(as.factor( c("forward_tracing", "backward_tracing", "unknown", "NA")  ))),
                                  options = list(
                                    `actions-box` = TRUE, 
                                    size = 12
@@ -1062,7 +1062,7 @@ fluidRow(
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
-         p(tags$em("Last updated: September 23, 2021"), style = 'font-size:75%'))
+         p(tags$em("Last updated: October 31, 2021"), style = 'font-size:75%'))
   ,
   column(3, align = "right",
          p('Powered by:', tags$a(href = " ", target = '_blank'), '', style = "font-size: 85%"),
