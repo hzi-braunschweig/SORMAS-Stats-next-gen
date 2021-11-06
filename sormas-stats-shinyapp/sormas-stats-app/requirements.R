@@ -55,6 +55,7 @@ install.packages('RPostgreSQL', version='0.6-2', repos='http://cran.us.r-project
 #install.packages('config', version='0.3.1', repos='https://cran.r-project.org')
 install.packages('sodium', version='1.1', repos='https://cran.r-project.org')
 install.packages('shinyauthr', version='1.0.0', repos='https://cran.r-project.org')
+
 # install.packages("shinyauthr") # this may not work on ubuntu adn may give errors like:
 # ERROR: dependency ‘sodium’ is not available for package ‘shinyauthr’
 # To solve this, install libsodium-dev on your ubuntu. Add this in the docker file also.

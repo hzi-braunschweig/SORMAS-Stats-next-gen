@@ -1219,15 +1219,15 @@
     },
     "sass": {
       "Package": "sass",
-      "Version": "0.3.1.9002",
+      "Version": "0.4.0.9000",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "sass",
       "RemoteUsername": "rstudio",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "489f54586958bb248f82f02434a54d1dfe291980",
-      "Hash": "11f5e611f16395e8bc5a551462a1997d"
+      "RemoteRepo": "sass",
+      "RemoteRef": "main",
+      "RemoteSha": "f95b4369f76071fbd7b383305167d7881ffe1a68",
+      "Hash": "6cb2f8e5133d6df0f238fce101216d4a"
     },
     "scales": {
       "Package": "scales",

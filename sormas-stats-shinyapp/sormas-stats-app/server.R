@@ -3,27 +3,26 @@
 #####  server function #######
 shinyServer(
   function(input, output,session) { 
-    #################################################
-    # call login module supplying data frame, 
-    # username and password cols and reactive trigger
-    # Commenting out authentication in app
-    # To activate it back, uncomment this sections and all lines with credentials()$user_auth
     
-    # credentials <- shinyauthr::loginServer(
-    #   id = "login",
-    #   data = users,
-    #   user_col = username,
-    #   pwd_col = password,
-    #   sodium_hashed = TRUE,
-    #   log_out = reactive(logout_init())
-    # )
+    #################################################
+    # Call login module and supplying it with the user dataframe, 
+    # username and password calls and reactive trigger
+
+    credentials <- shinyauthr::loginServer(
+      id = "login",
+      data = users,
+      user_col = username,
+      pwd_col = password,
+      sodium_hashed = TRUE,
+      log_out = reactive(logout_init())
+    )
     
     # call the logout module with reactive trigger to hide/show
     
-    # logout_init <- shinyauthr::logoutServer(
-    #   id = "logout",
-    #   active = reactive(credentials()$user_auth)
-    # )
+    logout_init <- shinyauthr::logoutServer(
+      id = "logout",
+      active = reactive(credentials()$user_auth)
+    )
     ########################################"
    
     ### toggling sidebar panel
@@ -32,7 +31,7 @@ shinyServer(
     #   shinyjs::toggle(id = "Sidebar")
     # })
     
-    # ui element to filter trensmisson chenin by disdrict based of users delected region 
+    # ui element to filter trensmisson chenin by district based of users delected region 
     output$pickerInputDistrict2 <- renderUI({
       # choicesRegionUI = sort(unique(contRegionDist$district_name[contRegionDist$region_name %in% input$regionUi]  ))
       if(!is.null(input$regionNetworkUi))
@@ -59,233 +58,201 @@ shinyServer(
       )
     })
     
-  ###### Trasmission chain ######################################
+  ###### Trasmission chain analysis ######################################
 
-  ########################## Nework option 2 code #############"""
 # plotting network -----
-  ## Filter elist by region, disease, and time time, etc
-  selElistRegionUI = reactive({
-    if(!is.null(input$regionNetworkUi))
-    {
-      #as.numeric(elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )), colnames(elist) == "id" ])
-      temp =  elist[((elist$region_name %in% input$regionNetworkUi) & (elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi) )  ) & (elist$reportdatetime <= (max(input$reportdateUi) ))),  colnames(elist)  %in% c("id","entityType", "district_name", "relationtocase","eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person", "resultingcase_id")]
-    } else{
-    temp = elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )), colnames(elist) %in% c("id","entityType", "district_name", "relationtocase", "eventstatus", "risklevelEvent", "from_uuid_person", "to_uuid_person", "resultingcase_id") ]
-    }
-    return(temp)
-  })
-  #
-  selElistRegionDistUI = reactive({
-    #temp = selElistRegionUI()
-    if(is.null(input$districtUi2))
-    {
-      temp = selElistRegionUI()
-    } else{
-      temp = selElistRegionUI() %>%
-        dplyr::filter(district_name %in% input$districtUi2)
-    }
-    return(temp)
-  })
-
-  # filtering selElistRegionDistUI by source entity type
-  selElistRegionEntityTypeUI = reactive({
-    if(!is.null(input$contactEntitiyTypeUi))
-    {
-      temp = selElistRegionDistUI() %>%
-        dplyr::filter(entityType %in% input$contactEntitiyTypeUi)
-    } else{
-      temp = selElistRegionDistUI()
-    }
-    return(temp)
-  })
-
-  # # filter selElistRegionEntityTypeUI by contact relationship type or  contact settings
-  # testing code relationCaseUi
-  selElistRegionEntityTypeSettingUI = reactive({
-    if(!is.null(input$relationCaseUi))
-    {
-     temp = selElistRegionEntityTypeUI() %>%
-        dplyr::filter(relationtocase %in% input$relationCaseUi)
-    } else{
-      temp = selElistRegionEntityTypeUI()
-    }
-    return(temp)
-  })
-
-  # # filter selElistRegionEntityTypeUI by eventstatus. By default only chains linked to events are retained.
-  selElistRegionEntityTypeSettingEventstatusUI = reactive({
-    if(!is.null(input$eventstatusUI))
-    {
-      temp = selElistRegionEntityTypeSettingUI() %>%
-        dplyr::filter(eventstatus %in% input$eventstatusUI)
-    } else{
-      temp = selElistRegionEntityTypeSettingUI()
-    }
-    return(temp)
-  })
-  
-  ## filter by event risk level
-  selElistRegionEntityTypeSettingEventstatusRisklevelUI = reactive({
-    if(!is.null(input$risklevelUI))
-    {
-      temp = selElistRegionEntityTypeSettingEventstatusUI() %>%
-        dplyr::filter(risklevelEvent %in% input$risklevelUI)
-    } else{
-      temp = selElistRegionEntityTypeSettingEventstatusUI()
-    }
-    return(temp)
-  })
-  
-  # #filtering contacts of a single node
-  selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode = reactive({ 
-    temp = selElistRegionEntityTypeSettingEventstatusRisklevelUI()
-    node_uuidUi = stri_replace_all_fixed(toupper(as.character(input$visSingleNodeUi)), " ", "") # replace all input charecters to upper case
-    if(input$visSingleNodeUi !=""){
-      temp = temp[((temp$from_uuid_person == node_uuidUi) | (temp$to_uuid_person == node_uuidUi)),]
-    } 
-    return(temp)
-    })
-  
-  # filter to exclude helthy event participants
-  selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy = reactive({
-    if(input$excludeHealthyEventPartUi == TRUE){
-      temp = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode() %>%
-        dplyr::filter(is.na(resultingcase_id) & (entityType == "Event")  )  # selecting health ep 
-      
-      ret = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode() %>%
-        dplyr::filter( !(id %in% temp$id)) # dropping dropping edges of healthy ep
-    } else{
-      ret = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode()
-      }
-    return(ret)
-  })
-
-  # further filtering based on resultingCaseOnlyUi, activeEventsOnlyUi
-  elistSel2ResCaseSourseCaseArch  = reactive({ 
-  # req(credentials()$user_auth)
-  elistSel <- elist[elist$id %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy()$id, ]
-  #Filter elist based on resulting cases varaible
-  if(input$resultingCaseOnlyUi == FALSE){
-    elistSel2ResCase = elistSel
+## Filter elist by region, disease,  time, etc
+selElistRegionUI = reactive({
+  if(!is.null(input$regionNetworkUi))
+  {
+    temp =  elist[((elist$region_name %in% input$regionNetworkUi) & (elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi) )  ) & (elist$reportdatetime <= (max(input$reportdateUi) ))), ]
   } else{
-    elistSel2ResCase =  elistSel[is.na(elistSel$resultingcase_id) == FALSE,]
+    temp = elist[((elist$disease == input$diseaseUi) & (elist$reportdatetime >= (min(input$reportdateUi))) & (elist$reportdatetime <= (max(input$reportdateUi)) )),  ]
   }
-  ##
-  if(input$activeEventsOnlyUi == FALSE){
-    elistSel2ResCaseArchived = elistSel2ResCase
+  return(temp)
+})
+##
+selElistRegionDistUI = reactive({
+  if(is.null(input$districtUi2))
+  {
+    temp = selElistRegionUI()
   } else{
-    elistSel2ResCaseArchived =  elistSel2ResCase %>%
-      dplyr::filter(archivedEvent == "f")
+    temp = selElistRegionUI() %>%
+      dplyr::filter(district_name %in% input$districtUi2)
   }
-  
-  # filter elist based on source nodes ids
-  if(!is.null(input$visSelectedChainsUi)){
-    contIdTemp = contIdsForMultipleChains(elist = elistSel2ResCaseArchived, uuid_vector = as.character(input$visSelectedChainsUi)) # retain list of contact ids
-    ret = elistSel2ResCaseArchived[elistSel2ResCaseArchived$id %in% contIdTemp,]
+  return(temp)
+})
+
+# filtering selElistRegionDistUI by source entity type
+selElistRegionEntityTypeUI = reactive({
+  if(!is.null(input$contactEntitiyTypeUi))
+  {
+    temp = selElistRegionDistUI() %>%
+      dplyr::filter(entityType %in% input$contactEntitiyTypeUi)
   } else{
-    ret <- elistSel2ResCaseArchived
+    temp = selElistRegionDistUI()
+  }
+  return(temp)
+})
+# # filter selElistRegionEntityTypeUI by contact relationship type or  contact settings
+# testing code relationCaseUi
+selElistRegionEntityTypeSettingUI = reactive({
+  if(!is.null(input$relationCaseUi))
+  {
+   temp = selElistRegionEntityTypeUI() %>%
+      dplyr::filter(relationtocase %in% input$relationCaseUi)
+  } else{
+    temp = selElistRegionEntityTypeUI()
+  }
+  return(temp)
+})
+
+# # filter selElistRegionEntityTypeUI by eventstatus. By default only chains linked to events are retained.
+selElistRegionEntityTypeSettingEventstatusUI = reactive({
+  if(!is.null(input$eventstatusUI))
+  {
+    temp = selElistRegionEntityTypeSettingUI() %>%
+      dplyr::filter(eventstatus %in% input$eventstatusUI)
+  } else{
+    temp = selElistRegionEntityTypeSettingUI()
+  }
+  return(temp)
+})
+
+## filter by event risk level
+selElistRegionEntityTypeSettingEventstatusRisklevelUI = reactive({
+  if(!is.null(input$risklevelUI))
+  {
+    temp = selElistRegionEntityTypeSettingEventstatusUI() %>%
+      dplyr::filter(risklevelEvent %in% input$risklevelUI)
+  } else{
+    temp = selElistRegionEntityTypeSettingEventstatusUI()
+  }
+  return(temp)
+})
+  
+# #filtering contacts of a single node
+selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode = reactive({ 
+  temp = selElistRegionEntityTypeSettingEventstatusRisklevelUI()
+  node_uuidUi = stri_replace_all_fixed(toupper(as.character(input$visSingleNodeUi)), " ", "") # replace all input charecters to upper case
+  if(input$visSingleNodeUi !=""){
+    temp = temp %>%
+      dplyr::filter((from_uuid_person == node_uuidUi) | (to_uuid_person == node_uuidUi))
+  } 
+  return(temp)
+  })
+
+# filter to exclude helthy event participants
+selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy = reactive({
+  if(input$excludeHealthyEventPartUi == TRUE){
+    temp = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode() %>%
+      # selecting healthy ep only
+      dplyr::filter(is.na(resultingcase_id) & (entityType == "Event")) 
+    ret = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode() %>%
+      dplyr::filter( !(id %in% temp$id)) # dropping dropping edges of healthy ep
+  } else{
+    ret = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNode()
+    }
+  return(ret)
+})
+####################
+# Filtering elist by node degree
+# filter  elist  by degree of source node and retain uuid of source nodes only
+selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthySourseCaseUUID = reactive({
+  elistSel = selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthy()  
+  ## computing node degree adn add it a column to dataframe
+  # For "from nodes" that are not source nodes, the degree would be NA
+  elistSel = sourceNodeDegreeCounter(elist=elistSel, nodeLineList = nodeLineList) %>%
+    # Comput degree for source nodes for the complete network
+    # the source node degree would later be used to filter the network
+    dplyr::select(from_uuid_person, deg) %>%
+    dplyr::right_join(., elistSel,  c( "from_uuid_person" = "from_uuid_person"))
+  # getting source nodes person uuid
+  if(!(is.na(input$nodeDegreeMinUi)) & input$nodeDegreeMinUi > 1){
+    sourceNodes_uuid = elistSel %>%
+      dplyr::filter(deg >= input$nodeDegreeMinUi) %>% # selecting only contacts with source node degree greater than or equal to nodeDegreeMinUi
+      dplyr::select(from_uuid_person) %>%
+      dplyr::distinct_at(., vars(from_uuid_person), .keep_all = TRUE) %>%
+      dplyr::pull(from_uuid_person)
+    # getting contact ids and use it to filter elist
+    contIdTemp = contIdsForMultipleChains(elist = elistSel, uuid_vector = as.character(sourceNodes_uuid)) # retain list of contact ids
+    ret = elistSel[elistSel$id %in% contIdTemp,]
+  }else{
+    ret = elistSel
   }
   return(ret)
-  }) 
-  
-  # Filtering elist by node degree
-  # filter  elist  by degree of source node and retain uuid of source nodes only
-  elistSel2ResCaseSourseCase = reactive({
-    elistSel = elistSel2ResCaseSourseCaseArch()
-    
-    ## computing node degree adn add it a column to dataframe
-    # For "from nodes" that are not source nodes, the degree would be NA
-    elistSel = sourceNodeDegreeCounter(elist=elistSel, nodeLineList = nodeLineList) %>% # Comput degree for source nodes for the complete network
-      # the source node degree would later be used to filter the network
-      dplyr::select(from_uuid_person, deg) %>%
-      dplyr::right_join(., elistSel,  c( "from_uuid_person" = "from_uuid_person"))
-    
-    # getting source nodes person uuid
-    if(!(is.na(input$nodeDegreeMinUi)) & input$nodeDegreeMinUi > 1){
-      sourceNodes_uuid = elistSel %>%
-        dplyr::filter(deg >= input$nodeDegreeMinUi) %>% # selecting only contacts with source node degree greater than or equal to nodeDegreeMinUi
-        dplyr::select(from_uuid_person) %>%
-        dplyr::distinct_at(., vars(from_uuid_person), .keep_all = TRUE) %>%
-        dplyr::pull(from_uuid_person)
-      # getting contact ids and use it to filter elist
-      contIdTemp = contIdsForMultipleChains(elist = elistSel, uuid_vector = as.character(sourceNodes_uuid)) # retain list of contact ids
-      ret = elistSel[elistSel$id %in% contIdTemp,]
-    }else{
-      ret = elistSel
-    }
-    return(ret)
-  })
+})
 
-  # Ordering column of elist to be plotted, this is needed to be in this specific order
-  elistPlot = reactive({ 
-    ret = elistSel2ResCaseSourseCase() %>%
-      dplyr::relocate(from, to)
-    return(ret)
-    })
-  ##
-  nodeToPlot = reactive({ 
-    nodeLineListSelResCase <- nodeLineList[nodeLineList$id %in% unique(c(elistSel2ResCaseSourseCase()$from, elistSel2ResCaseSourseCase()$to)), ]
-    ret = nodeLineListSelResCase %>%
-      dplyr::relocate(id, label, group, value, shape,  code,  title)
-    return(ret)
-  })
-  ## plotting network
-  output$transChain <- renderVisNetwork({ 
-    if(input$visNetworkDiagramUi == TRUE){
-      #plotNet(nodeLineList= nodeToPlot(), elist = elistPlot(), IgraphLayout= input$IgraphLayoutUi) 
-      # IgraphLayout helps to reduce ploting time but the nodes are placed at fixed positions
-      defaultFont="font-family:'Open Sans', sans-serif, 'Source Sans Pro'"
-      mainStyle = paste(defaultFont, "color: #6591C4", ";font-weight: 600", "font-size: 1.6em", "text-align:center;", sep="; ")
-      submainStyle = paste(defaultFont, "text-align:center;", sep="; ")
-      footerStyle = defaultFont
-      addNodesS <- data.frame(label = c("Healthy","Not_classified" ,"Suspected", "Probable", "Confirmed", "Not case", "1 = High risk", "2 = Low risk", "Event"), shape = "icon",
-                              icon.code = c("f007", "f007", "f007", "f007", "f007","f007", "f178", "f178", "f013"),
-                              icon.size = c(25, 25, 25, 25, 25,25,25,25,25), icon.color = c("#17bd27", "#706c67", "#ffff00", "#ffa500", "#f70707","#99bd17", "#0d0c0c", "#0d0c0c", "#0000ff"))
-      if(input$IgraphLayoutUi ==FALSE){
-        visNetwork(nodes = nodeToPlot(), edges = elistPlot(),  main = list(text = "Disease network diagram", style = mainStyle),
-                      submain = list(text = "The arrows indicate the direction of transmission", style = submainStyle), 
-                      # footer = list(text = "Zoom in to see the IDs and contact category", style = footerStyle), 
-                      background = "white", annot = T, width = "100%", height = "100vh") %>%  
-          visEdges(arrows = "to", color = "black", smooth = FALSE) %>% 
-          visOptions(selectedBy = NULL,highlightNearest = TRUE, nodesIdSelection = FALSE) %>% 
-          visGroups(groupname = "SUSPECT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffff00")) %>%
-          visGroups(groupname = "PROBABLE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffa500")) %>%
-          visGroups(groupname = "CONFIRMED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#f70707")) %>%
-          visGroups(groupname = "NOT_CLASSIFIED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#706c67" )) %>%
-          visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
-          visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
-          visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
-          visNetwork::addFontAwesome() %>% # addFontAwesome(name = "font-awesome-visNetwork") %>% # because shiny uses fontAwesome 5 and not 4
-          visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.1, ncol = 1, stepX = 100, stepY = 100, main = "Legend") %>%  
-          visPhysics(stabilization = F) %>%
-          visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
-        
-      } else{
-        visNetwork(nodes = nodeToPlot(), edges = elistPlot(),  main = list(text = "Disease network diagram", style = mainStyle),
-                      submain = list(text = "The arrows indicate the direction of transmission", style = submainStyle), 
-                      # footer = list(text = "Zoom in to see the IDs and contact category", style = footerStyle), 
-                      background = "white", annot = T, width = "100%", height = "100vh") %>%
-          visIgraphLayout() %>%  # to improve performance ie reduce plotting time
-          visEdges(arrows = "to", color = "black", smooth = FALSE) %>% 
-          visOptions(selectedBy = NULL,highlightNearest = TRUE, nodesIdSelection = FALSE) %>% 
-          visGroups(groupname = "SUSPECT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffff00")) %>%
-          visGroups(groupname = "PROBABLE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#ffa500")) %>%
-          visGroups(groupname = "CONFIRMED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#f70707")) %>%
-          visGroups(groupname = "NOT_CLASSIFIED", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#706c67" )) %>%
-          visGroups(groupname = "HEALTHY", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#17bd27")) %>%
-          visGroups(groupname = "NO_CASE", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f007"), color="#99bd17")) %>%
-          visGroups(groupname = "EVENT", size = 10, shape = "icon", icon = list( face ='FontAwesome', code = c( "f013"), color= "#0000ff")) %>% 
-          visNetwork::addFontAwesome() %>%
-          visLegend(addNodes = addNodesS, useGroups = F, position = "right", width = 0.1, ncol = 1, stepX = 100, stepY = 100, main = "Legend") %>%  
-          visPhysics(stabilization = F) %>%
-          visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
-      }
-    } 
-  })
+## For other developers, 
+# you can add further filter here using the object of elist ==  selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthySourseCaseUUID
 
-  ## computation of network parameters esing transmission network data ----
+# All  dependent filters should come before this section ie should be conditioned on 
+# selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthySourseCaseUUID
+
+# further filtering based on resultingCaseOnlyUi, activeEventsOnlyUi
+elistSel2ResCaseSourseCaseArch  = reactive({ 
+  elistSel <- elist[elist$id_elist %in% selElistRegionEntityTypeSettingEventstatusRisklevelUISingleNodeEvenPartHealthySourseCaseUUID()$id_elist, ]  
+#Filter elist based on resulting cases varaible
+if(input$resultingCaseOnlyUi == FALSE){
+  elistSel2ResCase = elistSel
+} else{
+  elistSel2ResCase =  elistSel[is.na(elistSel$resultingcase_id) == FALSE,]
+}
+##
+if(input$activeEventsOnlyUi == FALSE){
+  elistSel2ResCaseArchived = elistSel2ResCase
+} else{
+  elistSel2ResCaseArchived =  elistSel2ResCase %>%
+    dplyr::filter(archivedEvent == "f")
+}
+
+# filter elist based on source nodes ids
+if(!is.null(input$visSelectedChainsUi)){
+  contIdTemp = contIdsForMultipleChains(elist = elistSel2ResCaseArchived, uuid_vector = as.character(input$visSelectedChainsUi)) # retain list of contact ids
+  ret = elistSel2ResCaseArchived[elistSel2ResCaseArchived$id %in% contIdTemp,]
+} else{
+  ret <- elistSel2ResCaseArchived
+}
+return(ret)
+}) 
+ 
+# Take a dependency on input$transChainAction ie render for elistSel2ResCaseSourseCase only works when the action icon is clicked
+# Any output or computation that depend on elistSel2ResCaseSourseCase wouuld run only when input$transChainAction is clicked
+elistSel2ResCaseSourseCase = eventReactive(input$transChainAction, { 
+  elistSel2ResCaseSourseCaseArch() #elistSel2ResCaseSourseCaseUUID()
+}, ignoreNULL = FALSE)
+
+# Ordering column of elist to be plotted, this is needed to be in this specific order
+elistToPlot = reactive({
+  #remaming node id with node uuid
+  ret = elistSel2ResCaseSourseCase() %>%  #        
+    dplyr::select(-from, -to)  %>% 
+    dplyr::mutate(from = from_uuid_person, to = to_uuid_person, .keep = "all") %>%
+    dplyr::relocate(from, to)
+  return(ret)
+})
+##
+nodeToPlot = reactive({
+  uuid_nodeSel = unique(c(elistToPlot()$from_uuid_person, elistToPlot()$to_uuid_person))
+  ret <- nodeLineList %>% 
+    dplyr::filter(uuid_node %in% uuid_nodeSel) %>% 
+    dplyr::mutate(id = uuid_node, .keep = "unused")  %>%
+    dplyr::relocate(id, label, group, value, shape,  code,  title)
+  return(ret)
+})
+
+## plotting network
+output$transChain <- renderVisNetwork({
+  req(credentials()$user_auth)
+  if(input$visNetworkDiagramUi == TRUE){
+    plotNet(nodeLineList= nodeToPlot(), elist = elistToPlot(), IgraphLayout= input$IgraphLayoutUi) 
+  } 
+})
+
+  ## computation of network parameters using transmission network data ----
   ## total number of contacts
   output$totalEdges <- renderInfoBox({
+    req(credentials()$user_auth)
     infoBox(
      title = NULL, 
      value =  nrow(elistSel2ResCaseSourseCase() ),
@@ -296,6 +263,7 @@ shinyServer(
   })  
   ## Total number of edges (contacts or event participants) resulting to cases
   output$totalReultingcasesEdges <- renderInfoBox({
+    req(credentials()$user_auth)
     temp = elistSel2ResCaseSourseCase() %>%
       dplyr::filter(resultingcase_id != "NA")
     infoBox(
@@ -303,14 +271,14 @@ shinyServer(
       value = nrow(temp),
       icon = icon("long-arrow-alt-right"), color = colCase, fill = FALSE,
       subtitle = "∑ Contact & EP converted to case"
-      
     )
   })   
   
   ## Total number of unique infector-infectee pair
   # this is the same as contacts resulting to cases
   output$totalInfectorInfecteePair <- renderInfoBox({
-    temp = elistSel2ResCaseSourseCase() %>%
+    req(credentials()$user_auth)
+    temp =  elistSel2ResCaseSourseCase() %>%
       dplyr::filter(resultingcase_id != "NA")
     # no need to count unique pairs of person since elist has unique pairs of nodes when exported from sormas db
     infoBox(
@@ -323,6 +291,7 @@ shinyServer(
   
   ## total number of nodes: ie person and events
   output$totalNodes <- renderInfoBox({
+    req(credentials()$user_auth)
     infoBox(
       title = NULL, 
       value = length(unique(c(elistSel2ResCaseSourseCase()$from_uuid_person, elistSel2ResCaseSourseCase()$to_uuid_person ))),
@@ -334,7 +303,8 @@ shinyServer(
   }) 
   ## total number of event nodes
   output$totalEventNodes <- renderInfoBox({
-   temp =  as.numeric(
+    req(credentials()$user_auth)
+   temp = as.numeric(
      elistSel2ResCaseSourseCase() %>%
        dplyr::select(from_uuid_person, entityType ) %>%
        dplyr::filter(entityType == "Event") %>%
@@ -351,7 +321,8 @@ shinyServer(
   
   ## total number of person nodes
   output$totalPersonNodes <- renderInfoBox({
-    id_vec = compute_person_node_uuid(elist = elistSel2ResCaseSourseCase())
+    req(credentials()$user_auth)
+    id_vec = compute_person_node_uuid(elist = elistSel2ResCaseSourseCase()) 
     infoBox(
       title =NULL, 
       value = length(id_vec),
@@ -361,6 +332,7 @@ shinyServer(
   }) 
   ## Total number of nodes (persons) converted to cases
   output$totalReultingcasesNodes <- renderInfoBox({
+    req(credentials()$user_auth)
     temp = elistSel2ResCaseSourseCase() %>%
       dplyr::filter(resultingcase_id != "NA") %>%
       dplyr::distinct_at(., vars(to_uuid_person), .keep_all = TRUE) 
@@ -373,12 +345,10 @@ shinyServer(
       
     )
   })  
-  ###
-  
   ## Total number of ep and contact persons 
   output$totalContactEpPersonNodes <- renderInfoBox({
-    temp = elistSel2ResCaseSourseCase()
-    temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = temp)$n_contact_ep_nodes)
+    req(credentials()$user_auth)
+    temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = elistSel2ResCaseSourseCase() )$n_contact_ep_nodes)
     infoBox(
      # title = "∑ Person", 
       title = NULL, 
@@ -391,68 +361,51 @@ shinyServer(
 
   ## Prpportion of ep and contact person converted to case
   output$propContactEpPersonConverted <- renderInfoBox({
-    temp = elistSel2ResCaseSourseCase()
-    temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = temp)$prop_converted)
+    req(credentials()$user_auth)
+    temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = elistSel2ResCaseSourseCase() )$prop_converted)
     infoBox(
       #title = "% Converted", 
       title = NULL,
       value = temp ,
       icon = icon("user"), color = colCase, fill = FALSE,
       subtitle = "% Person converted to case"
-      
     )
   }) 
    
 ### Computing network parameters using igraph----
   graphObject <- reactive({
-    # req(credentials()$user_auth)
-    # elistSel = elistSel2ResCaseSourseCase()
-    # elistSel = elistSel %>%
-    #   dplyr::distinct_at(., vars(from, to), .keep_all = FALSE)
-    # 
-    # nodeLineListSelResCase = nodeLineList %>%
-    #   dplyr::select(id, group) 
-    # nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$id %in% unique(c(elistSel$from, elistSel$to)), ]
-    # 
-    # # ordering colums, this is needed to be in a specific order for igraph
-    # nodeToPlot = nodeLineListSelResCase %>%
-    #   dplyr::relocate(id, group)
-    # elistPlot = elistSel %>%
-    #   dplyr::relocate(from, to)
-    # net <- graph_from_data_frame(d=elistPlot, vertices = nodeToPlot, directed=T)
-    # 
+     req(credentials()$user_auth)
     net = convertNetworkToGraph(elist=elistSel2ResCaseSourseCase(), nodeLineList=nodeLineList) # converting network to graph object
     return(net)
   })
  
   # computing summary of node degree 
   output$nodeDegreeSummary <- renderPrint({
-    # req(credentials()$user_auth)
+     req(credentials()$user_auth)
     net = graphObject()
-    deg <- degree(net, mode="all") # 
+    deg <- degree(net, mode="all") 
     summary(deg)  # output
   })
   
   # computing summary of node betweeness
   output$nodeBetweenessSummary <- renderPrint({
-    # req(credentials()$user_auth)
+     req(credentials()$user_auth)
     net = graphObject()
     summary(betweenness(net, directed=F)) 
   })
   
   # degree histogram
   output$nodeDegreeHist <- renderPlot({
-    # req(credentials()$user_auth)
-    net = graphObject()
+     req(credentials()$user_auth)
+    net = graphObject() 
     deg <- degree(net, mode="all") # 
     hist(deg, breaks=20, xlim = c(1, max(deg)), main = NULL, xlab = "Contacts per case", col = "grey") # breaks=1:vcount(net)-1
-
   })	
   # variance-to-mean ratio (VMR) for node degree: 
   # https://en.wikipedia.org/wiki/Index_of_dispersion
   output$nodeVMR <- renderInfoBox({
-    # req(credentials()$user_auth)
-    net = graphObject()
+     req(credentials()$user_auth)
+    net = graphObject() 
     deg <- degree(net, mode="all") # extract degree
     node_mvr = round(var(deg) / mean(deg), 2)
     infoBox(
@@ -464,7 +417,7 @@ shinyServer(
   }) 
   # Betweeness histogram
   output$nodeBetweenessHist <- renderPlot({
-    # req(credentials()$user_auth)
+     req(credentials()$user_auth)
     net = graphObject()
     betweenness_score = betweenness(net, directed=F, weights=NA)
     hist(betweenness_score,  breaks=20, xlim = c(0, max(betweenness_score) + 2),main = NULL, col = "grey", xlab = "Betweeness score" )
@@ -472,8 +425,8 @@ shinyServer(
   
   # Edge density: The proportion of present edges from all possible edges in the network.
   output$edgeDensity <- renderInfoBox({
-    # req(credentials()$user_auth)
-    net = graphObject()
+     req(credentials()$user_auth)
+    net = graphObject() 
     edge_density = round(edge_density(net, loops=F), 2)
     infoBox(
       title = NULL, 
@@ -486,7 +439,7 @@ shinyServer(
   
   # Diameter: longest geodesic distance ie longest undirected chain, thus extract the source case
   output$diameterDirected <- renderInfoBox({
-    # req(credentials()$user_auth)
+     req(credentials()$user_auth)
     net = graphObject()
     temp = diameter(net, directed=TRUE) # # number of contact in longest chain of infector-infectee pairs
     infoBox(
@@ -498,8 +451,8 @@ shinyServer(
     )
   }) 
   output$diameterUndirected <- renderInfoBox({
-    # req(credentials()$user_auth)
-    net = graphObject()
+     req(credentials()$user_auth)
+    net = graphObject() 
     temp = diameter(net, directed=FALSE) # # number of contact in longest undirected chain
     infoBox(
       title = NULL,
@@ -511,7 +464,7 @@ shinyServer(
   }) 
   ## summary of source/ infector nodes for cases and evnet
   output$totInfectorCaseEventNodes <- renderInfoBox({
-    # req(credentials()$user_auth)
+     req(credentials()$user_auth)
     temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$sum_caseEvent_nodes
     infoBox(
       title = NULL, 
@@ -522,8 +475,9 @@ shinyServer(
   }) 
   #
   output$totSourceInfectorCaseEventNodes <- renderInfoBox({
-    # req(credentials()$user_auth)
-    temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$sum_missing_source_case_nodes
+    req(credentials()$user_auth)
+    temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), 
+                  nodeLineList = nodeLineList)$sum_missing_source_case_nodes
     infoBox(
       title = NULL,
       value = temp,
@@ -533,8 +487,9 @@ shinyServer(
   }) 
   ##
   output$propInfectorCaseEventNodes <- renderInfoBox({
-    # req(credentials()$user_auth)
-    temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$prop_missing_source_case_nodes
+     req(credentials()$user_auth)
+    temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(),
+                   nodeLineList = nodeLineList)$prop_missing_source_case_nodes
     infoBox(
       title = NULL, 
       value = temp,
@@ -545,14 +500,15 @@ shinyServer(
   
   # summary pronting uuid of app parant nodes
   output$sourceNodeUUID <- renderPrint({
-    # req(credentials()$user_auth)
-    temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$source_node_uuid
+     req(credentials()$user_auth)
+    temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(),
+                   nodeLineList = nodeLineList)$source_node_uuid
     cat(temp)
   })
   
   # Sum of parent source nodes ie infectors (cases, event) with unknown infectors
   output$transChainSumUI <- renderInfoBox({
-    # req(credentials()$user_auth)
+     req(credentials()$user_auth)
     temp = length(prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$source_node_uuid)
     infoBox(
       #title = "∑ chains", 
@@ -565,8 +521,8 @@ shinyServer(
   
   ##
   output$transitivityScore <- renderInfoBox({
-    # req(credentials()$user_auth)
-    net = graphObject()
+     req(credentials()$user_auth)
+    net = graphObject() 
     temp = round(transitivity(net), 2)
     infoBox(
       title = NULL,
@@ -578,8 +534,8 @@ shinyServer(
   
   # computing case counts by case classification from graphObject 
   output$nodeClassificationCountTable <- DT::renderDataTable({
-    # req(credentials()$user_auth)
-    net = graphObject()
+    req(credentials()$user_auth)
+    net =  graphObject() 
     temp = as.data.frame(table(V(net)$group))
     temp = temp %>% rename("Node classification" = Var1, Total = Freq)
     res =  DT::datatable(
@@ -599,35 +555,42 @@ shinyServer(
 ## end of transmission network analysis
 
 ## CONTACT DATA ANALYSIS-----
-    #d render contact table based on region district time and disease
-    d = reactive({
-      # req(credentials()$user_auth)
-      if(is.null(input$regionContactUi))
-      {
-        contRegionDist[((contRegionDist$disease == input$diseaseContactUi) & (contRegionDist$reportdatetime >= (min(input$reportdateContactUi))) & (contRegionDist$reportdatetime <= (max(input$reportdateContactUi)) )), ]
-      } else{
-        contRegionDist[((contRegionDist$region_name %in% input$regionContactUi) & (contRegionDist$disease == input$diseaseContactUi) & (contRegionDist$reportdatetime >= (min(input$reportdateContactUi) )  ) & (contRegionDist$reportdatetime <= (max(input$reportdateContactUi) ))),]
-      }
-
-    })
-    
-    ## Bar plot
-    output$plot <- renderPlot({
-      if(nrow(d( ) ) == 0)
-      {
-        plot(NULL, xlim=c(0,1), ylim=c(0,1), ylab="Number of contacts", xlab=" ",
-             main = "No data exist based on your selection, please choose another selection for which data exist")
-      }else{
-        if(is.null(input$regionContactUi) )
-        {
-          par(las=2, mar=c(7,4,4,2)) # make label text perpendicular to axis
-          barplot (table(as.factor(d( )$region_name)), ylab = "Number of contacts",main = "Bar plot for number of contacts")
-        } else {
-          par(las=2, mar=c(7,4,4,2)) # make label text perpendicular to axis
-          barplot (table(as.factor(d( )$district_name)), ylab = "Number of contacts",main = "Bar plot for number of contacts")
-        }
-      }
-    }, height=700)
+# begin of contact filter
+# Filter contact data  based on region district time and disease
+contRegionDistDiseaseDate = reactive({
+   req(credentials()$user_auth)
+  if(is.null(input$regionContactUi))
+  {
+    contRegionDist[((contRegionDist$disease == input$diseaseContactUi) & (contRegionDist$reportdatetime >= (min(input$reportdateContactUi))) & (contRegionDist$reportdatetime <= (max(input$reportdateContactUi)) )), ]
+  } else{
+    contRegionDist[((contRegionDist$region_name %in% input$regionContactUi) & (contRegionDist$disease == input$diseaseContactUi) & (contRegionDist$reportdatetime >= (min(input$reportdateContactUi) )  ) & (contRegionDist$reportdatetime <= (max(input$reportdateContactUi) ))),]
+  }
+})
+# Adding control based on contactDataAnalysisAction icon on front ui
+# Any output or computation that depend on contRegionDistDiseaseDate wouuld run only when input$contactDataAnalysisAction is clicked
+d = eventReactive(input$contactDataAnalysisAction, { 
+  contRegionDistDiseaseDate() 
+}, ignoreNULL = FALSE)
+  
+# end of contact filter  
+# Begin of contact analysis    
+## Bar plot
+output$plot <- renderPlot({
+  if(nrow(d( ) ) == 0)
+  {
+    plot(NULL, xlim=c(0,1), ylim=c(0,1), ylab="Number of contacts", xlab=" ",
+         main = "No data exist based on your selection, please choose another selection for which data exist")
+  }else{
+    if(is.null(input$regionContactUi) )
+    {
+      par(las=2, mar=c(7,4,4,2)) # make label text perpendicular to axis
+      barplot (table(as.factor(d( )$region_name)), ylab = "Number of contacts",main = "Bar plot for number of contacts")
+    } else {
+      par(las=2, mar=c(7,4,4,2)) # make label text perpendicular to axis
+      barplot (table(as.factor(d( )$district_name)), ylab = "Number of contacts",main = "Bar plot for number of contacts")
+    }
+  }
+}, height=700)
 
     ## exporting bar plot
     output$downloadBarplot = downloadHandler(
@@ -779,7 +742,7 @@ shinyServer(
     ## serial interval
     #selecting siDat baed on disease, time; regiion and district just as in d
     siD = reactive({
-      # req(credentials()$user_auth)
+      req(credentials()$user_auth)
       if(is.null(input$regionContactUi) )
       {
         siDat[((siDat$disease == input$diseaseContactUi) & (siDat$reportdatetime >= (min(input$reportdateContactUi))) & (siDat$reportdatetime <= (max(input$reportdateContactUi)) )), ]
@@ -878,7 +841,7 @@ shinyServer(
     })
 
   ## end exportation of data
-    
+       
   #### CASE DATA ANALYSIS  #################
     # ui element to filter casePersonRegionDist by disdrict based of users selected region 
     output$pickerInputdistrictCaseUi <- renderUI({
@@ -914,8 +877,8 @@ shinyServer(
     })
   
     # fiter by district of cose
-    casePersonFilter = reactive({
-      # req(credentials()$user_auth)
+    casePersonRegionDistFilter = reactive({
+       req(credentials()$user_auth)
       if(is.null(input$districtCaseUi))
       {
         temp = casePersonRegionFilter()
@@ -926,6 +889,12 @@ shinyServer(
       return(temp)
       
     })
+    
+    # Adding control based on apply changes icon on front ui
+    # Any output or computation that depend on casePersonFilter wouuld run only when input$caseDataAnalysisAction is clicked
+    casePersonFilter = eventReactive(input$caseDataAnalysisAction, { 
+      casePersonRegionDistFilter() 
+    }, ignoreNULL = FALSE)
     
     #### case KPI ################
     # case classification
@@ -1372,7 +1341,7 @@ shinyServer(
     # using casePersonFilter() and infectorInfecteeData
     # Filtering by disease and region of infector case
     infectorInfecteeDataDiseaseRegionFilter = reactive({
-      ## req(credentials()$user_auth)
+     req(credentials()$user_auth)
       if(is.null(input$regionCaseUi))
       {
         infectorInfecteeData[((infectorInfecteeData$disease_infector == input$diseaseCaseUi) & (infectorInfecteeData$report_date_infector >= (min(input$reportdateCaseUi))) & (infectorInfecteeData$report_date_infector <= (max(input$reportdateCaseUi)) )), ]
@@ -1382,7 +1351,7 @@ shinyServer(
     })
     
     # fiter by district of infector_case and serial_interval range
-    infectorInfecteeDataDiseaseRegionDistFilter = reactive({
+    infectorInfecteeDataDiseaseRegionDistSerialIntFilter = reactive({
       if(is.null(input$districtCaseUi))
       {
         temp = infectorInfecteeDataDiseaseRegionFilter() %>%
@@ -1406,6 +1375,12 @@ shinyServer(
           shinyjs::hide(id = "showMeanSdSIUI", anim = TRUE)
         } 
     })
+    
+    # Adding control based on apply changes icon on front ui
+    # Any output or computation that depend on infectorInfecteeDataDiseaseRegionDistFilter wouuld run only when input$caseDataAnalysisAction is clicked
+    infectorInfecteeDataDiseaseRegionDistFilter = eventReactive(input$caseDataAnalysisAction, { 
+      infectorInfecteeDataDiseaseRegionDistSerialIntFilter() 
+    }, ignoreNULL = FALSE)
     
     #Preparing data and estimate rt
     rt_data = reactive({
@@ -1513,12 +1488,16 @@ shinyServer(
     })
      
     # fitting user chosen distribution to SI
-    siRet <- reactive({
+    siRetDistributionRange <- reactive({
       temp = infectorInfecteeDataDiseaseRegionDistFilter()
       siRet = serialIntervalPlot(infectorInfecteePair = temp,  distr = input$siDistMethodUi, niter = input$niter_SI_UI,
                                  minSi = input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2] ) 
       return(siRet)
     })
+    # Any output or computation that depend on siRetDistributionRange wouuld run only when input$caseDataAnalysisAction is clicked
+    siRet = eventReactive(input$caseDataAnalysisAction, { 
+      siRetDistributionRange() 
+    }, ignoreNULL = FALSE)
     
     # plotting SI
     output$distribution_SI_plot <- renderPlot({
@@ -1551,80 +1530,81 @@ shinyServer(
 ## end of case data analysis ##
     
 ##### EVETN DATA ANALYSIS  ##################
-    eventLocRegDistFilter = reactive({
-      if(input$regionUi == "All regions")
-      {
-        eventLocRegDist[((eventLocRegDist$diseaseEvent == input$diseaseUi) & (eventLocRegDist$reportdatetime >= (min(input$reportdateUi))) & (eventLocRegDist$reportdatetime <= (max(input$reportdateUi)) )), ]
-      } else{
-        eventLocRegDist[((eventLocRegDist$region_name == input$regionUi) & (eventLocRegDist$diseaseEvent == input$diseaseUi) & (eventLocRegDist$reportdatetime >= (min(input$reportdateUi) )  ) & (eventLocRegDist$reportdatetime <= (max(input$reportdateUi) ))),]
-      }
 
-    })
-
-## EVENT dashboard and tables -----
-    # ui element to filter eventData by disdrict based of users selected region 
-    output$pickerInputdistrictEventUi <- renderUI({
-      if(!is.null(input$regionEventUi))
-      {
-        temp = eventData %>%
-          dplyr::filter(region_name %in% input$regionEventUi)  %>%
-          distinct(district_name) %>%
-          .$district_name
-      }else{
-        temp = NULL
-      }
-      pickerInput(inputId = 'districtEventUi', label = 'District of event',
-                  choices = temp, 
-                  options = list(
-                    `actions-box` = TRUE, 
-                    size = 12
-                  ),
-                  selected = NULL,
-                  multiple = TRUE
-      )
-    })
+## EVENT dashboard and tables ----
+# Begin of event filter
+# filtering disdrict name from eventData based of users selected region and parse it back to the frontend user
+output$pickerInputdistrictEventUi <- renderUI({
+  if(!is.null(input$regionEventUi))
+  {
+    temp = eventData %>%
+      dplyr::filter(region_name %in% input$regionEventUi)  %>%
+      distinct(district_name) %>%
+      .$district_name
+  }else{
+    temp = NULL
+  }
+  pickerInput(inputId = 'districtEventUi', label = 'District of event',
+              choices = temp, 
+              options = list(
+                `actions-box` = TRUE, 
+                size = 12
+              ),
+              selected = NULL,
+              multiple = TRUE
+  )
+})
 
 # filter eventData by disease, region, and time
-    selEventRegionUi = reactive({
-      if(!is.null(input$regionEventUi)){
-        eventData[((eventData$region_name  %in% input$regionEventUi) & (eventData$disease_event == input$diseaseEventUi) & (eventData$relevantdate_event >= (min(input$reportdateEventUi) )  ) & (eventData$relevantdate_event <= (max(input$reportdateEventUi) ))),]
-      } else{
-        eventData[((eventData$disease_event == input$diseaseEventUi) & (eventData$relevantdate_event >= (min(input$reportdateEventUi))) & (eventData$relevantdate_event <= (max(input$reportdateEventUi)) )), ]
-      }
-    }) 
+selEventRegionUi = reactive({
+  if(!is.null(input$regionEventUi)){
+    eventData[((eventData$region_name  %in% input$regionEventUi) & (eventData$disease_event == input$diseaseEventUi) & (eventData$relevantdate_event >= (min(input$reportdateEventUi) )  ) & (eventData$relevantdate_event <= (max(input$reportdateEventUi) ))),]
+  } else{
+    eventData[((eventData$disease_event == input$diseaseEventUi) & (eventData$relevantdate_event >= (min(input$reportdateEventUi))) & (eventData$relevantdate_event <= (max(input$reportdateEventUi)) )), ]
+  }
+}) 
     
-    # fiter by district of event
-    selEventRegionDistUi = reactive({
-      if(is.null(input$districtEventUi))
-      {
-        temp = selEventRegionUi()
-      } else{
-        temp = selEventRegionUi() %>%
-          dplyr::filter(district_name %in% input$districtEventUi)
-      }
-      return(temp)
-      
-    })
-    # fitering event by event identification source
-    selEventRegionDistIdentificationSourceUi = reactive({
-      if(is.null(input$eventIdentificationSourceUi))
-      {
-        temp = selEventRegionDistUi()
-      } else{
-        temp = selEventRegionDistUi() %>%
-          dplyr::filter(event_identification_source %in% input$eventIdentificationSourceUi)
-      }
-      return(temp)
-      
-    }) 
-   
-   # renaming selected data to eventDataDiseaseRegionTimeFilter  
-    eventDataDiseaseRegionTimeFilter = reactive({
-      # req(credentials()$user_auth)
-      selEventRegionDistIdentificationSourceUi()
-    })
-    
-    ## event batplot
+# fiter by district of event
+selEventRegionDistUi = reactive({
+  if(is.null(input$districtEventUi))
+  {
+    temp = selEventRegionUi()
+  } else{
+    temp = selEventRegionUi() %>%
+      dplyr::filter(district_name %in% input$districtEventUi)
+  }
+  return(temp)
+  
+})
+# fitering event by event identification source
+selEventRegionDistIdentificationSourceUi = reactive({
+  if(is.null(input$eventIdentificationSourceUi))
+  {
+    temp = selEventRegionDistUi()
+  } else{
+    temp = selEventRegionDistUi() %>%
+      dplyr::filter(event_identification_source %in% input$eventIdentificationSourceUi)
+  }
+  return(temp)
+  
+}) 
+
+# Authenticating and renaming selected data 
+# This authentication would apply to all previous filters that this object depends on
+eventDataDiseaseRegionTimeAuthFilter = reactive({
+ req(credentials()$user_auth)
+  selEventRegionDistIdentificationSourceUi()
+})
+
+# Adding control based on eventDataAnalysisAction icon on front ui
+# Any output or computation that depend on eventDataDiseaseRegionTimeAuthFilter wouuld run only when input$eventDataAnalysisAction is clicked
+eventDataDiseaseRegionTimeFilter = eventReactive(input$eventDataAnalysisAction, { 
+  eventDataDiseaseRegionTimeAuthFilter() 
+}, ignoreNULL = FALSE)
+# End of event filter
+
+# Begin of analysis
+## event batplot
     output$eventBarplotUi <- renderPlotly({
       temp = eventDataDiseaseRegionTimeFilter( )
       if(input$EventIndicatorTypeUi == "Count"){
@@ -1664,7 +1644,7 @@ shinyServer(
       return(fig)
     })
     
-    # Event dashboard indicators ----
+    # Event dashboard indicators 
     ## Total events
     output$totalEvent <- renderInfoBox({
       infoBox(
@@ -2120,7 +2100,7 @@ shinyServer(
 
 ### event map by administrative area ----
     output$eventMapUi <- renderPlot({
-      # req(credentials()$user_auth)
+       req(credentials()$user_auth)
       map_text_size = input$eventMapTextSizeUi
       if(input$eventMapShapesUi == "Region")
       {
@@ -2147,25 +2127,24 @@ shinyServer(
     #https://github.com/atmajitg/bloodbanks  to get sample app
     # Reactive expression for the data subsetted to what the user selected
     filteredData <- reactive({
-      # req(credentials()$user_auth)
+       req(credentials()$user_auth)
       eventData[eventData$n_ep >= input$range[1] & eventData$n_ep <= input$range[2],]
     })
     
     # This reactive expression represents the palette function,
     # which changes as the user makes selections in UI.
     colorpal <- reactive({
-      # req(credentials()$user_auth)
+       req(credentials()$user_auth)
       colorNumeric(input$colors, eventData$n_ep)
     })
     
     output$map <- renderLeaflet({
-      # req(credentials()$user_auth)
+       req(credentials()$user_auth)
       # Use leaflet() here, and only include aspects of the map that
       # won't need to change dynamically (at least, not unless the
       # entire map is being torn down and recreated).
       leaflet(eventData) %>% addTiles() %>%
         fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat))
-
 
     })
     
