@@ -15,16 +15,15 @@ shinyUI(bootstrapPage(
                        sidebarLayout(
                          #div( id ="Sidebar",
                          sidebarPanel(
-                           
                            # Filter specific to network diagram only
-                           span(tags$i(h6("Filter options for network diagram. Please filter by region, district and click on Visualize network diagram to plot network diagram.")), style="color:#045a8d"),
+                           span(tags$i(h5("Please select filter options and click on the `Apply changes` icon below. Click on `Visualize network diagram` to plot the network diagram.")), style="color:#045a8d"),
                            pickerInput("diseaseUi", "Disease", 
                                        choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
                                                    "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
                                        selected = c("CORONAVIRUS"),
                                        multiple = FALSE),
                            #br(),
-                           dateRangeInput("reportdateUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
+                           dateRangeInput("reportdateUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                                           max = NULL, format = "dd-mm-yyyy", startview = "month",
                                           weekstart = 0, language = "en", separator = " to ", width = NULL,
                                           autoclose = TRUE),  # replace start = Sys.Date()-30 in case you need to show default statistics for last 30 days only
@@ -43,9 +42,6 @@ shinyUI(bootstrapPage(
                           ),
                           # filter by district
                           uiOutput('pickerInputDistrict2'),
-                          # checkboc to plot notwork diagram
-                          checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", TRUE),
-                          
                           # filter by entity type
                           pickerInput(
                             inputId = "contactEntitiyTypeUi", 
@@ -97,11 +93,11 @@ shinyUI(bootstrapPage(
                             selected = NULL,
                             multiple = TRUE
                           ),
-                          
                           checkboxInput("resultingCaseOnlyUi", "Only chains with resulting cases ?", TRUE),
                           checkboxInput("excludeHealthyEventPartUi", "Exclude healthy event participant ?", FALSE),
-                          checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
                           checkboxInput("activeEventsOnlyUi", "Only chains with active events ?", FALSE),
+                          checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
+                          checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", TRUE),
                          selectizeInput(
                            inputId = "visSelectedChainsUi"
                            , label = h5("Source infector node IDs (comma delimited)")
@@ -112,20 +108,25 @@ shinyUI(bootstrapPage(
                          numericInput("nodeDegreeMinUi", h5("Minimum source infector node contact"), value = 1, min = 1),
                         textInput("visSingleNodeUi", label = h5("Only contacts of this ID"),
                                   value = "", placeholder = "Enter uuid of node ..." ),
+                        
+                        # adding action button to apply filters
+                       actionButton(inputId = "transChainAction", label = "Apply changes", icon =  icon("running"),
+                                     class = "btn-primary", width = '68.5%'), #  class = "btn-primary" for normal size icon, ref: https://www.jquery-az.com/boots/demo.php?ex=12.0_1
+                       #span(tags$i(h6("Click this button to update the output displayed on this dashboard each time you modify the filters.")), style="color:#045a8d"),
+                       
                         # add logout button to UI
-                        shinyauthr::logoutUI(id = "logout")
+                         shinyauthr::logoutUI(id = "logout"),
                           #br(),
                           #hr(),
                           #h6("Powered by:"),
                           # tags$img(src = "HZI_Logo.jpg", height = 50, width = 200) #addtiing HZI logo to sidebar panel
-                           ,
                           width = 2),
                          #), #end of div to activate option to dis sidebar panel 
                          
                          mainPanel(
                            width = 10,
                            # add login panel UI function
-                           shinyauthr::loginUI(id = "login", title = "Please authenticate to visualize results. For escaide users, use
+                           shinyauthr::loginUI(id = "login", title = "Please authenticate to begin analysis. For escaide users, use
                                               username: escaide password: TYFBF5-X6GF5W"),
                            # add logout button to UI
                            # div(class = "pull-right", shinyauthr::logoutUI(id = "logout")), # can also be "pull-left" or "pull-middle"
@@ -260,7 +261,10 @@ shinyUI(bootstrapPage(
              tabPanel( "Case data analysis", icon = icon("procedures"),
                        sidebarLayout(
                          sidebarPanel( 
-                           span(tags$i(h6("Visualization options.")), style="color:#045a8d"),
+                           span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
+                           actionButton(inputId = "caseDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+                                        class = "btn-primary", width = '55%'),
+                           hr(),
                            conditionalPanel(condition = "input.tabs1==0",
                                             radioButtons("caseDashboardIndicatorTypeUi","Indicator type",  
                                                          choices = c("Count","Proportion"),
@@ -362,8 +366,9 @@ shinyUI(bootstrapPage(
                                                            the system would then estimate the mean SI and 95% CI. The 95% percentile confidence in interval of the chosen model is 
                                                            estimated by bootstrap. A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
                                                            The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the superspreading parameter (k).")),
-                                                 style="color:#045a8d"),
-                           ), width = 2),
+                                                 style="color:#045a8d")
+                           ), 
+                           width = 2),
                          
                          mainPanel(
                            fluidRow(
@@ -374,7 +379,7 @@ shinyUI(bootstrapPage(
                                                 multiple = FALSE)
                                     ),
                              column(2,
-                                    dateRangeInput("reportdateCaseUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
+                                    dateRangeInput("reportdateCaseUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                                                    max = NULL, format = "dd-mm-yyyy", startview = "month",
                                                    weekstart = 0, language = "en", separator = " to ", width = NULL,
                                                    autoclose = TRUE)
@@ -417,7 +422,6 @@ shinyUI(bootstrapPage(
                                selected = NULL,
                                multiple = TRUE
                              ))
-                          
                            )
                            ,
                            #  br(),
@@ -582,7 +586,7 @@ shinyUI(bootstrapPage(
                                                                        width = 15,
                                                                        # height = 148, # 118, # 142,
                                                                        verbatimTextOutput("si_summaryTable"),
-                                                                       h6(helpText("n_value <= 0: number of records with negative of zero serial interval. This corresponds to assymptomatic transmissiion.
+                                                                       h5(helpText("n_value <= 0: number of records with negative or zero serial interval. This corresponds to assymptomatic transmissiion.
                                                                                     prop_value <= 0: Proportion of  assymptomatic transmissiion pairs"))
                                                                      )
                                                                    )
@@ -610,7 +614,7 @@ shinyUI(bootstrapPage(
                                                                        width = 15,
                                                                       # height = 148, # 118, # 142,
                                                                        verbatimTextOutput("SI_estimate"),
-                                                                      h6(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
+                                                                      h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
                                                                                    For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
                                                                                   to complete."))
                                                                      )
@@ -637,7 +641,7 @@ shinyUI(bootstrapPage(
                                                                        width = 15,
                                                                        #height = 158, # 118, # 142,
                                                                        verbatimTextOutput("k_estimate"),
-                                                                       h6(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
+                                                                       h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
                                                                                    For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
                                                                                   to complete."))
                                                                      )
@@ -689,8 +693,11 @@ shinyUI(bootstrapPage(
 tabPanel( "Event data analysis", icon = icon("procedures"),
           sidebarLayout(position = "left",
             sidebarPanel(width = 2,
-              span(tags$i(h6("Filter options for events:")), style="color:#045a8d"),
-              span(tags$i(h6("The relevant date filter uses  the date of event and if missing, impute with report date.")), style="color:#045a8d"),
+              span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
+              span(tags$i(h5("The relevant date filter uses  the date of event and if missing, impute with report date.")), style="color:#045a8d"),
+              actionButton(inputId = "eventDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+                           class = "btn-primary", width = '55%'),
+              hr(),
             conditionalPanel(condition =  "input.tabEvent == 1",
                 pickerInput(
                   inputId = "eventTableColumnVaribleUi", 
@@ -747,7 +754,7 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                         ),
                         # filter by date of event 
                         column(2, 
-                               dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date()- event_delay, end = Sys.Date(), min = NULL,
+                               dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                                               max = NULL, format = "dd-mm-yyyy", startview = "month",
                                               weekstart = 0, language = "en", separator = " to ", width = NULL,
                                               autoclose = TRUE)
@@ -906,16 +913,20 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
 ##### contat data analysis -----
 tabPanel("Contact data analysis", icon = icon("handshake"),
          sidebarLayout( position = "left",
-                        sidebarPanel(
-                          span(tags$i(h6("Visualization options.")), style="color:#045a8d"),
-                          width = 2,
+                        sidebarPanel( width = 2,
+                          span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
+                          
+                          actionButton(inputId = "contactDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+                                       class = "btn-primary", width = '55%'),
+                          hr(),
+                          
                           pickerInput("diseaseContactUi", "Disease", 
                                       choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
                                                   "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
                                       selected = c("CORONAVIRUS"),
                                       multiple = FALSE),
                           #br(),
-                          dateRangeInput("reportdateContactUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
+                          dateRangeInput("reportdateContactUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                                          max = NULL, format = "dd-mm-yyyy", startview = "month",
                                          weekstart = 0, language = "en", separator = " to ", width = NULL,
                                          autoclose = TRUE),

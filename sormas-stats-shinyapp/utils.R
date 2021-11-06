@@ -102,7 +102,7 @@ plotNet = function(nodeLineList, elist, IgraphLayout=TRUE)
 save(plotNet, file = "./utils/plotNet.R")
 
 ## network indicators computation 
-# computinig vector of person nodeuuid only
+# computinig vector of person_uuis of source nodes only
 compute_person_node_uuid = function(elist)
 {
   # takes elist and return a vector of unique person nodeuuid
@@ -151,23 +151,24 @@ save(prop_cont_ep_person_convertedToCase, file = "prop_cont_ep_person_convertedT
 ## proportion of missing source nodes among nodes 
 # This statistic only consider cases in the network ie not all cases in the system
 prop_missing_source_case_nodes = function(elist, nodeLineList){
-  nodeLineList = nodeLineList %>%
-    dplyr::select(id, group) %>% 
-    dplyr::filter( (id %in% unique(c(elist$from, elist$to))) & (group %in% c("EVENT","PROBABLE", "SUSPECT", "CONFIRMED", "NOT_CLASSIFIED")) )  # retaining only case or event nodes in elist 
-  
-  # extracting contacts with parents nodes
+  nodeLineListSel = nodeLineList %>%
+  dplyr::select(label, group) %>% # retaining infector (case or event)  nodes only in nodeLineList 
+  dplyr::filter( (label %in% unique(c(elist$from_uuid_person, elist$to_uuid_person))) & (group %in% c("EVENT","PROBABLE", "SUSPECT", "CONFIRMED", "NOT_CLASSIFIED")) )  
+  # extracting row (contact) in elist where the infector is not an infectee, ie source not contacts only
+  # keeping only parent case nodes that were not previousely known to be contact nodes,
   elist_case = elist %>%
-    dplyr::filter( !(from %in% to) ) %>%  # keeping only parent case nodes that were not previousely known to be contact nodes,
-    dplyr::distinct_at(., vars(from), .keep_all = TRUE)
-  
-  source_node_data =  elist_case %>%  # data of source nodes id and corresponding uuid
+    dplyr::filter( !(from_uuid_person %in% to_uuid_person) ) %>%  
+    # keeping distict infector nodes only
+    dplyr::distinct_at(., vars(from_uuid_person), .keep_all = TRUE) %>%
+    # keeping only node ids: from and from_uuid_person
     dplyr::mutate(from = from, from_uuid_person = from_uuid_person, .keep = "none")
+  # Computing indicators
   source_node_uuid = sort(elist_case$from_uuid_person) # contains nodes for events and case person in case elist also had event nodes
   sum_missing_source_case_nodes = length(source_node_uuid) 
-  sum_caseEvent_nodes = nrow(nodeLineList)  # computing total case nodes
+  sum_caseEvent_nodes = nrow(nodeLineListSel)  # computing total case nodes
   prop_missing_source_case_nodes = round((sum_missing_source_case_nodes/sum_caseEvent_nodes)*100, 2)
   
-  return(list(source_node_uuid = source_node_uuid, source_node_data=source_node_data,
+  return(list(source_node_uuid = source_node_uuid, source_node_data=elist_case,
               sum_caseEvent_nodes=sum_caseEvent_nodes, 
               prop_missing_source_case_nodes = prop_missing_source_case_nodes, 
               sum_missing_source_case_nodes = sum_missing_source_case_nodes ))
@@ -176,19 +177,26 @@ save(prop_missing_source_case_nodes, file = "./utils/prop_missing_source_case_no
 #prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)
 
 # Converting elist and nodeLinelist to graph object
-convertNetworkToGraph = function(elist, nodeLineList){
+convertNetworkToGraph = convertNetworkToGraph = function(elist, nodeLineList){
+  # filter elist with unique personuuid  and # reneming person_id with from and to.
+  # this order is needed by the method graph_from_data_frame
   elistSel = elist %>%
-    dplyr::distinct_at(., vars(from_uuid_person, to_uuid_person), .keep_all = TRUE) %>% # filter records with unique personuuid
-    dplyr::select(from, to, from_uuid_person, to_uuid_person)
+    dplyr::distinct_at(., vars(from_uuid_person, to_uuid_person), .keep_all = TRUE) %>% 
+    dplyr::mutate(from = from_uuid_person, to = to_uuid_person, .keep = "used") %>% 
+  dplyr::relocate(from, to, from_uuid_person, to_uuid_person)
+  
+  # filter node that also belongs to  selected elist using lebel ie person uuid of the node
+  node_uuid = unique(c(elistSel$from, elistSel$to))
   nodeLineListSelResCase = nodeLineList %>%
-    dplyr::select(id, group, label) 
-  #nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$id %in% unique(c(elistSel$from, elistSel$to)), ]
-  nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$label %in% unique(c(elistSel$from_uuid_person, elistSel$to_uuid_person)), ]
-  # # ordering of colums is to be respected, this is needed to be in a specific order for igraph
-  #  nodeToPlot = nodeLineListSelResCase %>%
-  #   dplyr::relocate(id, group)
-  #   elistPlot = elistSel %>%
-  #   dplyr::relocate(from, to)
+    dplyr::mutate(id = label, group = group, label=label, .keep = "none") %>%
+    dplyr::filter(id %in% node_uuid) %>%
+    dplyr::distinct_at(., vars(id), .keep_all = TRUE)
+  
+  # dropping all nodes in elist that are not in nodeList
+  # this is not needed in case the filter at front end generated a data with such a situation
+  elistSel = elistSel %>%
+    dplyr::filter((from %in% nodeLineListSelResCase$id) &  (to %in% nodeLineListSelResCase$id) )
+  # converting elist and nodeList to graph object
   net <- graph_from_data_frame(d=elistSel, vertices = nodeLineListSelResCase, directed=T)
   return(net)
 }
@@ -201,17 +209,17 @@ save(convertNetworkToGraph, file = "./utils/convertNetworkToGraph.R")
 sourceNodeDegreeCounter <- function(elist, nodeLineList){ 
   # this function depends on two others: convertNetworkToGraph and prop_missing_source_case_nodes
   networkGraphObject = convertNetworkToGraph(elist=elist, nodeLineList=nodeLineList) # converting network to graph object
-  sourceNodeData = prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)$source_node_data # computing source node data: node id and uuis
+  sourceNodeData = prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)$source_node_data # computing source node data: node id and uuid
   
   deg <- degree(graph = networkGraphObject,  mode="all") #   deg <- degree(graph = networkGraphObject(), v = sourceNodes, mode="all")
   ret = data.frame(deg, names(deg))
   rownames(ret) = NULL
-  colnames(ret) = c("deg","from")
-  ret$from = as.numeric(as.character(ret$from))
+  colnames(ret) = c("deg","from_uuid_person")
+  ret$from_uuid_person = as.character(ret$from_uuid_person)
   ## Merging ret with sourceNodeData to keep only sorcse nodes and their degree
   ret = ret %>%
-    dplyr::right_join(., sourceNodeData,  c( "from" = "from"))  %>%
-    distinct_at(., vars(from), .keep_all = TRUE) # source nodes and degree
+    dplyr::right_join(., sourceNodeData,  c( "from_uuid_person" = "from_uuid_person"))  %>%
+    distinct_at(., vars(from_uuid_person), .keep_all = TRUE) # source nodes and degree
   return(ret)
 }
 #sourceNodeDegreeData = sourceNodeDegreeCounter(elist=elist, nodeLineList = nodeLineList)
@@ -764,7 +772,7 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   
   # deleting duplicate nodes at random, this is not the optimum method to do,
   nodeListCaseEvent = dplyr::distinct(nodeListCaseEvent, label,  .keep_all = T)  %>% 
-    dplyr::mutate(., title = label) # labelling nodes
+    dplyr::mutate(., title = label, uuid_node = label) # labelling nodes
   
   # stacking elist
   # ordering  and combining elist and elistEvent  
@@ -783,7 +791,10 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   elistCaseEvent = base::rbind(elist,elistEvent)
   # dropping useless columns form elistCaseEvent that are not needed by the network
   elistCaseEvent = elistCaseEvent  %>%
-    dplyr::select(-c(caseclassification_case))
+    dplyr::select(-c(caseclassification_case)) %>%
+    # adding an elist id by combinig the uuid of the two nodes involved in the contact
+    # This is needed because the id for contacts and event partcipant may be the same since we stacked both tables above
+  dplyr::mutate(id_elist = paste(from_uuid_person, to_uuid_person, sep = "-"), .keep = "all")
   
   ############### determining serial interval  ###########
   # selecting unique case id from contats table
@@ -803,8 +814,6 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   siDat = selCasesSympResultCase[, colnames(selCasesSympResultCase) %in% c("si","reportdatetime", "disease", "region_name","district_name" )]
   siDat = siDat[is.na(siDat$si) == F,]  # dropping missing values
   
-  #return(list(contRegionDist = contRegionDist, nodeLineList = nodeLineList, elist = elist, siDat = siDat, 
-  #            nodeListCaseEvent = nodeListCaseEvent, elistCaseEvent = elistCaseEvent))
   return(list(contRegionDist = contRegionDist, nodeLineList = nodeListCaseEvent, elist = elistCaseEvent, siDat = siDat))
 }
 save(mergingDataFromDB, file = "./utils/mergingDataFromDB.R")
