@@ -2316,7 +2316,7 @@ save(fixBirthDate, file = "fixBirthDate.R")
 # 
 # library(RPostgreSQL)
 # library(DBI)
-# library(lubridate)
+# library(lubridate) 
 # library(dplyr)
 # sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT) # should be replaced when doin gpull request
 #load("fixBirthDate.R") # to load this method
@@ -2342,7 +2342,7 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     person_id AS person_id_contact, reportdatetime AS report_date_contact, creationdate AS creation_date_contact, lastcontactdate AS lastcontact_date_contact,
     contactproximity AS contact_proximity, resultingcase_id, contactstatus, contactclassification
                           FROM public.contact
-                          WHERE deleted = FALSE and caze_id IS NOT NULL and contactclassification = 'CONFIRMED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+                          WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ") 
   contact = dbGetQuery(sormas_db,queryContact)
   
   #loading symptom data
@@ -2352,12 +2352,15 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
                          from public.symptoms"
   )
   
-  # load person data
-  person = dbGetQuery(
-    sormas_db,
-    "SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
-    FROM person"
-  ) 
+  ### loading person data  ###
+  # only persons linkded to cases or contacts, events and ep persons are not included in this export
+  # since the goal is to get pairs on infectors and infectees with corresponding onset dates to be used to estimate serial interval
+  queryPerson <- sprintf("SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
+                        FROM public.person
+                        WHERE id  in (%s)", paste("'", base::unique(c(case$person_id_case, contact$person_id_contact )), "'",collapse=",") ) 
+  person = dbGetQuery(sormas_db, queryPerson)
+  
+  
   
   # load region
   region = dbGetQuery(
@@ -2390,9 +2393,8 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     dplyr::mutate(onset_date = as.Date(format(onset_date, "%Y-%m-%d")))
   
   # fixing birth date of person. 
-  person = fixBirthDate(person) # This method assign the birhdate of the person as first January of the year of birth. Improvement will follow
-  person = person %>%
-    dplyr::select(person_id, sex, date_of_birth) #dropping unused varaibles
+  person = fixBirthDate(person) %>% # This method assign the birhdate of the person as first January of the year of birth. Improvement will follow
+        dplyr::select(person_id, sex, date_of_birth, ) #dropping unused varaibles
   
   ## Obtaining dataset to the exported
   # The primary dataset to begin with is the contact since the goel is to export the contact data
@@ -2799,21 +2801,22 @@ save(serial_interval_mean_CI, file = "./utils/serial_interval_mean_CI.R")
 #serial_interval_mean_CI( infectorInfecteePair = infectorInfecteeData, distr = "Normal", minSi = NULL, maxSi = NULL )
 
 ## offspringDistPlot ------
-offspringDistPlot = function(infectorInfecteePair, niter = 51){ 
+# This method used the output data called infectorInfecteePair
+offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCasesCount = TRUE){ 
   #counting the number of offsprings per infector
   offspring <- infectorInfecteePair %>%
-    dplyr::select(case_id_infector) %>%
-    dplyr::group_by(case_id_infector) %>%
+    dplyr::select(person_id_case_infector) %>%
+    dplyr::group_by(person_id_case_infector) %>%
     dplyr::count() %>%
     dplyr::arrange(desc(n))
   
   # extracting infectee nodes
   infectee <- infectorInfecteePair %>%
-    dplyr::select(case_id_infectee) %>%
-    tidyr::gather() #%>%
+    dplyr::select(person_id_case_infectee) %>%
+    tidyr::gather() 
   #extracting infector nodes
   infector <-  infectorInfecteePair %>%
-    dplyr::select(case_id_infector) %>%
+    dplyr::select(person_id_case_infector) %>%
     tidyr::gather()
   
   # selecting nodes that are linked to both infectors and infectees, thus duplicates
@@ -2823,7 +2826,7 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51){
     dplyr::select(value) %>% # keep only id
     dplyr::distinct()   # selecte distict node id, this should be person id in this case.
   
-  # selecting terminal infectees nodes and sum them. 
+  # selecting terminal infectee nodes and sum them. 
   # This is a subset of termainal doses in the db because of infectorInfecteePair data
   nterminal_infectees <- infectee %>%
     dplyr::select(value) %>%
@@ -2832,8 +2835,12 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51){
     nrow() 
   
   #create vector of complete offspring distribution with terminal cases having zero secondary cases
-  complete_offspringd <- enframe(c(offspring$n, rep(0,nterminal_infectees))) # convert vector to dataframe
-  
+  # else exclude them, NA is not allowed as distribution os secondary cases for terminal nodes
+  if (ZeroForTerminalCasesCount == FALSE){
+    complete_offspringd <- tibble::enframe(c(offspring$n )) # convert vector to dataframe
+  } else{
+    complete_offspringd <- tibble::enframe(c(offspring$n, rep(0,nterminal_infectees))) # convert vector to dataframe
+  }
   #fit negative binomial distribution to the final offspring distribution
   fit <- complete_offspringd %>%
     dplyr::pull(value) %>%
@@ -2857,19 +2864,18 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51){
   }
   offspringDistributionPlot = ggplot(data = complete_offspringd) +
     geom_histogram(aes(x=value, y = ..density..), fill = "#dedede", colour = "Black", binwidth = 1) +
-    geom_point(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), size = 1.5) +
-    stat_smooth(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), method = 'lm', formula = y ~ poly(x, polyDegreePlot), se = FALSE, size = 0.5, colour = 'black') +
+    geom_point(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), size = 1) +
+    stat_smooth(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), method = 'lm', formula = y ~ poly(x, polyDegreePlot), se = FALSE, size = 0.8, colour = 'black') +
     expand_limits(x = 0, y = 0) +
-    scale_x_continuous("Secondary cases per infector", expand = c(0, 0), breaks = seq(min(complete_offspringd$value), max(complete_offspringd$value), by = 5))  +
-    scale_y_continuous("Proportion of onward transmission", limits = c(0,0.7), expand = c(0, 0)) +
+    scale_x_continuous("Secondary cases per infector", expand = c(0, 0), breaks = seq(min(complete_offspringd$value), max(complete_offspringd$value), by = 1))  +
+    scale_y_continuous("Proportion of onward transmission", expand = c(0, 0)) +
     theme_classic() +
-    theme(aspect.ratio = 1)
+    theme(aspect.ratio = 0.7)
   ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot)  # list object: table of estimates and image
   
 }
 save(offspringDistPlot, file = "./utils/offspringDistPlot.R")
 #retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
-
 
 ########## contactDataExport ############
 contactDataExport = function(sormas_db){
