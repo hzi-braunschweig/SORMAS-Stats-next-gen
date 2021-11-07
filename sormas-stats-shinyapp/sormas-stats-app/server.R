@@ -842,28 +842,28 @@ output$plot <- renderPlot({
 
   ## end exportation of data
        
-  #### CASE DATA ANALYSIS  #################
-    # ui element to filter casePersonRegionDist by disdrict based of users selected region 
-    output$pickerInputdistrictCaseUi <- renderUI({
-      if(!is.null(input$regionCaseUi))
-      {
-        temp = casePersonRegionDist %>%
-          dplyr::filter(region_name %in% input$regionCaseUi)  %>%
-          distinct(district_name) %>%
-          .$district_name
-      }else{
-        temp = NULL
-      }
-      pickerInput(inputId = 'districtCaseUi', label = 'District of case',
-                  choices = temp, 
-                  options = list(
-                    `actions-box` = TRUE, 
-                    size = 12
-                  ),
-                  selected = NULL,
-                  multiple = TRUE
-      )
-    })
+#### CASE DATA ANALYSIS  #################
+# ui element to filter casePersonRegionDist by disdrict based of users selected region 
+output$pickerInputdistrictCaseUi <- renderUI({
+  if(!is.null(input$regionCaseUi))
+  {
+    temp = casePersonRegionDist %>%
+      dplyr::filter(region_name %in% input$regionCaseUi)  %>%
+      distinct(district_name) %>%
+      .$district_name
+  }else{
+    temp = NULL
+  }
+  pickerInput(inputId = 'districtCaseUi', label = 'District of case',
+              choices = temp, 
+              options = list(
+                `actions-box` = TRUE, 
+                size = 12
+              ),
+              selected = NULL,
+              multiple = TRUE
+  )
+})
 
     # Filtering casepersonRegion
     casePersonRegionFilter = reactive({
@@ -1350,15 +1350,17 @@ output$plot <- renderPlot({
       }
     })
     
-    # fiter by district of infector_case and serial_interval range
+    # filter by district of infector_case and serial_interval range
     infectorInfecteeDataDiseaseRegionDistSerialIntFilter = reactive({
+      temp = infectorInfecteeDataDiseaseRegionFilter() %>%
+        tidyr::drop_na(serial_interval) # Dropping rows with NA fo SI
       if(is.null(input$districtCaseUi))
       {
-        temp = infectorInfecteeDataDiseaseRegionFilter() %>%
+        temp = temp %>%
           dplyr::filter(., serial_interval %in% c(input$serialIntervalRangeUi[1] : input$serialIntervalRangeUi[2]))  # filter by SI range
       } else{
-        temp = infectorInfecteeDataDiseaseRegionFilter() %>%
-          dplyr::filter(district_infector %in% input$districtCaseUi)%>%
+        temp = temp %>%
+          dplyr::filter(district_infector %in% input$districtCaseUi) %>%
           dplyr::filter(serial_interval %in% c(input$serialIntervalRangeUi[1] : input$serialIntervalRangeUi[2]))  # filter by SI range
       }
       return(temp)
@@ -1383,19 +1385,24 @@ output$plot <- renderPlot({
     }, ignoreNULL = FALSE)
     
     #Preparing data and estimate rt
-    rt_data = reactive({
-      # This is a list of all the data needed to plot estimate rt
+    rt_data = eventReactive(input$caseDataAnalysisAction, {
+      # This is a list of all the data needed to estimate and plot Rt
+      # The two data sets used are the complete case line listing casePersonFilter and SI data from infectorInfecteeDataDiseaseRegionDistFilter
       # preparing si_data data 
-      dateSumCase = aggregate(total ~ reportdate, data = casePersonFilter(), sum, na.rm = F)
+      dateSumCase = aggregate(total ~ reportdate, data = casePersonFilter(), sum, na.rm = F)  
       # completting missing dates
       dateSumCase =  dateSumCase %>%
         dplyr::mutate(Date = as.Date(reportdate)) %>%
         tidyr::complete(Date = seq.Date(min(Date), max(Date), by="day"), fill = list(total = 0))
-      dateSumCase = dateSumCase[,c(1,3)] # dropping old ulcompletted date
+      dateSumCase = dateSumCase[,c(1,3)] # dropping old uncompletted date
       colnames(dateSumCase) = c("dates","I")
-      temp = infectorInfecteeDataDiseaseRegionDistFilter()
       
-      temp = temp[temp$serial_interval > 0 & temp$serial_interval <= input$siUi,]  # deleting pairs with serial_interval < 0 or too large, this is needed for downtream analysis
+      temp = infectorInfecteeDataDiseaseRegionDistFilter()   # data having SI as column
+      
+      # extracting SI values that are not NA, negative and fall in the range specifird by user
+      #temp = temp[((temp$serial_interval > 0) & (temp$serial_interval <= input$siUi)),]  # deleting pairs with serial_interval < 0 or too large, this is needed for downtream analysis
+      temp =  temp %>%
+        dplyr::filter((serial_interval > 0) & (serial_interval <= input$siUi))
       n = nrow(temp)
       si_data = data.frame(matrix(0,n,5))
       si_data[,2] = 1
@@ -1407,7 +1414,7 @@ output$plot <- renderPlot({
       #estimating and computing summary of mean rt
       if(input$rtMethodUi == "Parametric distribution"){
         distVec = c(Gamma = "G", Weibull = "W", Lognormal = "L") 
-        distUI = distVec[names(distVec) == input$si_rt_UI] # getting shrt form of distribution name to be used in modelling
+        distUI = distVec[names(distVec) == input$si_rt_UI] # getting short form of distribution names to be used in modelling
         ret = RtPlot(mean_si = input$mean_siUI, std_si = input$std_siUI, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase,
                           si_data = si_data, rsi = input$rsiUi, dist = distUI, rt_legend = input$rtLegandUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
       }
@@ -1415,7 +1422,8 @@ output$plot <- renderPlot({
         ret =  RtPlot(dateSumCase = dateSumCase, method = "si_from_data",  burnin = 1000,  si_data = si_data, rsi = input$rsiUi, rt_legend = input$rtLegandUi) # method = "parametric_si" or "si_from_data"; rsi = "all", "R", "SI"
       }
       return(ret) # retuned vector of estimated rt and plot of estimated rt
-    }) 
+    }, ignoreNULL = FALSE) 
+    
     #plotting Rt
     output$rtPlot <- renderPlot({
       fig = rt_data()$rt_fig # extracting figure component in rt_data
@@ -1468,12 +1476,16 @@ output$plot <- renderPlot({
     })
     
     # computing mean CI based on user specified distribution
-    output$si_mean_CI_table <- DT::renderDataTable({
-      #temp = infectorInfecteeDataDiseaseRegionDistFilter()
+    # Delay rectivity to comput Meam estimate and 95% CI for serial interval based on distribtion with best fit to the data
+    # bases on serial interval range, distribution, etc
+    si_mean_CI_table_data = eventReactive(input$caseDataAnalysisAction, { 
       ret_mean_CI = serial_interval_mean_CI(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDistFilter(),
-                                            distr = input$siDistMethodUi, input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2]) 
+                                            distr = input$siDistMethodUi, input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2])   
+    }, ignoreNULL = FALSE)
+    
+    output$si_mean_CI_table <- DT::renderDataTable({
       res = DT::datatable(
-        ret_mean_CI,
+        data = si_mean_CI_table_data() ,
         options = list(
           dom = 't',
           fixedColumns = TRUE,
@@ -1482,21 +1494,16 @@ output$plot <- renderPlot({
           searching = FALSE
         ), 
         rownames = FALSE)
-      
-      # }
       return(res)
     })
      
     # fitting user chosen distribution to SI
-    siRetDistributionRange <- reactive({
+    # Any output or computation that depend on siRet (ie data and parameters used to generate siRet) wouuld run only when input$caseDataAnalysisAction is clicked
+    siRet = eventReactive(input$caseDataAnalysisAction, { 
       temp = infectorInfecteeDataDiseaseRegionDistFilter()
       siRet = serialIntervalPlot(infectorInfecteePair = temp,  distr = input$siDistMethodUi, niter = input$niter_SI_UI,
                                  minSi = input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2] ) 
       return(siRet)
-    })
-    # Any output or computation that depend on siRetDistributionRange wouuld run only when input$caseDataAnalysisAction is clicked
-    siRet = eventReactive(input$caseDataAnalysisAction, { 
-      siRetDistributionRange() 
     }, ignoreNULL = FALSE)
     
     # plotting SI
@@ -1512,15 +1519,17 @@ output$plot <- renderPlot({
     })
     
     # Offspring distribution plot, dispersion parameter k
-    kRet <- reactive({
+    # conditioning all estimates from kRet to deleay response based on the caseDataAnalysisAction icon
+    kRet <- eventReactive(input$caseDataAnalysisAction, {
       temp = infectorInfecteeDataDiseaseRegionDistFilter()
-      kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_SI_UI)
+      kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_SI_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI )
       return(kRet)
-    })
+    }, ignoreNULL = FALSE)
+    
     # plotting k
     output$distribution_k_plot <- renderPlot({
       temp = kRet()
-      temp$offspringDistributionPlot
+      plot(temp$offspringDistributionPlot)
     })
     # exporting estimate of k
     output$k_estimate <- renderPrint({

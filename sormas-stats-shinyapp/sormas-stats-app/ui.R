@@ -111,7 +111,7 @@ shinyUI(bootstrapPage(
                         
                         # adding action button to apply filters
                        actionButton(inputId = "transChainAction", label = "Apply changes", icon =  icon("running"),
-                                     class = "btn-primary", width = '68.5%'), #  class = "btn-primary" for normal size icon, ref: https://www.jquery-az.com/boots/demo.php?ex=12.0_1
+                                     class = "btn-primary", width = '65%'), #  class = "btn-primary" for normal size icon, ref: https://www.jquery-az.com/boots/demo.php?ex=12.0_1
                        #span(tags$i(h6("Click this button to update the output displayed on this dashboard each time you modify the filters.")), style="color:#045a8d"),
                        
                         # add logout button to UI
@@ -301,11 +301,6 @@ shinyUI(bootstrapPage(
                                             )
                                             ),
                            conditionalPanel(condition = "input.tabs1==5",
-                                            span(tags$i(h6("Estimation methods for Rt, t = week. We first need to estimate the serial interval (SI) and use it to estimate Rt. 
-                                                           SI can be estimated parametrically by specifying the mean and std for SI OR by using the observed tramission network data.")), style="color:#045a8d"),
-                                            radioButtons("rtMethodUi", h5("SI estimation method"),  choices = c("Parametric distribution","Transmission data"),
-                                                         selected = c("Parametric distribution")),
-                                            
                                            # numericInput("si_rt_UI", label = h5("Specify SI mean"), value = 5.2),
                                             # serial interval distribution to use in estimating Rt
                                             pickerInput(
@@ -322,6 +317,8 @@ shinyUI(bootstrapPage(
                                               selected = "Gamma",
                                               multiple = FALSE
                                             ),
+                                           radioButtons("rtMethodUi", h5("SI estimation method"),  choices = c("Parametric distribution","Transmission data"),
+                                                        selected = c("Parametric distribution")),
                                            # Only show mean and sd when method == parametric
                                            # ref: https://mran.microsoft.com/snapshot/2015-06-24/web/packages/shinyjs/README.html
                                            shinyjs::hidden(
@@ -334,7 +331,16 @@ shinyUI(bootstrapPage(
                                             sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 0, 
                                                         max = 30, step = 1, value = 14),
                                             radioButtons("rsiUi", h5("Ploting parameters"),  choices = c("all","R","SI"), selected = c("R"), inline = TRUE),
-                                            checkboxInput("rtLegandUi", label= h5("Show legend of estimated Rt plot?"), value = FALSE)
+                                            checkboxInput("rtLegandUi", label= h5("Show legend of estimated Rt plot?"), value = FALSE),
+                                           span(tags$i(h5("This section estimates the time dependent reproduction number Rt, t = week. 
+                                            The data used are the case-based incidence data and transmission network data.")), style="color:#045a8d"),
+                                           span(tags$i(h5("We begin by estimating the serial interval (SI) distribution and use it to estimate Rt. 
+                                                           The SI distribution can be estimated parametrically by specifying the mean and std for SI OR by using the tramission network data.")), 
+                                                style="color:#045a8d"),
+                                           
+                                           span(tags$i(h5("For `SI estimation method` using transmission data, the analysis is based on MCMC and may take some time, depenting on your data size.")), 
+                                                style="color:#045a8d")
+                                           
                                             ),
                            conditionalPanel(condition = "input.tabs1==6",
                                             radioButtons("caseByRegionIndicatorTypeUi","Indicator type",  
@@ -359,14 +365,19 @@ shinyUI(bootstrapPage(
                                             ),
                                             #checkboxInput("boot_CI_SI_UI", h5("Compute 95% CI of model parameters by bootstrap ?"), FALSE),
                                             numericInput("niter_SI_UI", label = h5("Specify number of bootstrap iteration"), value = 51),
+                                            checkboxInput("ZeroForTerminalCasesCountUI",  "Impute 0 for offsping distribution of terminal cases ?", FALSE),
                                             checkboxInput("showModelDiagnosticsPanel_SI",  "Show model disgnostics plots", FALSE),
                                             br(),
                                             span(tags$i(h5(" This section estimates the serial interval (SI), and superspreading parameter (k). 
-                                                           Different distributions are fitted to the observed SI. After choosing the distribution with best fit based on smallest AIC, 
-                                                           the system would then estimate the mean SI and 95% CI. The 95% percentile confidence in interval of the chosen model is 
-                                                           estimated by bootstrap. A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
-                                                           The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the superspreading parameter (k).")),
-                                                 style="color:#045a8d")
+                                                           The data used here is the case-based data of infector-infertee pairs extracted from thet transmission network data."
+                                                           )), style="color:#045a8d"),
+                                            span(tags$i(h5("Different distributions are fitted to the observed SI. After choosing the distribution with best fit based on smallest AIC, 
+                                                           the app then estimate the mean SI and 95% CI. The 95% percentile confidence in interval of the chosen model is 
+                                                           estimated by bootstrap." 
+                                                           )), style="color:#045a8d"),
+                                            span(tags$i(h5("A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
+                                                           The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the superspreading parameter (k).
+                                                           ")), style="color:#045a8d")
                            ), 
                            width = 2),
                          
@@ -693,7 +704,7 @@ shinyUI(bootstrapPage(
 tabPanel( "Event data analysis", icon = icon("procedures"),
           sidebarLayout(position = "left",
             sidebarPanel(width = 2,
-              span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
+              span(tags$i(h5("Please select filter options and click on `Apply changes` to run analysis.")), style="color:#045a8d"),
               span(tags$i(h5("The relevant date filter uses  the date of event and if missing, impute with report date.")), style="color:#045a8d"),
               actionButton(inputId = "eventDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
                            class = "btn-primary", width = '55%'),
