@@ -2466,7 +2466,7 @@ fixContactJurisdiction = function(contCase){
   return(res)
 }
 save(fixContactJurisdiction, file = "fixContactJurisdiction.R")
-
+ 
 ###########  serialIntervalPlot ##############
 # infectorInfecteePair = infectorInfecteeData
 serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi = NULL, maxSi = NULL, niter = 51){ 
@@ -2527,7 +2527,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
-    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% percentile CI", "97.5% percentile CI")
+    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
     siEstmate = round(siEstmate, 2)
     
     #Plotting 
@@ -2556,7 +2556,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
-    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% percentile CI", "97.5% percentile CI")
+    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
     siEstmate = round(siEstmate, 2)
     
     #Plotting 
@@ -2585,7 +2585,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
-    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% percentile CI", "97.5% percentile CI")
+    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
     siEstmate = round(siEstmate, 2)
     
     #Plotting 
@@ -2851,9 +2851,9 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCa
   
   # extracting estimates
   rkEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
-  colnames(rkEstmate) = c("Estimate", "Bootstrap median", "2.5% percentile CI", "97.5% percentile CI")
+  colnames(rkEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
   rkEstmate = round(rkEstmate, 2) # mu = nbfit$estimate[[2]] = mean = overall reporoduction number and  size = nbfit$estimate[[1]] = dispersion parameter k 
-  rownames(rkEstmate) = c("Reproduction number (R)" , "Dispersion parameter (k)" )
+  rownames(rkEstmate) = c("R" , "k" )
   #plot offspring distribution with negative binomial parameters
   #Setting polynomial degree
   polyDegree = length(unique(complete_offspringd$value))
