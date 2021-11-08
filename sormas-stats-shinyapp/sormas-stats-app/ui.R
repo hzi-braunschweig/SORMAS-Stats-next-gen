@@ -126,8 +126,8 @@ shinyUI(bootstrapPage(
                          mainPanel(
                            width = 10,
                            # add login panel UI function
-                           shinyauthr::loginUI(id = "login", title = "Please authenticate to begin analysis. For escaide users, use
-                                              username: escaide password: TYFBF5-X6GF5W"),
+                           shinyauthr::loginUI(id = "login", title = "Please authenticate to begin analysis. For Demo users, use
+                                              username: Demo password: TYFBF5-X6GF5W"),
                            # add logout button to UI
                            # div(class = "pull-right", shinyauthr::logoutUI(id = "logout")), # can also be "pull-left" or "pull-middle"
                            
