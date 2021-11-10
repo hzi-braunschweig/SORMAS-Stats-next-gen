@@ -2716,17 +2716,21 @@ serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = N
   # minSi and maxSi are the min and max user specified values of si to be used for the analysis
   # fiting Normal, Weibull, Gamma, Lognormal distributions to serial intervals 
   
-  # filtering based on user specified min and max values of serial interval.
+  # dropping rows with missing values for serial interval. This can heppen when one of the pairs has a missing onset date
+  selData = infectorInfecteePair[is.na(infectorInfecteePair$serial_interval) == FALSE, ] # dplyr::filter(serial_interval != 'NA')
+  
+  # filtering selData based on user specified min and max values of serial interval.
+  # return a vextor of SI values called x
   if(any(is.null(c(minSi, maxSi)))) {
-    minSi = min(infectorInfecteePair$serial_interval, na.rm = T)
-    maxSi = max(infectorInfecteePair$serial_interval, na.rm = T)
+    minSi = min(selData$serial_interval, na.rm = T)
+    maxSi = max(selData$serial_interval, na.rm = T)
   }
   siVector = c(minSi: maxSi)
-  selData <- infectorInfecteePair %>%
-    dplyr::filter(serial_interval != 'NA' & serial_interval %in% siVector)
+  x <- selData %>%
+    dplyr::filter(serial_interval %in% siVector) %>% 
+    pull(serial_interval) # or .$serial_interval
   
-  x = selData$serial_interval
-  x = x[is.na(x) == FALSE]  # dropping NA
+  # Fitting user specified distribution to SI
   ## normal distribution
   if(distr == "Normal"){
     fit  = fitdistrplus::fitdist(data = x, distr = 'norm')  # fit a normal distribution to the data
@@ -2742,6 +2746,7 @@ serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = N
   }
   
   ## log normal
+  # ref: https://stats.stackexchange.com/questions/469311/how-to-calculate-mean-and-sd-of-lognormal-distribution-based-on-meanlog-an
   if(distr == "Lognormal"){
     fit  = x[x > 0]  %>%  # lnorm can not be used to describe a random varaible with negative or 0 values
       fitdistrplus::fitdist(data = ., distr = "lnorm")  
@@ -2750,8 +2755,7 @@ serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = N
     mu = fit$estimate[1] # mean in log scale ie meanlog
     sigma = fit$estimate[2]  # # sd in log scale ie sdlog
     mean_si = exp(mu + sigma^2/2 ) # mean = exp (mu + sigma^2/2)
-    Varaince_mean_si = (exp(sigma^2) -1 ) * exp(2*mu + sigma^2) # varaince  = (exp(sigma^2) -1) * ( exp(2*mu+sigma^2))
-    sd_mean = sqrt(Varaince_mean_si)
+    sd_mean = (exp(mu + 1/2*sigma^2)) * sqrt( exp(sigma^2)-1) # OR  sqrt(varaince)  = sqrt((exp(sigma^2) -1) * ( exp(2*mu+sigma^2)))
     # 95% CI
     ll = mean_si - 1.96*sd_mean/sqrt(n)
     ul = mean_si + 1.96*sd_mean/sqrt(n) # this can also be computed using  confint(fit, level = 0.95)
@@ -2802,6 +2806,7 @@ save(serial_interval_mean_CI, file = "./utils/serial_interval_mean_CI.R")
 
 ## offspringDistPlot ------
 # This method used the output data called infectorInfecteePair
+# This method fit a NB dist to the offsprint distr data and estimate R and k
 offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCasesCount = TRUE){ 
   #counting the number of offsprings per infector
   offspring <- infectorInfecteePair %>%
@@ -2844,16 +2849,16 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCa
   #fit negative binomial distribution to the final offspring distribution
   fit <- complete_offspringd %>%
     dplyr::pull(value) %>%
-    fitdistrplus::fitdist(., distr = 'nbinom')
-  
+    fitdistrplus::fitdist(., distr = "nbinom", method = "mle")
+  # fit$estimate[[1]] = k or overdispersion parameter and fit$estimate[[1]]  = mu/ mean/ R
   # Estimating CI by bootstrap method 
   fit_boot <- summary(fitdistrplus::bootdist(fit, niter = niter))  
   
   # extracting estimates
   rkEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
   colnames(rkEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
-  rkEstmate = round(rkEstmate, 2) # mu = nbfit$estimate[[2]] = mean = overall reporoduction number and  size = nbfit$estimate[[1]] = dispersion parameter k 
-  rownames(rkEstmate) = c("R" , "k" )
+  rkEstmate = round(rkEstmate, 3) # mu = nbfit$estimate[[2]] = mean = overall reporoduction number and  size = nbfit$estimate[[1]] = dispersion parameter k 
+  rownames(rkEstmate) = c("k" , "R" )
   #plot offspring distribution with negative binomial parameters
   #Setting polynomial degree
   polyDegree = length(unique(complete_offspringd$value))
