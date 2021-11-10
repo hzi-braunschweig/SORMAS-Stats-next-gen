@@ -365,7 +365,7 @@ shinyUI(bootstrapPage(
                                             ),
                                             #checkboxInput("boot_CI_SI_UI", h5("Compute 95% CI of model parameters by bootstrap ?"), FALSE),
                                             numericInput("niter_SI_UI", label = h5("Specify number of bootstrap iteration"), value = 51),
-                                            checkboxInput("ZeroForTerminalCasesCountUI",  "Impute 0 for offsping distribution of terminal cases ?", FALSE),
+                                            checkboxInput("ZeroForTerminalCasesCountUI",  "Impute 0 for offsping distribution of terminal cases ?", TRUE),
                                             checkboxInput("showModelDiagnosticsPanel_SI",  "Show model disgnostics plots", FALSE),
                                             br(),
                                             span(tags$i(h5(" This section estimates the serial interval (SI), and superspreading parameter (k). 
@@ -643,7 +643,7 @@ shinyUI(bootstrapPage(
                                                                    fluidRow(
                                                                      width = 12,
                                                                      box(
-                                                                       h4(helpText("Estimates of reproduction number and dispersion parameter using NB distribution")),
+                                                                       h4(helpText("Estimates of reproduction number (R) and dispersion parameter (k) using NB distribution")),
                                                                        #footer = "Node degree",
                                                                        status ="primary", #  "success", # or "warning", 
                                                                        solidHeader = FALSE,
