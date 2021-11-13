@@ -2876,11 +2876,12 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCa
     scale_y_continuous("Proportion of onward transmission", expand = c(0, 0)) +
     theme_classic() +
     theme(aspect.ratio = 0.7)
+
   ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot)  # list object: table of estimates and image
   
 }
 save(offspringDistPlot, file = "./utils/offspringDistPlot.R")
-#retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
+retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
 
 ########## contactDataExport ############
 contactDataExport = function(sormas_db){

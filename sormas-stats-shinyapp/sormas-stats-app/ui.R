@@ -624,7 +624,7 @@ shinyUI(bootstrapPage(
                                                                        collapsed = FALSE,
                                                                        width = 15,
                                                                       # height = 148, # 118, # 142,
-                                                                       verbatimTextOutput("SI_estimate"),
+                                                                      div( DT::dataTableOutput("SI_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
                                                                       h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
                                                                                    For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
                                                                                   to complete."))
@@ -651,7 +651,7 @@ shinyUI(bootstrapPage(
                                                                        collapsed = FALSE,
                                                                        width = 15,
                                                                        #height = 158, # 118, # 142,
-                                                                       verbatimTextOutput("k_estimate"),
+                                                                       div( DT::dataTableOutput("k_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
                                                                        h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
                                                                                    For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
                                                                                   to complete."))
