@@ -3,7 +3,7 @@
 #####  server function #######
 shinyServer(
   function(input, output,session) { 
-    
+
     #################################################
     # Call login module and supplying it with the user dataframe, 
     # username and password calls and reactive trigger
@@ -1513,13 +1513,24 @@ output$pickerInputdistrictCaseUi <- renderUI({
     })
     
     # exporting estimates of SI
-    output$SI_estimate <- renderPrint({
+    output$SI_estimate_table <- DT::renderDataTable({
       temp = siRet()
-      temp$siEstmate
+      res = DT::datatable(
+        data =  temp$siEstmate,
+        options = list(
+          dom = 't',
+          fixedColumns = TRUE,
+          #autoWidth = TRUE,
+          columnDefs = list(list(className = 'dt-center', targets = "_all")),
+          searching = FALSE
+        ), 
+        rownames = TRUE)
+      return(res)
     })
     
     # Offspring distribution plot, dispersion parameter k
     # conditioning all estimates from kRet to deleay response based on the caseDataAnalysisAction icon
+    
     kRet <- eventReactive(input$caseDataAnalysisAction, {
       temp = infectorInfecteeDataDiseaseRegionDistFilter()
       kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_SI_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI )
@@ -1532,9 +1543,19 @@ output$pickerInputdistrictCaseUi <- renderUI({
       plot(temp$offspringDistributionPlot)
     })
     # exporting estimate of k
-    output$k_estimate <- renderPrint({
+    output$k_estimate_table <- DT::renderDataTable({
       temp = kRet()
-      temp$rkEstmate
+      res = DT::datatable(
+        data =  temp$rkEstmate,
+          options = list(
+          dom = 't',
+          fixedColumns = TRUE,
+          #autoWidth = TRUE,
+          columnDefs = list(list(className = 'dt-center', targets = "_all")),
+          searching = FALSE
+        ), 
+        rownames = TRUE)
+      return(res)
     })
 ## end of case data analysis ##
     
@@ -2186,8 +2207,8 @@ eventDataDiseaseRegionTimeFilter = eventReactive(input$eventDataAnalysisAction, 
       }
     })
     
-# End of event analysis    
-    
+# End of event analysis 
+   
 # Model specifocation----
     output$model_specificationUI <- renderUI(
       includeMarkdown(paste0("Documentation/model_specification_", input$language,".md"))
