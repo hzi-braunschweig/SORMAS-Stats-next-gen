@@ -2208,7 +2208,28 @@ RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSu
   rt_mean = res$R$`Mean(R)` # vector containing average of estimated rt values
   return(list(rt_fig = rt_fig, rt_mean = rt_mean))
 }
-#test_res = RtPlot(mean_si = 5, std_si = 2.5, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase, si_data = si_data,  dist = distUI)
+# test run
+casePersontest = casePerson
+casePersontest$total = 1
+dateSumCase = stats::aggregate(formula = total ~  reportdate, data = casePersontest, FUN = sum, na.rm = T)
+dateSumCase =  dateSumCase %>%
+  dplyr::mutate(Date = as.Date(reportdate)) %>%
+  tidyr::complete(Date = seq.Date(min(Date), max(Date), by="day"), fill = list(total = 0))
+dateSumCase = dateSumCase[,c(1,3)] # dropping old uncompletted date
+colnames(dateSumCase) = c("dates","I")
+
+temp = infectorInfecteeData  # data having SI as column
+# extracting SI values that are not NA, negative and fall in the range specifird by user
+temp =  temp %>%
+  dplyr::filter((serial_interval > 0) & (serial_interval <= input$siUi))
+n = nrow(temp)
+si_data = data.frame(matrix(0,n,5))
+si_data[,2] = 1
+si_data[,3] = c(temp$serial_interval -1)
+si_data[,4] = temp$serial_interval
+colnames(si_data) =  c("EL", "ER", "SL", "SR", "type")
+si_data[,-5] = apply(si_data[,-5], 2, as.integer) # all columns except type should be integer
+test_res = RtPlot(mean_si = 5, std_si = 2.5, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase, si_data = si_data,  dist = "G")
 save(RtPlot, file = "./utils/RtPlot.R")
 
 ##### Table of case count by regions and other case variables: classification, outcome, quarantine, etc
@@ -2881,7 +2902,7 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCa
   
 }
 save(offspringDistPlot, file = "./utils/offspringDistPlot.R")
-retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
+# retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
 
 ########## contactDataExport ############
 contactDataExport = function(sormas_db){
