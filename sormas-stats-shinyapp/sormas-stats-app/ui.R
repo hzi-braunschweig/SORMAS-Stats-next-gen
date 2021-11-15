@@ -363,22 +363,28 @@ shinyUI(bootstrapPage(
                                                 maxOptions = 2
                                               )
                                             ),
-                                            #checkboxInput("boot_CI_SI_UI", h5("Compute 95% CI of model parameters by bootstrap ?"), FALSE),
-                                            numericInput("niter_SI_UI", label = h5("Specify number of bootstrap iteration"), value = 51),
-                                            checkboxInput("ZeroForTerminalCasesCountUI",  "Impute 0 for offsping distribution of terminal cases ?", TRUE),
+                                            numericInput("niter_SI_UI", label = h5("Specify number of bootstrap iteration"), value = 100),
                                             checkboxInput("showModelDiagnosticsPanel_SI",  "Show model disgnostics plots", FALSE),
                                             br(),
-                                            span(tags$i(h5(" This section estimates the serial interval (SI), and superspreading parameter (k). 
-                                                           The data used here is the case-based data of infector-infertee pairs extracted from thet transmission network data."
+                                            span(tags$i(h5(" This section estimates the serial interval (SI). The data used here is the case-based data of infector-infertee 
+                                                           pairs extracted from thet transmission network data."
                                                            )), style="color:#045a8d"),
                                             span(tags$i(h5("Different distributions are fitted to the observed SI. After choosing the distribution with best fit based on smallest AIC, 
-                                                           the app then estimate the mean SI and 95% CI. The 95% percentile confidence in interval of the chosen model is 
-                                                           estimated by bootstrap." 
-                                                           )), style="color:#045a8d"),
-                                            span(tags$i(h5("A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
-                                                           The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the superspreading parameter (k).
-                                                           ")), style="color:#045a8d")
+                                                           the app then estimate the mean SI and 95% CI using bootstrap." 
+                                                           )), style="color:#045a8d")
                            ), 
+                           conditionalPanel(condition = "input.tabs1==8",
+                                            numericInput("niter_RtK_UI", label = h5("Specify number of bootstrap iteration"), value = 100),
+                                            checkboxInput("ZeroForTerminalCasesCountUI",  "Impute 0 for offsping distribution of terminal cases ?", TRUE),
+                                            br(),
+                                            span(tags$i(h5("This section estimates the superspreading parameter (k) and effective reproduction number (R). 
+                                                           The data used here is the case-based infector-infertee pairs extracted from thet transmission network data."
+                                            )), style="color:#045a8d"),
+                                            span(tags$i(h5("A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
+                                                           The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the 
+                                                           superspreading parameter (k). The 95% percentile confidence interval is estimated by bootstrap.
+                                                           ")), style="color:#045a8d")
+                           ),
                            width = 2),
                          
                          mainPanel(
@@ -575,20 +581,26 @@ shinyUI(bootstrapPage(
                                                           ),
                                                           column(6,
                                                                  wellPanel(
-                                                                    h4(helpText("Meam estimate and 95% CI for serial interval based on distribtion with best fit to the data" )),
-                                                                   # div( DT::dataTableOutput("si_mean_CI_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
-                                                                   fluidRow(
-                                                                     width = 12,
-                                                                     div( DT::dataTableOutput("si_mean_CI_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
-                                                                   ),
-                                                                   br(),
-                                                                   hr(),
-                                                                   hr(),
-                                                                   
                                                                    fluidRow(
                                                                      width = 12,
                                                                      box(
                                                                        h4(helpText("Summary statistics for observed serial interval")),
+                                                                       #footer = "Node degree",
+                                                                       status ="primary", #  "success", # or "warning",
+                                                                       solidHeader = FALSE,
+                                                                       collapsible = TRUE,
+                                                                       collapsed = FALSE,
+                                                                       width = 15,
+                                                                       # height = 148, # 118, # 142,
+                                                                       # verbatimTextOutput("si_summaryTable"),
+                                                                       div(DT::dataTableOutput("si_summaryTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
+                                                                       h5(helpText("n_value <= 0: number of records with negative or zero serial interval. This corresponds to assymptomatic transmissiion."))
+                                                                     )
+                                                                   ),
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     box(
+                                                                       h4(helpText("Parameter estimate and 95% CI of distribtion with best fit to the data")),
                                                                        #footer = "Node degree",
                                                                        status ="primary", #  "success", # or "warning", 
                                                                        solidHeader = FALSE,
@@ -596,72 +608,89 @@ shinyUI(bootstrapPage(
                                                                        collapsed = FALSE,
                                                                        width = 15,
                                                                        # height = 148, # 118, # 142,
-                                                                       verbatimTextOutput("si_summaryTable"),
-                                                                       h5(helpText("n_value <= 0: number of records with negative or zero serial interval. This corresponds to assymptomatic transmissiion.
-                                                                                    prop_value <= 0: Proportion of  assymptomatic transmissiion pairs"))
+                                                                       div( DT::dataTableOutput("SI_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
+                                                                       h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
+                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
+                                                                                  to complete."))
+                                                                     )
+                                                                   ),
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     box(
+                                                                       h4(helpText("Estimate of mean serial interval")),
+                                                                       #footer = "Node degree",
+                                                                       status ="primary", #  "success", # or "warning",
+                                                                       solidHeader = FALSE,
+                                                                       collapsible = TRUE,
+                                                                       collapsed = FALSE,
+                                                                       width = 15,
+                                                                       # height = 148, # 118, # 142,
+                                                                       # verbatimTextOutput("si_summaryTable"),
+                                                                       div( DT::dataTableOutput("si_mean_CI_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
                                                                      )
                                                                    )
                                                                    )
                                                           )
                                                 ), ## end of flud row
                                                 fluidRow( width = 10,
-                                                          column(6,
+                                                          column(12,
                                                                  wellPanel(
-                                                                   h4(helpText("Serial interval and fitted distribtion")),
+                                                                   h4(helpText("Serial interval and fitted distribtion for model with best fit to the data")),
                                                                    fluidRow(
                                                                      width = 12,
                                                                      plotOutput("distribution_SI_plot", width = "100%", height = "60vh")
                                                                    )
-                                                                   ,
-                                                                   fluidRow(
-                                                                     width = 12,
-                                                                     box(
-                                                                       h4(helpText("Estimates of serial interval")),
-                                                                       #footer = "Node degree",
-                                                                       status ="primary", #  "success", # or "warning", 
-                                                                       solidHeader = FALSE,
-                                                                       collapsible = TRUE,
-                                                                       collapsed = FALSE,
-                                                                       width = 15,
-                                                                      # height = 148, # 118, # 142,
-                                                                      div( DT::dataTableOutput("SI_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
-                                                                      h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
-                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
-                                                                                  to complete."))
-                                                                     )
-                                                                   )
-                                                                 )
-                                                          )
-                                                          ,
-                                                          column(6,
-                                                                 wellPanel(
-                                                                   h4(helpText("Distributions of number of infectee per infector (offsping distribution)")),
-                                                                   fluidRow(
-                                                                     width = 12,
-                                                                     plotOutput("distribution_k_plot", width = "100%", height = "60vh")
-                                                                   ),
-                                                                   fluidRow(
-                                                                     width = 12,
-                                                                     box(
-                                                                       h4(helpText("Estimates of reproduction number (R) and dispersion parameter (k) using NB distribution")),
-                                                                       #footer = "Node degree",
-                                                                       status ="primary", #  "success", # or "warning", 
-                                                                       solidHeader = FALSE,
-                                                                       collapsible = TRUE,
-                                                                       collapsed = FALSE,
-                                                                       width = 15,
-                                                                       #height = 158, # 118, # 142,
-                                                                       div( DT::dataTableOutput("k_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
-                                                                       h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
-                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
-                                                                                  to complete."))
-                                                                     )
-                                                                   )
                                                                  )
                                                           )
                                                 ) ## end of flud row
-                                     )
-                                     ,
+                                     ),
+                                     tabPanel("Dispersion analysis", value = 8,  
+                                              fluidRow( width = 10,                                                        
+                                                        column(6,
+                                                               wellPanel(
+                                                                 h4(helpText("Distributions of number of infectee per infector (offsping distribution)")),
+                                                                 fluidRow(
+                                                                   width = 12,
+                                                                   plotOutput("distribution_k_plot", width = "100%", height = "60vh")
+                                                                 )
+                                                               )
+                                                               ),
+                                                        column(6,
+                                                               wellPanel(
+                                                                 fluidRow(
+                                                                   width = 12,
+                                                                   box(
+                                                                     h4(helpText("Summary statistics for observed offsring distribution")),
+                                                                     #footer = "Node degree",
+                                                                     status ="primary", #  "success", # or "warning", 
+                                                                     solidHeader = FALSE,
+                                                                     collapsible = TRUE,
+                                                                     collapsed = FALSE,
+                                                                     width = 15,
+                                                                     div( DT::dataTableOutput("nodedegree_summaryTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
+                                                                   )
+                                                                 ),
+                                                                 fluidRow(
+                                                                   width = 12,
+                                                                   box(
+                                                                     h4(helpText("Estimates of reproduction number (R) and dispersion parameter (k) using NB distribution")),
+                                                                     #footer = "Node degree",
+                                                                     status ="primary", #  "success", # or "warning", 
+                                                                     solidHeader = FALSE,
+                                                                     collapsible = TRUE,
+                                                                     collapsed = FALSE,
+                                                                     width = 15,
+                                                                     #height = 158, # 118, # 142,
+                                                                     div( DT::dataTableOutput("k_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
+                                                                     h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
+                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
+                                                                                  to complete."))
+                                                                     )
+                                                                 )
+                                                               )
+                                                        )
+                                              ) ## end of flud row
+                                     ),
                                      tabPanel("Reproduction number (Rt)", value = 5, 
                                               wellPanel(
                                                 h4(helpText("Estimate of time dependent reproduction number Rt")) ,
@@ -685,7 +714,6 @@ shinyUI(bootstrapPage(
                                                     div( DT::dataTableOutput("rtSummary_table", width = "50%", height = "auto"), style = "font-size: 100%; width: 100%"),
                                                   )
                                                 )
-                                                
                                               )
                                               )
                                      , 
@@ -694,7 +722,6 @@ shinyUI(bootstrapPage(
                                                        verbatimTextOutput("casebyRegionVarTable"),
                                                        downloadButton("caseRegionVarExpCsv", "Download as CSV"),tags$br(),tags$br(),
                                                        "Each row in this data a case. The data was obtained by merging case, person, region and district tables")
-                            
                            ),
                            width = 10)                       
                        )
@@ -1085,7 +1112,7 @@ fluidRow(
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
-         p(tags$em("Last updated: October 31, 2021"), style = 'font-size:75%'))
+         p(tags$em("Last updated: November 15, 2021"), style = 'font-size:75%'))
   ,
   column(3, align = "right",
          p('Powered by:', tags$a(href = " ", target = '_blank'), '', style = "font-size: 85%"),

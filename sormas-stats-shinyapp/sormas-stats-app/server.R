@@ -1464,9 +1464,19 @@ output$pickerInputdistrictCaseUi <- renderUI({
     })
     
     # summary statistics for SI
-    output$si_summaryTable <- renderPrint({
+    output$si_summaryTable <- DT::renderDataTable({
       temp = summary_statistics(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
-      print(temp, row.names = FALSE) 
+      res = DT::datatable(
+        data = temp,
+        options = list(
+          dom = 't',
+          fixedColumns = TRUE,
+          #autoWidth = TRUE,
+          columnDefs = list(list(className = 'dt-center', targets = "_all")),
+          searching = FALSE
+        ), 
+        rownames = FALSE)
+      return(res)
     })
     
     # plotting distributions for model selection
@@ -1544,11 +1554,31 @@ output$pickerInputdistrictCaseUi <- renderUI({
     # conditioning all estimates from kRet to deleay response based on the caseDataAnalysisAction icon
     # Since infectore-infectee pairs with NA for serial interval can be included in offspring analysis
     # we do not need to use infectorInfecteeDataDiseaseRegionDistSerialIntFilter() but to use infectorInfecteeDataDiseaseRegionDist()
-    offspringAnalysisData = 
     
+    # summary statistics for offsring distribtion
+    output$nodedegree_summaryTable <- DT::renderDataTable({
+      # compute node degree
+      temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(), 
+                                      niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI)
+      # compute summary and send to ui
+      temp = summary_statistics(x = temp$offspringDegree )
+      res = DT::datatable(
+        data = temp,
+        options = list(
+          dom = 't',
+          fixedColumns = TRUE,
+          #autoWidth = TRUE,
+          columnDefs = list(list(className = 'dt-center', targets = "_all")),
+          searching = FALSE
+        ), 
+        rownames = FALSE)
+      return(res)
+    })
+    
+    # Estimation of dispersion parameter k and R
     kRet <- eventReactive(input$caseDataAnalysisAction, {
       temp =  infectorInfecteeDataDiseaseRegionDist() # infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
-      kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_SI_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI )
+      kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI )
       return(kRet)
     }, ignoreNULL = FALSE)
     
@@ -1599,7 +1629,7 @@ output$pickerInputdistrictEventUi <- renderUI({
               multiple = TRUE
   )
 })
-
+ 
 # filter eventData by disease, region, and time
 selEventRegionUi = reactive({
   if(!is.null(input$regionEventUi)){
