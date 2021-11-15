@@ -2720,14 +2720,14 @@ summary_statistics = function(x){
   # compute nunber and proportion of records <=0
   n = length(x)
   n_asymp_trans = length(x[x<=0])
-  p_asymp_trans = round(n_asymp_trans/n*100, 2)
-  ret = data.frame(n, summary_temp, n_asymp_trans, p_asymp_trans)
+  ret = data.frame(n, summary_temp, n_asymp_trans)
   ret = ret %>%
-    dplyr::rename(N = n, Minimum = Min., Maximum = Max.,  Quart.1 = X1st.Qu., Quart.3 = X3rd.Qu., "n_value <= 0" = n_asymp_trans, "prop_value <= 0" = p_asymp_trans)
+    dplyr::rename(N = n, Minimum = Min., Maximum = Max.,  Quart.1 = X1st.Qu., Quart.3 = X3rd.Qu., "n_value <= 0" = n_asymp_trans)
+  rownames(ret) = c("")
   return(ret)
 }
 save(summary_statistics, file = "./utils/summary_statistics.R")
-#ben = summary_statistics(x = serial_interval)
+#ben = summary_statistics(x = infectorInfecteeData$serial_interval)
 
 #fit distributions specofied by user to serial intervals and compute CI for sample mean
 serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = NULL, maxSi = NULL){ 
@@ -2898,7 +2898,8 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCa
     theme_classic() +
     theme(aspect.ratio = 0.7)
 
-  ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot)  # list object: table of estimates and image
+  offspringDegree = complete_offspringd$value
+  ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot, offspringDegree = offspringDegree)  # list object: table of estimates and image
   
 }
 save(offspringDistPlot, file = "./utils/offspringDistPlot.R")
