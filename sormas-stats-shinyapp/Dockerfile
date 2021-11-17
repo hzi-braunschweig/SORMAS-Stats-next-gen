@@ -1,5 +1,5 @@
 # Base image https://hub.docker.com/u/rocker/
-FROM rocker/shiny:3.6.3
+FROM rocker/shiny:latest 
 
 # system libraries of general use
 ## install debian packages
