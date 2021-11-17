@@ -3,7 +3,7 @@ FROM rocker/shiny:3.6.3
 # ---------------------------------------------
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 #code with default packahes from https://hub.docker.com/r/rocker/shiny-verse/dockerfile
-RUN apt-get update -qq && apt-get upgrade -y && apt-get -y --no-install-recommends install \
+RUN apt-get --allow-releaseinfo-change update -qq && apt-get upgrade -y && apt-get -y --no-install-recommends install \
   libmysqlclient-dev \
   default-libmysqlclient-dev \
   libxml2-dev \
