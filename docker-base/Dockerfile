@@ -1,6 +1,6 @@
 # check available R versions here: <https://hub.docker.com/r/rocker/shiny/tags>
 #FROM rocker/shiny:3.6.3
-FROM rocker/shiny:latest
+FROM rocker/shiny:4.1.2
 # ---------------------------------------------
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 #code with default packahes from https://hub.docker.com/r/rocker/shiny-verse/dockerfile
