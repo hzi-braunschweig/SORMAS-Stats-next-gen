@@ -301,7 +301,6 @@ shinyUI(bootstrapPage(
                                             )
                                             ),
                            conditionalPanel(condition = "input.tabs1==5",
-                                           # numericInput("si_rt_UI", label = h5("Specify SI mean"), value = 5.2),
                                             # serial interval distribution to use in estimating Rt
                                             pickerInput(
                                               inputId = "si_rt_UI",
@@ -323,12 +322,12 @@ shinyUI(bootstrapPage(
                                            # ref: https://mran.microsoft.com/snapshot/2015-06-24/web/packages/shinyjs/README.html
                                            shinyjs::hidden(
                                              div(id = "showMeanSdSIUI",
-                                                 numericInput("mean_siUI", label = h5("Specify SI mean"), value = 5.2),
-                                                 numericInput("std_siUI", label = h5("Specify SI Std Dev"), value = 2.3 )
+                                                 numericInput("mean_siUI", label = h5("Specify SI mean"), value = 5.2, min = 1), # Mean SI must be > 1 for parametric distribution
+                                                 numericInput("std_siUI", label = h5("Specify SI Std Dev"), value = 2.3, min =0.01 )
                                              )
                                            ), 
                                            
-                                            sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 0, 
+                                            sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 1, 
                                                         max = 30, step = 1, value = 14),
                                             radioButtons("rsiUi", h5("Ploting parameters"),  choices = c("all","R","SI"), selected = c("R"), inline = TRUE),
                                             checkboxInput("rtLegandUi", label= h5("Show legend of estimated Rt plot?"), value = FALSE),
@@ -338,7 +337,7 @@ shinyUI(bootstrapPage(
                                                            The SI distribution can be estimated parametrically by specifying the mean and std for SI OR by using the tramission network data.")), 
                                                 style="color:#045a8d"),
                                            
-                                           span(tags$i(h5("For `SI estimation method` using transmission data, the analysis is based on MCMC and may take some time, depenting on your data size.")), 
+                                           span(tags$i(h5("For `SI estimation method` using transmission data, the analysis is based on 1500 MCMC iterations and may take some time, depenting on your data size.")), 
                                                 style="color:#045a8d")
                                            
                                             ),
@@ -349,7 +348,7 @@ shinyUI(bootstrapPage(
                                             ),
                            conditionalPanel(condition = "input.tabs1==7",
                                             sliderInput("serialIntervalRangeUi", label = h5("Choose the serial interval range"), min = -30, 
-                                                        max = 50, step = 1, value = c(0, 30)),
+                                                        max = 50, step = 1, value = c(1, 30)),
                                             pickerInput(
                                               inputId = "siDistMethodUi", 
                                               label = h5('Choose distribution with best fit'),
@@ -921,9 +920,8 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                                           div(plotlyOutput("barChartEventUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
                                         )              
                                  )
-                       ), ## end of flud row
-                       )
-              ,
+                       ) ## end of flud row
+                       ),
               # tabPanel("Event time series" ), # to be added later
               tabPanel("Shapfile map", value = 3,
                        plotOutput("eventMapUi", width = "100%", height = "95vh")),
@@ -937,11 +935,11 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                                      selectInput("colors", "Choose color Scheme to plot entities",
                                                  rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
                                      ),
-                                     checkboxInput("legend", "Show legend", TRUE)
-                       )
+                                     checkboxInput("legend", "Show legend", TRUE)                       
+                                     )
                     )
              # tabPanel("Event management" ) # to be added
-            ),
+            ) #,
           ) # clossing main panel                       
         )  # clossing sidbarlayout
 ),
@@ -1105,11 +1103,12 @@ h5(" Mote txt to add ...")
 ),
 
 # Footer ------
+tags$footer(
 hr(style = "border-color: #cbcbcb;"),
 fluidRow(
   column(9,
          p('All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://sormasorg.helmholtz-hzi.de/", 'SORMAS', target = '_blank'), '.', style = "font-size: 85%"),
-         p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
+         p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p(tags$em("Last updated: November 15, 2021"), style = 'font-size:75%'))
@@ -1122,6 +1121,7 @@ fluidRow(
          p(tags$a(href = "https://www.giz.de/en/html/index.html", 'GIZ', target = '_blank'), '', style = "font-size: 85%")
   )
   )
+)##
 )
 ))
 

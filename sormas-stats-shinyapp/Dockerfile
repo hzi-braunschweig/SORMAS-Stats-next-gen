@@ -1,5 +1,5 @@
 # Base image https://hub.docker.com/u/rocker/
-FROM rocker/shiny:latest
+FROM rocker/shiny:3.6.3
 
 # system libraries of general use
 ## install debian packages
@@ -46,7 +46,7 @@ RUN apt-get update \
 
 # copy necessary files
 ## renv.lock file
-COPY /sormas-stats-app/renv.lock ./renv.lock
+# COPY /sormas-stats-app/renv.lock ./renv.lock 
 ## app folder
 COPY /sormas-stats-app ./app
 
@@ -55,7 +55,8 @@ RUN mkdir -p /var/log/shiny-server \
   && chmod 664 /var/log/shiny-server
 
 # install renv & restore packages
-RUN Rscript -e 'install.packages("renv")'
+RUN Rscript -e 'install.packages("renv")' 
+RUN Rscript -e 'renv::consent(provided = TRUE)'
 RUN Rscript -e 'renv::restore()'
 
 # expose port

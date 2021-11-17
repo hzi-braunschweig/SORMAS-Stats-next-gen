@@ -30,6 +30,7 @@ rehash	rehash
 remote	remote
 remove	remove
 renv	renv-package
+renv_lockfile_from_manifest	renv_lockfile_from_manifest
 restore	restore
 revert	revert
 run	run

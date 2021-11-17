@@ -150,7 +150,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ol>
 <p>in determining which packages should enter the lockfile. The intention is that only the packages you truly require for your project should enter the lockfile; development dependencies (e.g. <code>devtools</code>) normally should not.</p>
 <p>If you find a package is not entering the lockfile, you can check the output of:</p>
-<pre><code>renv::dependencies()</code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">dependencies</span>()</span></code></pre></div>
 <p>and see whether usages of your package are reported in the output.</p>
 <p>Note that <code>renv</code>’s dependency discovery machinery relies on static analysis of your R code, and does not understand all of the different ways in which a package might be used in a project. For example, <code>renv</code> will detect the following usages:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
@@ -163,16 +163,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="capturing-all-dependencies" class="section level3">
 <h3>Capturing all dependencies</h3>
 <p>If you’d instead prefer to capture <em>all</em> packages installed into your project library (and eschew dependency discovery altogether), you can do so with:</p>
-<pre><code>renv::settings$snapshot.type(&quot;all&quot;)</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span>settings<span class="sc">$</span><span class="fu">snapshot.type</span>(<span class="st">&quot;all&quot;</span>)</span></code></pre></div>
 <p>Packages can also be explicitly ignored through a project setting, e.g. with:</p>
-<pre><code>renv::settings$ignored.packages(&quot;&lt;package&gt;&quot;)</code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span>settings<span class="sc">$</span><span class="fu">ignored.packages</span>(<span class="st">&quot;&lt;package&gt;&quot;</span>)</span></code></pre></div>
 <p>You might also want to double-check the set of ignored packages (<code>renv::settings$ignored.packages()</code>) and confirm that you aren’t unintentionally ignoring a package you actually require.</p>
 <p>See the documentation in <code>?snapshot</code> for more details.</p>
 </div>
 <div id="capturing-explicit-dependencies" class="section level3">
 <h3>Capturing explicit dependencies</h3>
 <p>If you’d like to explicitly declare which packages your project depends on, you can do so by telling <code>renv</code> to form “explicit” snapshots:</p>
-<pre><code>renv::settings$snapshot.type(&quot;explicit&quot;)</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span>settings<span class="sc">$</span><span class="fu">snapshot.type</span>(<span class="st">&quot;explicit&quot;</span>)</span></code></pre></div>
 <p>In this mode, <code>renv</code> will only include packages which are explicitly listed in the project’s <code>DESCRIPTION</code> file as dependencies.</p>
 </div>
 </div>
@@ -180,14 +180,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2>How should I handle development dependencies?</h2>
 <p>This is related to the above question: by design, <code>renv.lock</code> normally only captures build-time or deploy-time dependencies; it may not capture the packages that you use in iterative workflows (e.g. <code>devtools</code>). However, you may want some way of still ensuring these development dependencies get installed when trying to restore a project library.</p>
 <p>For cases like these, we recommend tracking these packages in a project DESCRIPTION file; typically, within the <code>Suggests:</code> field. Then, you can execute:</p>
-<pre><code>renv::install()</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">install</span>()</span></code></pre></div>
 <p>to request that <code>renv</code> install the packages as described in the DESCRIPTION file. In addition, the <code>Remotes:</code> fields will be parsed and used, to ensure packages are installed from their declared remote source as appropriate.</p>
 </div>
 <div id="im-returning-to-an-older-renv-project.-what-do-i-do" class="section level2">
 <h2>I’m returning to an older renv project. What do I do?</h2>
 <p>Suppose you were using <code>renv</code> to manage an older project’s dependencies. You have an older lockfile, capturing the dependencies in use when you were last working with that project. You now need to resume work on this project – what do you do?</p>
 <p>The answer depends on how exactly you want to use the project. Do you want to treat it as a “time capsule”, with dependencies frozen in time? Or are the dependencies in this project fluid, and you are primarily using <code>renv</code> just for isolation of project dependencies?</p>
-<p>For time capsules, the solution is to use <code>renv::restore()</code> to re-install the exact packages as declared in the project lockfile <code>renv.lock</code>. You may also need to find and install the older version of R used previously with that project, unless your intention is to upgrade R.</p>
+<p>For time capsules, the solution is to use <code>renv::restore()</code> to reinstall the exact packages as declared in the project lockfile <code>renv.lock</code>. You may also need to find and install the older version of R used previously with that project, unless your intention is to upgrade R.</p>
 <p>For projects with fluid dependencies, one solution is to use <code>renv::init()</code> to re-initialize the project with a brand new project library. When <code>renv::init()</code> is invoked, you may see a question such as:</p>
 <pre><code>&gt; renv::init()
 This project already has a lockfile. What would you like to do?
@@ -207,8 +207,20 @@ This project already has a lockfile. What would you like to do?
 <div id="why-arent-packages-installed-in-the-system-library-visible-in-my-renv-projects" class="section level2">
 <h2>Why aren’t packages installed in the system library visible in my renv projects?</h2>
 <p>By default, <code>renv</code> generates a “sandboxed” version of the system library, containing only the base set of packages normally bundled and distributed with R. If you’d prefer that packages installed into the system library remain visible to <code>renv</code> projects, you can set:</p>
-<pre><code>RENV_CONFIG_SANDBOX_ENABLED = FALSE</code></pre>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>RENV_CONFIG_SANDBOX_ENABLED <span class="ot">=</span> <span class="cn">FALSE</span></span></code></pre></div>
 <p>in an appropriate <code>.Renviron</code> file. See the entry for <code>renv.config.sandbox.enabled</code> in <code>?renv::config</code> for more details.</p>
+</div>
+<div id="why-are-package-downloads-failing" class="section level2">
+<h2>Why are package downloads failing?</h2>
+<p>Some issues ultimately boil down to a lack of connectivity between your machine and the R package repositories and remote sources you are trying to use. If you are working in a corporate environment, it may be worth confirming whether you have a corporate proxy in place inhibiting internet access, or whether R and <code>renv</code> need to be configured in a way compatible with your working environment. This is often true on Windows machines in enterprise environments, where the default “wininet” download method may work more reliably than others.</p>
+<p>Note that by default <code>renv</code> attempts to use the <code>curl</code> command line utility in order to download files and communicate with remote web services. This is done to enable authentication with private web services (e.g. private GitHub repositories).</p>
+<p>If you find that downloads work outside of <code>renv</code> projects, but not within <code>renv</code> projects, you may need to tell <code>renv</code> to use the same download file method that R has been configured to use. You can check which download method R is currently configured to use with:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">&quot;download.file.method&quot;</span>)</span></code></pre></div>
+<p>And the downloader currently used by <code>renv</code> can be queried with:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">:::</span><span class="fu">renv_download_method</span>()</span></code></pre></div>
+<p>You can force <code>renv</code> to use the same download method as R by setting:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">RENV_DOWNLOAD_FILE_METHOD =</span> <span class="fu">getOption</span>(<span class="st">&quot;download.file.method&quot;</span>))</span></code></pre></div>
+<p>and, if necessary, you could also set this environment variable within e.g. your <code>~/.Renviron</code>, so that it is visible to all R sessions. See <code>?Startup</code> for more details.</p>
 </div>
 
 
