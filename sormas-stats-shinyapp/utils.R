@@ -1,12 +1,17 @@
-
-## diagnosing versions of packages intalled
+# exploring packages
+# printing lib path
+.libPaths()
+## extracting list of all packages installed
 ip <- installed.packages()
 ip = data.frame(ip)
 ip$Built = as.character(ip$Built)
 View(ip[ip$Built != "3.6.3", ])
+View(ip[ip$Built != "4.1.2", ])
 pkgs.to.remove <- ip[!(ip[,"Priority"] %in% c("base", "recommended")), 1]
 sapply(pkgs.to.remove, remove.packages)
-
+# installing packages with build not the same as 4.1.2
+packades_to_install =  ip[ip$Built != "4.1.2", ][,1]
+install.packages(packades_to_install, lib = "/usr/lib/R/site-library" )
 
 # listing tables in database
 tables = sort(dbListTables(sormas_db)) # sormas_db is the db connection
@@ -44,7 +49,7 @@ dateTimeToDate = function(x)
   temp1[temp1==""]=NA  # replace empty substring with NA
   return(as.Date(temp1)) # convert substring to R date 
 }
-save(dateTimeToDate, file = "dateTimeToDate.R")
+save(dateTimeToDate, file = "./utils/dateTimeToDate.R")
 
 ###
 import.multiple.csv.files<-function(mypath,mypattern,...)
@@ -130,7 +135,7 @@ compute_person_node_uuid = function(elist)
   paerson_node_uuid = unique( c(person_eventPart_uuid$to_uuid_person, person_uuid$from_uuid_person, person_uuid$to_uuid_person))
   return(paerson_node_uuid)
 }
-save(compute_person_node_uuid, file = "compute_person_node_uuid.R")
+save(compute_person_node_uuid, file = "./utils/compute_person_node_uuid.R")
 #id_vec = compute_person_node_uuid (elist = elist)
 
 # proportion of contacts converted to case
@@ -154,7 +159,7 @@ prop_cont_ep_person_convertedToCase = function(elist)
   
   return(list(prop_converted = ret, n_contact_ep_nodes= n_contact_ep_nodes, n_resultingCase_nodes=n_resultingCase_nodes))
 }
-save(prop_cont_ep_person_convertedToCase, file = "prop_cont_ep_person_convertedToCase.R")
+save(prop_cont_ep_person_convertedToCase, file = "./utils/prop_cont_ep_person_convertedToCase.R")
 # prop_cont_ep_person_convertedToCase(elist = elist)
 
 ## proportion of missing source nodes among nodes 
@@ -1484,7 +1489,7 @@ pieChartPlot = function(variable){
                 insidetextorientation='radial') 
   return(fig)
 }
-save(pieChartPlot, file = "pieChartPlot.R")
+save(pieChartPlot, file = "./utils/pieChartPlot.R")
 pieChartPlot(variable = eventData$eventmanagementstatus)
 ## end of pie chart
 
@@ -1510,10 +1515,8 @@ barplotEventStatusByJurisdiction  = function(data, Var1, count = TRUE){
   fig = ggplotly(fig)  
   return(fig)
 }
-save(barplotEventStatusByJurisdiction, file = "barplotEventStatusByJurisdiction.R")
+save(barplotEventStatusByJurisdiction, file = "./utils/barplotEventStatusByJurisdiction.R")
 # end of event bar plot 
-
-
 
 # univariabte bar plot
 univariate_barplot = function(var, count=FALSE, x_verticalLayout = FALSE){
@@ -1575,7 +1578,7 @@ factorLevelCountEvent = function(data,  rowName){ #takes a data and rerun the co
   globalCount = data.frame(Name,Total, nlast24hrs, eventinvestigationstatusTotal, eventstatusTotal,managementstatusTotal, typeofplaceTotal, nosocomialTotal, srctypeTotal,risklevelTotal, archivedTotal)
   return(globalCount)
 }
-save(factorLevelCountEvent, file = "factorLevelCountEvent.R")
+save(factorLevelCountEvent, file = "./utils/factorLevelCountEvent.R")
 
 # cuntbyRegionDistrictEvent takes  eventData and return the count by region or district and certain event varaibles defined in the  factorLevelCountEvent function
 # this function depends on factorLevelCountEvent
@@ -1609,7 +1612,7 @@ cuntbyRegionDistrictEvent = function(data, byRegion = TRUE){  # depends on facto
   return(countByJurisdictionVaribles)
 }
 #eventByJurisdiction = cuntbyRegionDistrictEvent(data = eventData, byRegion = FALSE) 
-save(cuntbyRegionDistrictEvent, file = "cuntbyRegionDistrictEvent.R")
+save(cuntbyRegionDistrictEvent, file = "./utils/cuntbyRegionDistrictEvent.R")
 
 ## event_variable_category_maper: adding a mapper to map event varaibles to categories
 event_variable_category_maper = function(cuntbyRegionTableEvent){
@@ -1627,7 +1630,7 @@ event_variable_category_maper = function(cuntbyRegionTableEvent){
   return(event_variable_category)
 }
 #event_variable_data = event_variable_category_maper(cuntbyRegionTableEvent = cuntbyRegionTableEvent)
-save(event_variable_category_maper, file = "event_variable_category_maper.R")
+save(event_variable_category_maper, file = "./utils/event_variable_category_maper.R")
 
 
 
@@ -2027,7 +2030,7 @@ timeSeriesPlotDay = function(data, cum){
   }
   return(fig)
 }
-save(timeSeriesPlotDay, file = "timeSeriesPlotDay.R")
+save(timeSeriesPlotDay, file = "./utils/timeSeriesPlotDay.R")
 ##
 timeSeriesPlotWeek = function(data){
   f <- list(
@@ -2048,7 +2051,7 @@ timeSeriesPlotWeek = function(data){
   fig <- fig %>% layout(xaxis = x, yaxis = y)
   return(fig)
 }
-save(timeSeriesPlotWeek, file = "timeSeriesPlotWeek.R")
+save(timeSeriesPlotWeek, file = "./utils/timeSeriesPlotWeek.R")
 ##
 timeSeriesPlotMonth = function(data){
   f <- list(
@@ -2069,7 +2072,7 @@ timeSeriesPlotMonth = function(data){
   fig <- fig %>% layout(xaxis = x, yaxis = y)
   return(fig)
 }
-save(timeSeriesPlotMonth, file = "timeSeriesPlotMonth.R")
+save(timeSeriesPlotMonth, file = "./utils/timeSeriesPlotMonth.R")
 ## time series by region 
 timeSeriesPlotDayRegion = function(data, cum){
   f <- list(
@@ -2105,7 +2108,7 @@ timeSeriesPlotDayRegion = function(data, cum){
   }
   return(fig)
 }
-save(timeSeriesPlotDayRegion, file = "timeSeriesPlotDayRegion.R")
+save(timeSeriesPlotDayRegion, file = "./utils/timeSeriesPlotDayRegion.R")
 ## epidemic curve by date
 epicurveDate = function(data){
   #sorting data by case clessification nefore plotting to have the legends right
@@ -2132,7 +2135,7 @@ epicurveDate = function(data){
   fig <- fig %>% layout(xaxis = x, yaxis = y)
   return(fig)
 }
-save(epicurveDate, file = "epicurveDate.R")
+save(epicurveDate, file = "./utils/epicurveDate.R")
 ##
 epicurveMonth = function(data){
   # initial formatting
@@ -2155,7 +2158,7 @@ epicurveMonth = function(data){
   return(ggplotly(p4))
   
 }
-save(epicurveMonth, file = "epicurveMonth.R")
+save(epicurveMonth, file = "./utils/epicurveMonth.R")
 ##
 ### map of incidence ot case count by region
 regionMapPlot = function(data , lnd)
@@ -2169,7 +2172,7 @@ regionMapPlot = function(data , lnd)
   return(p)
   
 }
-save(regionMapPlot, file = "regionMapPlot.R")
+save(regionMapPlot, file = "./utils/regionMapPlot.R")
 
 ## function to plot district shapes based on case count or incidence
 districtMapPlot = function(data , districtShapes){
@@ -2183,7 +2186,7 @@ districtMapPlot = function(data , districtShapes){
   return(p)
   
 }
-save(districtMapPlot, file = "districtMapPlot.R")
+save(districtMapPlot, file = "./utils/districtMapPlot.R")
 ###
 ## Function to plot Rt
 # weekly estimate of Rt, week is default but can be latered in config
@@ -2256,7 +2259,7 @@ factorLevelCount = function(data,  rowName){ #takes a data and rerun the counts 
   globalCount = data.frame(Name,Total, nlast24hrs, caseByClassTotal, caseByOutcomeTotal, caseByOriginTotal, caseByQuarantineTotal)
   return(globalCount)
 }
-save(factorLevelCount, file = "factorLevelCount.R")
+save(factorLevelCount, file = "./utils/factorLevelCount.R")
 
 # cuntbyRegionDistrictCase takes the data of cases and return the case count by region or district and certain case varaibles defined by factorLevelCount function
 cuntbyRegionDistrictCase = function(data, byRegion = TRUE){  # depends on factorLevelCount function
@@ -2289,7 +2292,7 @@ cuntbyRegionDistrictCase = function(data, byRegion = TRUE){  # depends on factor
   
   return(countByRegionVaribles)
 }
-save(cuntbyRegionDistrictCase, file = "cuntbyRegionDistrictCase.R")
+save(cuntbyRegionDistrictCase, file = "./utils/cuntbyRegionDistrictCase.R")
 
 # proportionByregion: this function takes the table of number of cases by retion returned by cuntbyRegion function and computes the proportion for each cell
 proportionByregion = function(data){
@@ -2306,10 +2309,7 @@ proportionByregion = function(data){
   percentage_by_region = cbind(temp1, rowPercent)
   return(percentage_by_region)
 }
-save(proportionByregion, file = "proportionByregion.R")
-
-
-
+save(proportionByregion, file = "./utils/proportionByregion.R")
 
 fixBirthDate = function(person){
   # cases with birth year set!!!
@@ -2333,7 +2333,7 @@ fixBirthDate = function(person){
   person = rbind(birthYear, noBirthYear)
   return (person)
 }
-save(fixBirthDate, file = "fixBirthDate.R")
+save(fixBirthDate, file = "./utils/fixBirthDate.R")
 
 ######## infectorInfecteeExport #############
 # This function connects to the sormas db generate the data specified by issue https://github.com/hzi-braunschweig/SORMAS-Stats/issues/87
@@ -2495,7 +2495,7 @@ fixContactJurisdiction = function(contCase){
   res = rbind(temp1, temp2)
   return(res)
 }
-save(fixContactJurisdiction, file = "fixContactJurisdiction.R")
+save(fixContactJurisdiction, file = "./utils/fixContactJurisdiction.R")
  
 ###########  serialIntervalPlot ##############
 # infectorInfecteePair = infectorInfecteeData
@@ -3129,8 +3129,6 @@ contactDataExport = function(sormas_db){
   
   return(list(contRegionDist = contCaseRegionDist, nodeLineList = nodeListCombined, elist = elistCombined)) 
 }
-save(contactDataExport, file = "contactDataExport.R")
-
-
+save(contactDataExport, file = "./utils/contactDataExport.R")
 
 #################"
