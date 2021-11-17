@@ -46,7 +46,7 @@ RUN apt-get update \
 
 # copy necessary files
 ## renv.lock file
-# COPY /sormas-stats-app/renv.lock ./renv.lock 
+COPY /sormas-stats-app/renv.lock ./renv.lock 
 ## app folder
 COPY /sormas-stats-app ./app
 
