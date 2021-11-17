@@ -1,4 +1,13 @@
 
+## diagnosing versions of packages intalled
+ip <- installed.packages()
+ip = data.frame(ip)
+ip$Built = as.character(ip$Built)
+View(ip[ip$Built != "3.6.3", ])
+pkgs.to.remove <- ip[!(ip[,"Priority"] %in% c("base", "recommended")), 1]
+sapply(pkgs.to.remove, remove.packages)
+
+
 # listing tables in database
 tables = sort(dbListTables(sormas_db)) # sormas_db is the db connection
 

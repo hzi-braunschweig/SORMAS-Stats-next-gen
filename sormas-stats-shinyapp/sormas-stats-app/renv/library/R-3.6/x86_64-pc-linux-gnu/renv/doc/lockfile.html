@@ -56,7 +56,7 @@
 <p>Here is an example lockfile, including the packages <code>markdown</code> and <code>mime</code>:</p>
 <pre><code>{
   &quot;R&quot;: {
-    &quot;Version&quot;: &quot;4.0.4&quot;,
+    &quot;Version&quot;: &quot;4.1.0&quot;,
     &quot;Repositories&quot;: [
       {
         &quot;Name&quot;: &quot;CRAN&quot;,
@@ -81,7 +81,7 @@
     }
   }
 }</code></pre>
-<p>The function <code>renv::snapshot()</code> is used to create this lockfile, and by default writes these records to the file <code>renv.lock</code>. Later, if you need to re-install the specific package versions as recorded in <code>renv.lock</code>, you can use <code>renv::restore()</code>.</p>
+<p>The function <code>renv::snapshot()</code> is used to create this lockfile, and by default writes these records to the file <code>renv.lock</code>. Later, if you need to reinstall the specific package versions as recorded in <code>renv.lock</code>, you can use <code>renv::restore()</code>.</p>
 
 
 
