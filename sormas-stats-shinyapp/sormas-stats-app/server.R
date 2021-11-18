@@ -1341,14 +1341,19 @@ output$pickerInputdistrictCaseUi <- renderUI({
     # using casePersonFilter() and infectorInfecteeData
     # Filtering by disease and region of infector case
     infectorInfecteeDataDiseaseRegionFilter = reactive({
-     req(credentials()$user_auth)
+      req(credentials()$user_auth)
       if(is.null(input$regionCaseUi))
       {
-        infectorInfecteeData[((infectorInfecteeData$disease_infector == input$diseaseCaseUi) & (infectorInfecteeData$report_date_infector >= (min(input$reportdateCaseUi))) & (infectorInfecteeData$report_date_infector <= (max(input$reportdateCaseUi)) )), ]
+        ret = infectorInfecteeData %>% 
+          dplyr::filter(disease_infector == input$diseaseCaseUi) %>% 
+          dplyr::filter(report_date_infector >= input$reportdateCaseUi[1] & report_date_infector <= input$reportdateCaseUi[2] )
       } else{
-        infectorInfecteeData[((infectorInfecteeData$region_infector %in% input$regionCaseUi) & (infectorInfecteeData$disease_infector == input$diseaseCaseUi) & (infectorInfecteeData$report_date_infector >= (min(input$reportdateCaseUi) )  ) & (infectorInfecteeData$report_date_infector <= (max(input$reportdateCaseUi) ))),]
+        ret = infectorInfecteeData %>% 
+          dplyr::filter( disease_infector == input$diseaseCaseUi & region_infector %in% input$regionCaseUi) %>% 
+          dplyr::filter((report_date_infector >= input$reportdateCaseUi[1]) & (report_date_infector <= input$reportdateCaseUi[2]) )
       }
-    })
+      return(ret)
+    })  
     
     # filter by district of infector_case 
     infectorInfecteeDataDiseaseRegionDist = reactive({
@@ -1387,7 +1392,7 @@ output$pickerInputdistrictCaseUi <- renderUI({
       # This is a list of all the data needed to estimate and plot Rt
       # The two data sets used are the complete case line listing casePersonFilter and SI data 
       # preparing si_data data
-      rt_analysis_data = casePersonFilter() 
+      rt_analysis_data = casePersonFilter()  
       rt_analysis_data$total = 1
       dateSumCase = stats::aggregate(formula = total ~ reportdate, data = rt_analysis_data, FUN = sum, na.rm = T)  
       # completting missing dates
