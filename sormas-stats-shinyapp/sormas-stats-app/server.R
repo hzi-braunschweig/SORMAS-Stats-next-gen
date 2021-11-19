@@ -1380,12 +1380,29 @@ output$pickerInputdistrictCaseUi <- renderUI({
     
     # filter by serial interval range
     # Adding control based on apply changes icon on front ui
-    infectorInfecteeDataDiseaseRegionDistSerialIntFilter  =  eventReactive(input$caseDataAnalysisAction, {
-      temp = infectorInfecteeDataDiseaseRegionDist() %>%
-        tidyr::drop_na(serial_interval) %>%    # Dropping rows with NA fo SI
-        dplyr::filter(., serial_interval %in% c(input$serialIntervalRangeUi[1] : input$serialIntervalRangeUi[2]))  # filter by SI range
-      return(temp)
-    }, ignoreNULL = FALSE)
+    ################ begin debuging
+    ## Wrapper for debugging errors 
+    base::try({
+      # The withLogErrors call ensures that stack traces are captured
+      # and that errors that bubble up are logged using warning().
+      shiny::withLogErrors({
+        # tryCatch and withVisible are just here to add some noise to
+        # the stack trace.
+        base::tryCatch(
+          base::withVisible({
+            # add function here whose output should be traced 
+            infectorInfecteeDataDiseaseRegionDistSerialIntFilter  =  eventReactive(input$caseDataAnalysisAction, {
+              temp = infectorInfecteeDataDiseaseRegionDist() %>%
+                tidyr::drop_na(serial_interval) %>%    # Dropping rows with NA fo SI
+                dplyr::filter(., serial_interval %in% c(input$serialIntervalRangeUi[1] : input$serialIntervalRangeUi[2]))  # filter by SI range
+              return(temp)
+            }, ignoreNULL = FALSE)
+            
+          })
+        )
+      })
+    })
+    ################ end debuging
     
     #Preparing data and estimate rt
     rt_data = eventReactive(input$caseDataAnalysisAction, {
@@ -1452,161 +1469,209 @@ output$pickerInputdistrictCaseUi <- renderUI({
      })
     
 ## SI analysis
-    # model selection for SI   
-    # fiting normal, weibull, gamma, lnorm distributions to serial intervals 
-    output$si_model_fitTable <- DT::renderDataTable({
-      temp = fit_distribution(serial_interval = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
-      res = DT::datatable(temp,
-        options = list(
-          dom = 't',
-          fixedColumns = TRUE,
-          #autoWidth = TRUE,
-          columnDefs = list(list(className = 'dt-center', targets = "_all")),
-          searching = FALSE
-        ), 
-        rownames = FALSE )
-      return(res)
-    })
+    # model selection for SI  
+# Addting congtrols to print errors
+################ begin debuging
+ base::try({
+   # The withLogErrors call ensures that stack traces are captured
+   # and that errors that bubble up are logged using warning().
+   shiny::withLogErrors({
+     # tryCatch and withVisible are just here to add some noise to
+     # the stack trace.
+     base::tryCatch(
+       base::withVisible({
+         # add function here whose output should be traced 
+         
+         # fiting normal, weibull, gamma, lnorm distributions to serial intervals 
+         output$si_model_fitTable <- DT::renderDataTable({
+           temp = fit_distribution(serial_interval = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
+           res = DT::datatable(temp,
+                               options = list(
+                                 dom = 't',
+                                 fixedColumns = TRUE,
+                                 #autoWidth = TRUE,
+                                 columnDefs = list(list(className = 'dt-center', targets = "_all")),
+                                 searching = FALSE
+                               ), 
+                               rownames = FALSE )
+           return(res)
+         }) 
+         
+       })
+     )
+   })
+ })
+########### end debuging
     
-    # summary statistics for SI
-    output$si_summaryTable <- DT::renderDataTable({
-      temp = summary_statistics(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
-      res = DT::datatable(
-        data = temp,
-        options = list(
-          dom = 't',
-          fixedColumns = TRUE,
-          #autoWidth = TRUE,
-          columnDefs = list(list(className = 'dt-center', targets = "_all")),
-          searching = FALSE
-        ), 
-        rownames = FALSE)
-      return(res)
-    })
+# summary statistics for SI
+output$si_summaryTable <- DT::renderDataTable({
+  temp = summary_statistics(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
+  res = DT::datatable(
+    data = temp,
+    options = list(
+      dom = 't',
+      fixedColumns = TRUE,
+      #autoWidth = TRUE,
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE
+    ), 
+    rownames = FALSE)
+  return(res)
+})
     
-    # plotting distributions for model selection
-    # plotting distribution of data
-    output$SI_hist_model_plot <- renderPlot({
-      temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
-      temp$density
-    })
-    #qq plot for si
-    output$SI_model_qq_plot <- renderPlot({
-      temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
-      temp$qq
-    })
+# plotting distributions for model selection
+# plotting distribution of data
+output$SI_hist_model_plot <- renderPlot({
+  temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
+  temp$density
+})
+#qq plot for si
+output$SI_model_qq_plot <- renderPlot({
+  temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
+  temp$qq
+})
+
+#cdf plot for si
+output$SI_model_cdf_plot <- renderPlot({
+  temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
+  temp$cdf
+})
     
-    #cdf plot for si
-    output$SI_model_cdf_plot <- renderPlot({
-      temp = fitdist_plot(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
-      temp$cdf
-    })
+# computing mean CI based on user specified distribution
+# Delay rectivity to comput Meam estimate and 95% CI for serial interval based on distribtion with best fit to the data
+# bases on serial interval range, distribution, etc
+si_mean_CI_table_data = eventReactive(input$caseDataAnalysisAction, { 
+  ret_mean_CI = serial_interval_mean_CI(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDistSerialIntFilter(),
+                                        distr = input$siDistMethodUi, input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2])   
+}, ignoreNULL = FALSE)
     
-    # computing mean CI based on user specified distribution
-    # Delay rectivity to comput Meam estimate and 95% CI for serial interval based on distribtion with best fit to the data
-    # bases on serial interval range, distribution, etc
-    si_mean_CI_table_data = eventReactive(input$caseDataAnalysisAction, { 
-      ret_mean_CI = serial_interval_mean_CI(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDistSerialIntFilter(),
-                                            distr = input$siDistMethodUi, input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2])   
-    }, ignoreNULL = FALSE)
-    
-    output$si_mean_CI_table <- DT::renderDataTable({
-      res = DT::datatable(
-        data = si_mean_CI_table_data() ,
-        options = list(
-          dom = 't',
-          fixedColumns = TRUE,
-          #autoWidth = TRUE,
-          columnDefs = list(list(className = 'dt-center', targets = "_all")),
-          searching = FALSE
-        ), 
-        rownames = FALSE)
-      return(res)
-    })
+output$si_mean_CI_table <- DT::renderDataTable({
+  res = DT::datatable(
+    data = si_mean_CI_table_data() ,
+    options = list(
+      dom = 't',
+      fixedColumns = TRUE,
+      #autoWidth = TRUE,
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE
+    ), 
+    rownames = FALSE)
+  return(res)
+})
      
-    # fitting user chosen distribution to SI
-    # Any output or computation that depend on siRet (ie data and parameters used to generate siRet) wouuld run only when input$caseDataAnalysisAction is clicked
-    siRet = eventReactive(input$caseDataAnalysisAction, { 
-      temp = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
-      siRet = serialIntervalPlot(infectorInfecteePair = temp,  distr = input$siDistMethodUi, niter = input$niter_SI_UI,
-                                 minSi = input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2] ) 
-      return(siRet)
-    }, ignoreNULL = FALSE)
-    
-    # plotting SI
-    output$distribution_SI_plot <- renderPlot({
-      temp = siRet()
-      temp$siDistributionPlot
-    })
-    
-    # exporting estimates of SI
-    output$SI_estimate_table <- DT::renderDataTable({
-      temp = siRet()
-      res = DT::datatable(
-        data =  temp$siEstmate,
-        options = list(
-          dom = 't',
-          fixedColumns = TRUE,
-          #autoWidth = TRUE,
-          columnDefs = list(list(className = 'dt-center', targets = "_all")),
-          searching = FALSE
-        ), 
-        rownames = TRUE)
-      return(res)
-    })
-    
-    # Offspring distribution and estimation of dispersion parameter k
-    # conditioning all estimates from kRet to deleay response based on the caseDataAnalysisAction icon
-    # Since infectore-infectee pairs with NA for serial interval can be included in offspring analysis
-    # we do not need to use infectorInfecteeDataDiseaseRegionDistSerialIntFilter() but to use infectorInfecteeDataDiseaseRegionDist()
-    
-    # summary statistics for offsring distribtion
-    output$nodedegree_summaryTable <- DT::renderDataTable({
-      # compute node degree
-      temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(), 
-                                      niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI)
-      # compute summary and send to ui
-      temp = summary_statistics(x = temp$offspringDegree )
-      res = DT::datatable(
-        data = temp,
-        options = list(
-          dom = 't',
-          fixedColumns = TRUE,
-          #autoWidth = TRUE,
-          columnDefs = list(list(className = 'dt-center', targets = "_all")),
-          searching = FALSE
-        ), 
-        rownames = FALSE)
-      return(res)
-    })
-    
-    # Estimation of dispersion parameter k and R
-    kRet <- eventReactive(input$caseDataAnalysisAction, {
-      temp =  infectorInfecteeDataDiseaseRegionDist() # infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
-      kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI )
-      return(kRet)
-    }, ignoreNULL = FALSE)
-    
-    # plotting k
-    output$distribution_k_plot <- renderPlot({
-      temp = kRet()
-      plot(temp$offspringDistributionPlot)
-    })
-    # exporting estimate of k
-    output$k_estimate_table <- DT::renderDataTable({
-      temp = kRet()
-      res = DT::datatable(
-        data =  temp$rkEstmate,
-          options = list(
-          dom = 't',
-          fixedColumns = TRUE,
-          #autoWidth = TRUE,
-          columnDefs = list(list(className = 'dt-center', targets = "_all")),
-          searching = FALSE
-        ), 
-        rownames = TRUE)
-      return(res)
-    })
+# fitting user chosen distribution to SI
+# Any output or computation that depend on siRet (ie data and parameters used to generate siRet) wouuld run only when input$caseDataAnalysisAction is clicked
+##### beging bebug
+## Wrapper for debugging errors 
+base::try({
+  # The withLogErrors call ensures that stack traces are captured
+  # and that errors that bubble up are logged using warning().
+  shiny::withLogErrors({
+    # tryCatch and withVisible are just here to add some noise to
+    # the stack trace.
+    base::tryCatch(
+      base::withVisible({
+        # add function here whose output should be traced 
+        siRet = eventReactive(input$caseDataAnalysisAction, { 
+          temp = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
+          siRet = serialIntervalPlot(infectorInfecteePair = temp,  distr = input$siDistMethodUi, niter = input$niter_SI_UI,
+                                     minSi = input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2] ) 
+          return(siRet)
+        }, ignoreNULL = FALSE)
+      })
+    )
+  })
+})
+##### end bebug
+
+# plotting SI
+output$distribution_SI_plot <- renderPlot({
+  temp = siRet()
+  temp$siDistributionPlot
+})
+
+# exporting estimates of SI
+output$SI_estimate_table <- DT::renderDataTable({
+  temp = siRet()
+  res = DT::datatable(
+    data =  temp$siEstmate,
+    options = list(
+      dom = 't',
+      fixedColumns = TRUE,
+      #autoWidth = TRUE,
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE
+    ), 
+    rownames = TRUE)
+  return(res)
+})
+
+# Offspring distribution and estimation of dispersion parameter k
+# conditioning all estimates from kRet to deleay response based on the caseDataAnalysisAction icon
+# Since infectore-infectee pairs with NA for serial interval can be included in offspring analysis
+# we do not need to use infectorInfecteeDataDiseaseRegionDistSerialIntFilter() but to use infectorInfecteeDataDiseaseRegionDist()
+
+# summary statistics for offsring distribtion
+output$nodedegree_summaryTable <- DT::renderDataTable({
+  # compute node degree
+  temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(), 
+                                  niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI)
+  # compute summary and send to ui
+  temp = summary_statistics(x = temp$offspringDegree )
+  res = DT::datatable(
+    data = temp,
+    options = list(
+      dom = 't',
+      fixedColumns = TRUE,
+      #autoWidth = TRUE,
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE
+    ), 
+    rownames = FALSE)
+  return(res)
+})
+
+# Estimation of dispersion parameter k and R
+##### beging bebug
+base::try({
+  # The withLogErrors call ensures that stack traces are captured
+  # and that errors that bubble up are logged using warning().
+  shiny::withLogErrors({
+    # tryCatch and withVisible are just here to add some noise to
+    # the stack trace.
+    base::tryCatch(
+      base::withVisible({
+        # add function here whose output should be traced 
+        kRet <- eventReactive(input$caseDataAnalysisAction, {
+          temp =  infectorInfecteeDataDiseaseRegionDist() # infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
+          kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI )
+          return(kRet)
+        }, ignoreNULL = FALSE) 
+      })
+    )
+  })
+})
+##### end bebug
+# plotting k
+output$distribution_k_plot <- renderPlot({
+  temp = kRet()
+  plot(temp$offspringDistributionPlot)
+})
+# exporting estimate of k
+output$k_estimate_table <- DT::renderDataTable({
+  temp = kRet()
+  res = DT::datatable(
+    data =  temp$rkEstmate,
+      options = list(
+      dom = 't',
+      fixedColumns = TRUE,
+      #autoWidth = TRUE,
+      columnDefs = list(list(className = 'dt-center', targets = "_all")),
+      searching = FALSE
+    ), 
+    rownames = TRUE)
+  return(res)
+})
 ## end of case data analysis ##
     
 ##### EVETN DATA ANALYSIS  ##################

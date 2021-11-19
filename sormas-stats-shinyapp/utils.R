@@ -1,3 +1,20 @@
+
+## Wrapper for debugging errors 
+base::try({
+  # The withLogErrors call ensures that stack traces are captured
+  # and that errors that bubble up are logged using warning().
+  shiny::withLogErrors({
+    # tryCatch and withVisible are just here to add some noise to
+    # the stack trace.
+    base::tryCatch(
+      base::withVisible({
+        # add function here whose output should be traced 
+        
+      })
+    )
+  })
+})
+
 # exploring packages
 # printing lib path
 .libPaths()
