@@ -373,8 +373,9 @@ shinyUI(bootstrapPage(
                                                            )), style="color:#045a8d")
                            ), 
                            conditionalPanel(condition = "input.tabs1==8",
-                                            numericInput("niter_RtK_UI", label = h5("Specify number of bootstrap iteration"), value = 100),
+                                            numericInput("niter_RtK_UI", label = h5("Specify number of bootstrap iteration"), value = 100, min = 50, max=5000),
                                             checkboxInput("ZeroForTerminalCasesCountUI",  "Impute 0 for offsping distribution of terminal cases ?", TRUE),
+                                            numericInput("polyDegree_RtK_UI", label = h5("Specify degree of the polynomial curve"),  min = 1, max=9, value = NA),
                                             br(),
                                             span(tags$i(h5("This section estimates the superspreading parameter (k) and effective reproduction number (R). 
                                                            The data used here is the case-based infector-infertee pairs extracted from thet transmission network data."
