@@ -2854,7 +2854,7 @@ save(serial_interval_mean_CI, file = "./utils/serial_interval_mean_CI.R")
 ## offspringDistPlot ------
 # This method used the output data called infectorInfecteePair
 # This method fit a NB dist to the offsprint distr data and estimate R and k
-offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCasesCount = TRUE){ 
+offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCasesCount = TRUE, polyDegree = NA){ 
   #counting the number of offsprings per infector
   offspring <- infectorInfecteePair %>%
     dplyr::select(person_id_case_infector) %>%
@@ -2908,22 +2908,27 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCa
   rownames(rkEstmate) = c("k" , "R" )
   #plot offspring distribution with negative binomial parameters
   #Setting polynomial degree
-  polyDegree = length(unique(complete_offspringd$value))
-  if(polyDegree > 9){
-    polyDegreePlot = 9 # Think of adding parameter for user defined if need be.
-  } else {
-    polyDegreePlot = polyDegree-1 # polyDegreePlot should be less than the number of unique values
+  if(is.na(polyDegree) == TRUE){
+    polyDegree = length(unique(complete_offspringd$value))
+    if(polyDegree > 9){
+      polyDegreePlot = 9 # Think of adding parameter for user defined if need be.
+    } else {
+      polyDegreePlot = polyDegree-1 # polyDegreePlot should be less than the number of unique values
+    }
+  } else{
+    polyDegreePlot = polyDegree
   }
   offspringDistributionPlot = ggplot(data = complete_offspringd) +
     geom_histogram(aes(x=value, y = ..density..), fill = "#dedede", colour = "Black", binwidth = 1) +
     geom_point(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), size = 1) +
-    stat_smooth(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), method = 'lm', formula = y ~ poly(x, polyDegreePlot), se = FALSE, size = 0.8, colour = 'black') +
+    stat_smooth(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), method = 'lm', 
+                formula = y ~ poly(x, polyDegreePlot), se = FALSE, size = 0.8, colour = 'black', linetype = 2) +
     expand_limits(x = 0, y = 0) +
     scale_x_continuous("Secondary cases per infector", expand = c(0, 0), breaks = seq(min(complete_offspringd$value), max(complete_offspringd$value), by = 1))  +
     scale_y_continuous("Proportion of onward transmission", expand = c(0, 0)) +
     theme_classic() +
     theme(aspect.ratio = 0.7)
-
+  # extracting node degree
   offspringDegree = complete_offspringd$value
   ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot, offspringDegree = offspringDegree)  # list object: table of estimates and image
   

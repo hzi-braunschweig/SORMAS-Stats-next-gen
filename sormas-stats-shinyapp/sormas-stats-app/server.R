@@ -1614,8 +1614,8 @@ output$SI_estimate_table <- DT::renderDataTable({
 # summary statistics for offsring distribtion
 output$nodedegree_summaryTable <- DT::renderDataTable({
   # compute node degree
-  temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(), 
-                                  niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI)
+  temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(),niter = input$niter_RtK_UI, 
+                           ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI, polyDegree = input$polyDegree_RtK_UI)
   # compute summary and send to ui
   temp = summary_statistics(x = temp$offspringDegree )
   res = DT::datatable(
@@ -1644,7 +1644,8 @@ base::try({
         # add function here whose output should be traced 
         kRet <- eventReactive(input$caseDataAnalysisAction, {
           temp =  infectorInfecteeDataDiseaseRegionDist() # infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
-          kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI )
+          kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI,
+                                   polyDegree = input$polyDegree_RtK_UI)
           return(kRet)
         }, ignoreNULL = FALSE) 
       })
