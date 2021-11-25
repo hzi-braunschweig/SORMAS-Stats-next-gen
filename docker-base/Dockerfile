@@ -15,7 +15,18 @@ RUN apt-get update -qq && apt-get upgrade -y && apt-get -y --no-install-recommen
     unixodbc-dev \
     libcurl4-openssl-dev \
     libssl-dev \
-    && install2.r --error \
+    libv8-dev \
+    libudunits2-dev \
+	libmysqlclient-dev \
+    libgdal-dev \
+    perl \ 
+    libcompress-raw-zlib-perl \
+    libsodium-dev \
+  && apt-get -y autoremove \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*		
+  
+RUN install2.r --error \
     --deps TRUE \
     tidyverse \
     dplyr \
@@ -24,18 +35,9 @@ RUN apt-get update -qq && apt-get upgrade -y && apt-get -y --no-install-recommen
     remotes \
     selectr \
     caTools \
-    libv8-dev \
-    libudunits2-dev \
-	libmysqlclient-dev \
-    libgdal-dev \
-    perl \ 
-    libcompress-raw-zlib-perl \
-    libsodium-dev \
-  && rm -rf /tmp/downloaded_packages \ 
-  && apt-get -y autoremove \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*		
-  
+  && rm -rf /tmp/downloaded_packages 
+
+
 ## renv.lock file
 COPY renv.lock ./renv.lock 
 
