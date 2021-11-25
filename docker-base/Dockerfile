@@ -6,7 +6,7 @@ LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 #code with default packahes from https://hub.docker.com/r/rocker/shiny-verse/dockerfile
 RUN apt-get update -qq && apt-get upgrade -y \
  && apt-get -y --no-install-recommends install \
- # libxml2-dev \
+  libxml2-dev \
  #   libcairo2-dev \
  #   libsqlite3-dev \
     libpq-dev \
