@@ -5,42 +5,39 @@ FROM rocker/shiny:4.1.2
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 #code with default packahes from https://hub.docker.com/r/rocker/shiny-verse/dockerfile
 RUN apt-get update -qq && apt-get upgrade -y && apt-get -y --no-install-recommends install \
-  libmysqlclient-dev \
-  default-libmysqlclient-dev \
   libxml2-dev \
-  libcairo2-dev \
-  libsqlite3-dev \
-  libpq-dev \
-  libssl-dev \
-  libcurl4-openssl-dev \
-  libssh2-1-dev \
-  unixodbc-dev \
-  xtail \
-  libv8-dev \
-  libudunits2-dev \
-  libgdal-dev \
-  perl \
-  libcompress-raw-zlib-perl \
-  libsodium-dev \
-  && apt-get -y autoremove \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-  
-    
-RUN install2.r --error \
+    libcairo2-dev \
+    libsqlite3-dev \
+    libmariadbd-dev \
+	libmariadbclient-dev \
+    libpq-dev \
+    libssh2-1-dev \
+    unixodbc-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    && install2.r --error \
     --deps TRUE \
     tidyverse \
     dplyr \
     devtools \
-	formatR \
+    formatR \
     remotes \
     selectr \
-    caTools \	      
-  && rm -rf /tmp/downloaded_packages
-  
-# Install required R packages for shiny
-COPY renv.lock ./renv.lock
+    caTools \
+    libv8-dev \
+    libudunits2-dev \
+	libmysqlclient-dev \
+    libgdal-dev \
+    perl \ 
+    libcompress-raw-zlib-perl \
+    libsodium-dev \
+  && rm -rf /tmp/downloaded_packages \ 
+  && apt-get -y autoremove \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*		
+   
 
 # install renv & restore packages
 RUN Rscript -e 'install.packages("renv")'
+RUN Rscript -e 'renv::consent(provided = TRUE)'
 RUN Rscript -e 'renv::restore()'
