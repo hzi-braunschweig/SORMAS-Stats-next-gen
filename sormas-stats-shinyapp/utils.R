@@ -2854,7 +2854,13 @@ save(serial_interval_mean_CI, file = "./utils/serial_interval_mean_CI.R")
 ## offspringDistPlot ------
 # This method used the output data called infectorInfecteePair
 # This method fit a NB dist to the offsprint distr data and estimate R and k
-offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCasesCount = TRUE, polyDegree = NA){ 
+offspringDistPlot = function(infectorInfecteePair, niter = 51, polyDegree = NA){ 
+  # Deleting duplicate pairs of infector-infectee
+  # The data for infectorInfecteePair can have duplicates since a person can infect the same person more than once
+  # The infectorInfecteePair should have unique infector-infectee pairs
+  infectorInfecteePair = infectorInfecteePair %>% 
+  dplyr::distinct_at(. , vars(person_id_case_infector, person_id_case_infectee), .keep_all = TRUE)
+  
   #counting the number of offsprings per infector
   offspring <- infectorInfecteePair %>%
     dplyr::select(person_id_case_infector) %>%
@@ -2887,12 +2893,8 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51, ZeroForTerminalCa
     nrow() 
   
   #create vector of complete offspring distribution with terminal cases having zero secondary cases
-  # else exclude them, NA is not allowed as distribution os secondary cases for terminal nodes
-  if (ZeroForTerminalCasesCount == FALSE){
-    complete_offspringd <- tibble::enframe(c(offspring$n )) # convert vector to dataframe
-  } else{
-    complete_offspringd <- tibble::enframe(c(offspring$n, rep(0,nterminal_infectees))) # convert vector to dataframe
-  }
+  complete_offspringd <- tibble::enframe(c(offspring$n, rep(0,nterminal_infectees))) # convert vector to dataframe
+  
   #fit negative binomial distribution to the final offspring distribution
   fit <- complete_offspringd %>%
     dplyr::pull(value) %>%

@@ -1339,7 +1339,7 @@ output$pickerInputdistrictCaseUi <- renderUI({
     ## Rt analysis and plotting-----
     #####
     # using casePersonFilter() and infectorInfecteeData
-    # Filtering by disease and region of infector case
+    # Filtering by disease, time, region of infector and  deduplication (unique infector-infectee persons)
     infectorInfecteeDataDiseaseRegionFilter = reactive({
       req(credentials()$user_auth)
       if(is.null(input$regionCaseUi))
@@ -1352,19 +1352,22 @@ output$pickerInputdistrictCaseUi <- renderUI({
           dplyr::filter( disease_infector == input$diseaseCaseUi & region_infector %in% input$regionCaseUi) %>% 
           dplyr::filter((report_date_infector >= input$reportdateCaseUi[1]) & (report_date_infector <= input$reportdateCaseUi[2]) )
       }
+      # deduplication,  keeping only unique infector-infectee persons
+      ret = ret %>% 
+        dplyr::distinct_at(. , vars(person_id_case_infector, person_id_case_infectee), .keep_all = TRUE) 
       return(ret)
     })  
     
-    # filter by district of infector_case 
+    # filter by district of infector_case  
     infectorInfecteeDataDiseaseRegionDist = reactive({
       if(is.null(input$districtCaseUi))
       {
-        temp = infectorInfecteeDataDiseaseRegionFilter() 
+        ret = infectorInfecteeDataDiseaseRegionFilter() 
       } else{
-        temp = infectorInfecteeDataDiseaseRegionFilter() %>%
+        ret = infectorInfecteeDataDiseaseRegionFilter() %>%
           dplyr::filter(district_infector %in% input$districtCaseUi)
       }
-      return(temp)
+      return(ret)
     })
     
     #Rendering and showing ui element for mean and sd  based on user defined choice of "SI estimation method": parmetric or si_from_data
@@ -1378,7 +1381,7 @@ output$pickerInputdistrictCaseUi <- renderUI({
         } 
     })
     
-    # filter by serial interval range
+    # filter by serial interval range 
     # Adding control based on apply changes icon on front ui
     ################ begin debuging
     ## Wrapper for debugging errors 
@@ -1612,14 +1615,18 @@ output$SI_estimate_table <- DT::renderDataTable({
 # we do not need to use infectorInfecteeDataDiseaseRegionDistSerialIntFilter() but to use infectorInfecteeDataDiseaseRegionDist()
 
 # summary statistics for offsring distribtion
-output$nodedegree_summaryTable <- DT::renderDataTable({
+nodedegree_summaryTab = eventReactive(input$caseDataAnalysisAction, { 
   # compute node degree
-  temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(),niter = input$niter_RtK_UI, 
-                           ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI, polyDegree = input$polyDegree_RtK_UI)
-  # compute summary and send to ui
-  temp = summary_statistics(x = temp$offspringDegree )
+  temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(), niter = input$niter_Rk_UI, 
+                           polyDegree = input$polyDegree_RtK_UI)
+  # compute summary statistics table
+  ret = summary_statistics(x = temp$offspringDegree )
+  return(ret)
+}, ignoreNULL = FALSE)
+# exporting nodedegree_summaryTab table to ui
+output$nodedegree_summaryTable <- DT::renderDataTable({
   res = DT::datatable(
-    data = temp,
+    data = nodedegree_summaryTab() ,
     options = list(
       dom = 't',
       fixedColumns = TRUE,
@@ -1644,8 +1651,7 @@ base::try({
         # add function here whose output should be traced 
         kRet <- eventReactive(input$caseDataAnalysisAction, {
           temp =  infectorInfecteeDataDiseaseRegionDist() # infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
-          kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_RtK_UI, ZeroForTerminalCasesCount = input$ZeroForTerminalCasesCountUI,
-                                   polyDegree = input$polyDegree_RtK_UI)
+          kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_Rk_UI, polyDegree = input$polyDegree_RtK_UI)
           return(kRet)
         }, ignoreNULL = FALSE) 
       })
