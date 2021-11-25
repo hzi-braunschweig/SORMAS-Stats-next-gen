@@ -10,6 +10,15 @@ ENV DB_HOST="127.0.0.1"
 ENV DB_PORT="5432"
 ENV DB_NAME="sormas"
 
+
+## renv.lock file
+COPY sormas-stats-shinyapp/sormas-stats-app/renv.lock ./renv.lock 
+
+# install renv & restore packages
+RUN Rscript -e 'install.packages("renv")' 
+RUN Rscript -e 'renv::consent(provided = TRUE)'
+RUN Rscript -e 'renv::restore()'
+
 # Copy the app
 RUN mkdir /srv/shiny-server/sormas-stats-shinyapp \
   && mkdir -p /home/shiny/log \
