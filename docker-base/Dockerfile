@@ -8,8 +8,6 @@ RUN apt-get update -qq && apt-get upgrade -y && apt-get -y --no-install-recommen
   libxml2-dev \
     libcairo2-dev \
     libsqlite3-dev \
-    libmariadbd-dev \
-	libmariadbclient-dev \
     libpq-dev \
     libssh2-1-dev \
     unixodbc-dev \
@@ -17,7 +15,6 @@ RUN apt-get update -qq && apt-get upgrade -y && apt-get -y --no-install-recommen
     libssl-dev \
     libv8-dev \
     libudunits2-dev \
-	libmysqlclient-dev \
     libgdal-dev \
     perl \ 
     libcompress-raw-zlib-perl \
