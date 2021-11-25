@@ -32,7 +32,7 @@ RUN install2.r --error \
     tidyverse \
     dplyr \
     devtools \
-	formatR \
+    formatR \
     remotes \
     selectr \
     caTools \
