@@ -35,9 +35,12 @@ RUN apt-get update -qq && apt-get upgrade -y && apt-get -y --no-install-recommen
   && apt-get -y autoremove \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*		
-   
+  
+## renv.lock file
+COPY renv.lock ./renv.lock 
 
 # install renv & restore packages
-RUN Rscript -e 'install.packages("renv")'
+RUN Rscript -e 'install.packages("renv")' 
 RUN Rscript -e 'renv::consent(provided = TRUE)'
 RUN Rscript -e 'renv::restore()'
+
