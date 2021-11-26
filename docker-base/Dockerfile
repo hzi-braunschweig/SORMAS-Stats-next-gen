@@ -16,7 +16,7 @@ RUN apt-get update -qq && apt-get upgrade -y \
     libssl-dev \
  #   libv8-dev \
   # libudunits2-dev \
-   # libgdal-dev \
+    libgdal-dev \
     #perl \ 
 #    libcompress-raw-zlib-perl \
 #    libsodium-dev \
