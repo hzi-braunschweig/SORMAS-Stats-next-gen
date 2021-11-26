@@ -9,14 +9,14 @@ RUN apt-get update -qq && apt-get upgrade -y \
   libxml2-dev \
  #   libcairo2-dev \
  #   libsqlite3-dev \
-    libpq-dev \
+  libpq-dev \
  #   libssh2-1-dev \
  #   unixodbc-dev \
  #   libcurl4-openssl-dev \
-    libssl-dev \
+  libssl-dev \
  #   libv8-dev \
-  # libudunits2-dev \
-    libgdal-dev \
+  libudunits2-dev \
+  libgdal-dev \
     #perl \ 
 #    libcompress-raw-zlib-perl \
 #    libsodium-dev \
