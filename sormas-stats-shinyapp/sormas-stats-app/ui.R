@@ -373,8 +373,7 @@ shinyUI(bootstrapPage(
                                                            )), style="color:#045a8d")
                            ), 
                            conditionalPanel(condition = "input.tabs1==8",
-                                            numericInput("niter_RtK_UI", label = h5("Specify number of bootstrap iteration"), value = 100, min = 50, max=5000),
-                                            checkboxInput("ZeroForTerminalCasesCountUI",  "Impute 0 for offsping distribution of terminal cases ?", TRUE),
+                                            numericInput("niter_Rk_UI", label = h5("Specify number of bootstrap iteration"), value = 100, min = 50, max=5000),
                                             numericInput("polyDegree_RtK_UI", label = h5("Specify degree of the polynomial curve"),  min = 1, max=9, value = NA),
                                             br(),
                                             span(tags$i(h5("This section estimates the superspreading parameter (k) and effective reproduction number (R). 
@@ -667,7 +666,8 @@ shinyUI(bootstrapPage(
                                                                      collapsible = TRUE,
                                                                      collapsed = FALSE,
                                                                      width = 15,
-                                                                     div( DT::dataTableOutput("nodedegree_summaryTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
+                                                                     div( DT::dataTableOutput("nodedegree_summaryTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
+                                                                     h5(helpText("n_value <= 0: number of terminal infectee nodes. This corresponds to cases that were infected but did not infect further cases."))
                                                                    )
                                                                  ),
                                                                  fluidRow(
