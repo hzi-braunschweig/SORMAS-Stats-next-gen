@@ -5,21 +5,21 @@ FROM rocker/shiny:4.1.2
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 #code with default packahes from https://hub.docker.com/r/rocker/shiny-verse/dockerfile
 RUN apt-get update -qq && apt-get upgrade -y \
- && apt-get -y --no-install-recommends install \
-  libxml2-dev \
+  && apt-get -y --no-install-recommends install \
+    libxml2-dev \
  #   libcairo2-dev \
  #   libsqlite3-dev \
-  libpq-dev \
+    libpq-dev \
  #   libssh2-1-dev \
  #   unixodbc-dev \
  #   libcurl4-openssl-dev \
-  libssl-dev \
+    libssl-dev \
  #   libv8-dev \
-  libudunits2-dev \
-  libgdal-dev \
+    libudunits2-dev \
+    libgdal-dev \
     #perl \ 
 #    libcompress-raw-zlib-perl \
-#    libsodium-dev \
+    libsodium-dev \
   && apt-get -y autoremove \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*		
