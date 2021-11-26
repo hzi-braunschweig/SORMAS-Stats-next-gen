@@ -13,7 +13,7 @@ RUN apt-get update -qq && apt-get upgrade -y \
  #   libssh2-1-dev \
  #   unixodbc-dev \
  #   libcurl4-openssl-dev \
- #   libssl-dev \
+    libssl-dev \
  #   libv8-dev \
   # libudunits2-dev \
    # libgdal-dev \
