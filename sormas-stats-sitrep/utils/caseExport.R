@@ -1,9 +1,9 @@
 caseExport <- function(sormas_db, fromDate, toDate){
   # This function creates two tables as output.
   # The first table is a line listing of all cases reported in the defined
-  # time period. This line listing of cases includes all the variables as columns
-  # that are necessary for the creation of the SitRep, apart from population and 
-  # geo shapes data.
+  # time period. This line listing of cases includes all the variables as
+  # columns that are necessary for the creation of the SitRep, apart from
+  # population and geo shapes data.
   # The second table contains the population and geo data.
   # It contains data on the population by agegroup and gender in each district.
   # The two tables are output separately, because each case corresponds to one 
@@ -94,8 +94,8 @@ caseExport <- function(sormas_db, fromDate, toDate){
       and reportdate between '", fromDate, "' and '", toDate, "' 
       and disease = 'CORONAVIRUS')
                             ")
-  # Only phospitalizations with a hospitalization_id that also appears in a case 
-  # are queried from the database
+  # Only phospitalizations with a hospitalization_id that also appears in a
+  # case are queried from the database
   hospitalizations <- dbGetQuery(sormas_db, queryHospitalizations)
   
   # District table SQL query
@@ -181,7 +181,7 @@ caseExport <- function(sormas_db, fromDate, toDate){
   population_geo_data <- population_geo_data %>% 
     dplyr::select(-population_id, -district_name_geo)
   
-  # Return the geo outout tables
+  # Return the geo output tables
   return(list(line_list_cases=line_list_cases, population_geo_data=population_geo_data))
 }
 
