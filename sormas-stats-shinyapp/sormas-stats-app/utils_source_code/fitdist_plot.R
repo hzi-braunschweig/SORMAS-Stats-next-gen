@@ -17,7 +17,7 @@ fitdist_plot = function(x){
   plot.new() ## clean up device
   # plotting histrogram and theretical densities
   denscomp(list(wfit, gfit, lnfit, nfit), legendtext=c("Weibull", "gamma", "lognormal", "normal"),
-           main = NULL, probability = FALSE, fitlwd = 2 )
+           main = NULL, probability = TRUE, fitlwd = 2 )
   density <- recordPlot() # saving immage
   plot.new() ## clean up device
   # plotting Q-Q plot
