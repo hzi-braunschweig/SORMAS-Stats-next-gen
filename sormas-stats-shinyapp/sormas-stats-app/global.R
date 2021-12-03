@@ -29,7 +29,8 @@ DB_NAME= "sormas"
 source(file.path(".", "loading_packages.R"))
   
 # load binary files for functions -----
-source(file.path(".", "loading_functions.R"))
+# source(file.path(".", "loading_functions.R")) # Use this version of sourcing the binary version of functions
+source(file.path(".", "loading_functions_source.R"))
 
 ## loading data ----
 ## loading_data connects to sormas db, pull all the non sensitive data needed by sormas-stats and disconnect when done
