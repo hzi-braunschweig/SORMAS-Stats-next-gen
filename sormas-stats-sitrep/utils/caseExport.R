@@ -30,7 +30,6 @@ caseExport <- function(sormas_db, fromDate, toDate){
     EndOfIsolationReason AS case_end_of_iso_reason,
     reportdate AS report_date_case,
     disease,
-    vaccinationstatus AS vaccination_status, 
     symptoms_id,
     person_id,
     hospitalization_id 
