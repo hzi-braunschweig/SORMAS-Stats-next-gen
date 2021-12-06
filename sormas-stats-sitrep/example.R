@@ -13,6 +13,7 @@ toDate = as.character(Sys.Date() + 1) # or toDate = as.character("yyyy-mm-dd"), 
 
 # Sourcing utils
 source("utils/caseExport.R")
+source("utils/geoPopExport.R")
 
 # Defining USER, PASSWORD, HOST, PORT and Name to connnect to PostgreSQL database
 DB_USER = "postgres"
@@ -30,10 +31,13 @@ sormas_db = DBI::dbConnect(RPostgres::Postgres(),
                       port=DB_PORT
                       )
 # Extracting case data, Hashing Passwords with sodium
-sormas_data = caseExport(sormas_db = sormas_db)
+cases = caseExport(sormas_db, fromDate, toDate)
 
-# Line listing of cases
-cases <- sormas_data$line_list_cases
+# Exporting population and geo shapes data
+pop_geo_data = geoPopExport(sormas_db, fromDate, toDate)
 
-# Population and geo shapes data
-population_geo <- sormas_data$population_geo_data
+# Population data
+population_data <- pop_geo_data$population_data
+
+# Geo data
+geo_data <- pop_geo_data$geo_data
