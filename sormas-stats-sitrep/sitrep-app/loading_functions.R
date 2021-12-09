@@ -1,0 +1,17 @@
+## This file contains all the functions needed by the sitrep-app
+
+## General functions ----
+
+## Functions to export data from sormas ----
+base::source(file.path("./utils", "function_name.R"))
+
+## Functions for data analysis ----
+
+
+
+
+
+
+
+
+

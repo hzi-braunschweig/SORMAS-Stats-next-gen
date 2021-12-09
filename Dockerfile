@@ -10,12 +10,16 @@ ENV DB_HOST="127.0.0.1"
 ENV DB_PORT="5432"
 ENV DB_NAME="sormas"
 
+
+
+
 # Copy the app
 RUN mkdir /srv/shiny-server/sormas-stats-shinyapp \
   && mkdir -p /home/shiny/log \
   && chown -R shiny.shiny /home/shiny
 COPY sormas-stats-shinyapp/sormas-stats-app /srv/shiny-server/sormas-stats-shinyapp
-RUN chmod -R 755 /srv/shiny-server/sormas-stats-shinyapp
+RUN chmod -R 755 /srv/shiny-server/sormas-stats-shinyapp \
+  && rm -rf /srv/shiny-server/sormas-stats-shinyapp/utils/*
 COPY run_app.sh /usr/sbin/run_app.sh
 RUN chmod 700 /usr/sbin/run_app.sh
 

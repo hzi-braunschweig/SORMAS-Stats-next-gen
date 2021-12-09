@@ -1,5 +1,58 @@
-# loading functions needed
 
+## Wrapper for debugging errors 
+base::try({
+  # The withLogErrors call ensures that stack traces are captured
+  # and that errors that bubble up are logged using warning().
+  shiny::withLogErrors({
+    # tryCatch and withVisible are just here to add some noise to
+    # the stack trace.
+    base::tryCatch(
+      base::withVisible({
+        # add function here whose output should be traced 
+        
+      })
+    )
+  })
+})
+
+# exploring packages
+# printing lib path
+.libPaths()
+## extracting list of all packages installed
+ip <- installed.packages()
+ip = data.frame(ip)
+ip$Built = as.character(ip$Built)
+View(ip[ip$Built != "3.6.3", ])
+View(ip[ip$Built != "4.1.2", ])
+pkgs.to.remove <- ip[!(ip[,"Priority"] %in% c("base", "recommended")), 1]
+sapply(pkgs.to.remove, remove.packages)
+# installing packages with build not the same as 4.1.2
+packades_to_install =  ip[ip$Built != "4.1.2", ][,1]
+install.packages(packades_to_install, lib = "/usr/lib/R/site-library" )
+
+# listing tables in database
+tables = sort(dbListTables(sormas_db)) # sormas_db is the db connection
+
+# document statistics ----
+## load packages
+source(file.path(".", "loading_packages.R"))  
+# Defining connection to db
+DB_USER = "sormas_user"
+DB_PASS = "password"
+DB_HOST = "127.0.0.1"
+DB_PORT = "5432"
+DB_NAME= "sormas"
+sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
+# import document table
+queryDocs <- paste0("SELECT *
+                        FROM public.documents")
+documents = dbGetQuery(sormas_db,queryDocs)
+#explore document table
+nrow(documents)
+table(documents$relatedentity_type)
+table(documents$deleted)
+
+# loading functions needed ----
 importingData = function(mypath, sep){
   dataList = import.multiple.csv.files(mypath = mypath, mypattern = ".csv$", sep = ";")
   return(dataList)
@@ -13,7 +66,7 @@ dateTimeToDate = function(x)
   temp1[temp1==""]=NA  # replace empty substring with NA
   return(as.Date(temp1)) # convert substring to R date 
 }
-save(dateTimeToDate, file = "dateTimeToDate.R")
+save(dateTimeToDate, file = "./utils/dateTimeToDate.R")
 
 ###
 import.multiple.csv.files<-function(mypath,mypattern,...)
@@ -80,7 +133,7 @@ plotNet = function(nodeLineList, elist, IgraphLayout=TRUE)
 save(plotNet, file = "./utils/plotNet.R")
 
 ## network indicators computation 
-# computinig vector of person nodeuuid only
+# computinig vector of person_uuis of source nodes only
 compute_person_node_uuid = function(elist)
 {
   # takes elist and return a vector of unique person nodeuuid
@@ -99,7 +152,7 @@ compute_person_node_uuid = function(elist)
   paerson_node_uuid = unique( c(person_eventPart_uuid$to_uuid_person, person_uuid$from_uuid_person, person_uuid$to_uuid_person))
   return(paerson_node_uuid)
 }
-save(compute_person_node_uuid, file = "compute_person_node_uuid.R")
+save(compute_person_node_uuid, file = "./utils/compute_person_node_uuid.R")
 #id_vec = compute_person_node_uuid (elist = elist)
 
 # proportion of contacts converted to case
@@ -123,29 +176,30 @@ prop_cont_ep_person_convertedToCase = function(elist)
   
   return(list(prop_converted = ret, n_contact_ep_nodes= n_contact_ep_nodes, n_resultingCase_nodes=n_resultingCase_nodes))
 }
-save(prop_cont_ep_person_convertedToCase, file = "prop_cont_ep_person_convertedToCase.R")
+save(prop_cont_ep_person_convertedToCase, file = "./utils/prop_cont_ep_person_convertedToCase.R")
 # prop_cont_ep_person_convertedToCase(elist = elist)
 
 ## proportion of missing source nodes among nodes 
 # This statistic only consider cases in the network ie not all cases in the system
 prop_missing_source_case_nodes = function(elist, nodeLineList){
-  nodeLineList = nodeLineList %>%
-    dplyr::select(id, group) %>% 
-    dplyr::filter( (id %in% unique(c(elist$from, elist$to))) & (group %in% c("EVENT","PROBABLE", "SUSPECT", "CONFIRMED", "NOT_CLASSIFIED")) )  # retaining only case or event nodes in elist 
-  
-  # extracting contacts with parents nodes
+  nodeLineListSel = nodeLineList %>%
+  dplyr::select(label, group) %>% # retaining infector (case or event)  nodes only in nodeLineList 
+  dplyr::filter( (label %in% unique(c(elist$from_uuid_person, elist$to_uuid_person))) & (group %in% c("EVENT","PROBABLE", "SUSPECT", "CONFIRMED", "NOT_CLASSIFIED")) )  
+  # extracting row (contact) in elist where the infector is not an infectee, ie source not contacts only
+  # keeping only parent case nodes that were not previousely known to be contact nodes,
   elist_case = elist %>%
-    dplyr::filter( !(from %in% to) ) %>%  # keeping only parent case nodes that were not previousely known to be contact nodes,
-    dplyr::distinct_at(., vars(from), .keep_all = TRUE)
-  
-  source_node_data =  elist_case %>%  # data of source nodes id and corresponding uuid
+    dplyr::filter( !(from_uuid_person %in% to_uuid_person) ) %>%  
+    # keeping distict infector nodes only
+    dplyr::distinct_at(., vars(from_uuid_person), .keep_all = TRUE) %>%
+    # keeping only node ids: from and from_uuid_person
     dplyr::mutate(from = from, from_uuid_person = from_uuid_person, .keep = "none")
+  # Computing indicators
   source_node_uuid = sort(elist_case$from_uuid_person) # contains nodes for events and case person in case elist also had event nodes
   sum_missing_source_case_nodes = length(source_node_uuid) 
-  sum_caseEvent_nodes = nrow(nodeLineList)  # computing total case nodes
+  sum_caseEvent_nodes = nrow(nodeLineListSel)  # computing total case nodes
   prop_missing_source_case_nodes = round((sum_missing_source_case_nodes/sum_caseEvent_nodes)*100, 2)
   
-  return(list(source_node_uuid = source_node_uuid, source_node_data=source_node_data,
+  return(list(source_node_uuid = source_node_uuid, source_node_data=elist_case,
               sum_caseEvent_nodes=sum_caseEvent_nodes, 
               prop_missing_source_case_nodes = prop_missing_source_case_nodes, 
               sum_missing_source_case_nodes = sum_missing_source_case_nodes ))
@@ -154,19 +208,26 @@ save(prop_missing_source_case_nodes, file = "./utils/prop_missing_source_case_no
 #prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)
 
 # Converting elist and nodeLinelist to graph object
-convertNetworkToGraph = function(elist, nodeLineList){
+convertNetworkToGraph = convertNetworkToGraph = function(elist, nodeLineList){
+  # filter elist with unique personuuid  and # reneming person_id with from and to.
+  # this order is needed by the method graph_from_data_frame
   elistSel = elist %>%
-    dplyr::distinct_at(., vars(from_uuid_person, to_uuid_person), .keep_all = TRUE) %>% # filter records with unique personuuid
-    dplyr::select(from, to, from_uuid_person, to_uuid_person)
+    dplyr::distinct_at(., vars(from_uuid_person, to_uuid_person), .keep_all = TRUE) %>% 
+    dplyr::mutate(from = from_uuid_person, to = to_uuid_person, .keep = "used") %>% 
+  dplyr::relocate(from, to, from_uuid_person, to_uuid_person)
+  
+  # filter node that also belongs to  selected elist using lebel ie person uuid of the node
+  node_uuid = unique(c(elistSel$from, elistSel$to))
   nodeLineListSelResCase = nodeLineList %>%
-    dplyr::select(id, group, label) 
-  #nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$id %in% unique(c(elistSel$from, elistSel$to)), ]
-  nodeLineListSelResCase <- nodeLineListSelResCase[nodeLineListSelResCase$label %in% unique(c(elistSel$from_uuid_person, elistSel$to_uuid_person)), ]
-  # # ordering of colums is to be respected, this is needed to be in a specific order for igraph
-  #  nodeToPlot = nodeLineListSelResCase %>%
-  #   dplyr::relocate(id, group)
-  #   elistPlot = elistSel %>%
-  #   dplyr::relocate(from, to)
+    dplyr::mutate(id = label, group = group, label=label, .keep = "none") %>%
+    dplyr::filter(id %in% node_uuid) %>%
+    dplyr::distinct_at(., vars(id), .keep_all = TRUE)
+  
+  # dropping all nodes in elist that are not in nodeList
+  # this is not needed in case the filter at front end generated a data with such a situation
+  elistSel = elistSel %>%
+    dplyr::filter((from %in% nodeLineListSelResCase$id) &  (to %in% nodeLineListSelResCase$id) )
+  # converting elist and nodeList to graph object
   net <- graph_from_data_frame(d=elistSel, vertices = nodeLineListSelResCase, directed=T)
   return(net)
 }
@@ -179,17 +240,17 @@ save(convertNetworkToGraph, file = "./utils/convertNetworkToGraph.R")
 sourceNodeDegreeCounter <- function(elist, nodeLineList){ 
   # this function depends on two others: convertNetworkToGraph and prop_missing_source_case_nodes
   networkGraphObject = convertNetworkToGraph(elist=elist, nodeLineList=nodeLineList) # converting network to graph object
-  sourceNodeData = prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)$source_node_data # computing source node data: node id and uuis
+  sourceNodeData = prop_missing_source_case_nodes(elist=elist, nodeLineList = nodeLineList)$source_node_data # computing source node data: node id and uuid
   
   deg <- degree(graph = networkGraphObject,  mode="all") #   deg <- degree(graph = networkGraphObject(), v = sourceNodes, mode="all")
   ret = data.frame(deg, names(deg))
   rownames(ret) = NULL
-  colnames(ret) = c("deg","from")
-  ret$from = as.numeric(as.character(ret$from))
+  colnames(ret) = c("deg","from_uuid_person")
+  ret$from_uuid_person = as.character(ret$from_uuid_person)
   ## Merging ret with sourceNodeData to keep only sorcse nodes and their degree
   ret = ret %>%
-    dplyr::right_join(., sourceNodeData,  c( "from" = "from"))  %>%
-    distinct_at(., vars(from), .keep_all = TRUE) # source nodes and degree
+    dplyr::right_join(., sourceNodeData,  c( "from_uuid_person" = "from_uuid_person"))  %>%
+    distinct_at(., vars(from_uuid_person), .keep_all = TRUE) # source nodes and degree
   return(ret)
 }
 #sourceNodeDegreeData = sourceNodeDegreeCounter(elist=elist, nodeLineList = nodeLineList)
@@ -742,7 +803,7 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   
   # deleting duplicate nodes at random, this is not the optimum method to do,
   nodeListCaseEvent = dplyr::distinct(nodeListCaseEvent, label,  .keep_all = T)  %>% 
-    dplyr::mutate(., title = label) # labelling nodes
+    dplyr::mutate(., title = label, uuid_node = label) # labelling nodes
   
   # stacking elist
   # ordering  and combining elist and elistEvent  
@@ -761,7 +822,10 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   elistCaseEvent = base::rbind(elist,elistEvent)
   # dropping useless columns form elistCaseEvent that are not needed by the network
   elistCaseEvent = elistCaseEvent  %>%
-    dplyr::select(-c(caseclassification_case))
+    dplyr::select(-c(caseclassification_case)) %>%
+    # adding an elist id by combinig the uuid of the two nodes involved in the contact
+    # This is needed because the id for contacts and event partcipant may be the same since we stacked both tables above
+  dplyr::mutate(id_elist = paste(from_uuid_person, to_uuid_person, sep = "-"), .keep = "all")
   
   ############### determining serial interval  ###########
   # selecting unique case id from contats table
@@ -781,8 +845,6 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   siDat = selCasesSympResultCase[, colnames(selCasesSympResultCase) %in% c("si","reportdatetime", "disease", "region_name","district_name" )]
   siDat = siDat[is.na(siDat$si) == F,]  # dropping missing values
   
-  #return(list(contRegionDist = contRegionDist, nodeLineList = nodeLineList, elist = elist, siDat = siDat, 
-  #            nodeListCaseEvent = nodeListCaseEvent, elistCaseEvent = elistCaseEvent))
   return(list(contRegionDist = contRegionDist, nodeLineList = nodeListCaseEvent, elist = elistCaseEvent, siDat = siDat))
 }
 save(mergingDataFromDB, file = "./utils/mergingDataFromDB.R")
@@ -1250,7 +1312,7 @@ eventExport = function(sormas_db, fromDate, toDate){
   # leading event
   queryEvent <- paste0("SELECT uuid AS uuid_event, id AS id_event, eventinvestigationstatus, reportdatetime AS reportdatetime_event, eventstatus, disease AS disease_event, typeofplace AS typeofplace_event,
       creationdate AS creationdate_event, enddate AS enddate_event, startdate AS startdate_event, archived AS archived_event, nosocomial AS nosocomial_event,
-      srctype AS srctype_event, risklevel AS risklevel_event,  eventlocation_id, eventmanagementstatus, eventtitle
+      srctype AS srctype_event, risklevel AS risklevel_event,  eventlocation_id, eventmanagementstatus, eventidentificationsource AS  event_identification_source, eventtitle
                         FROM public.events
                         WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   event = dbGetQuery(sormas_db,queryEvent)
@@ -1303,12 +1365,12 @@ eventExport = function(sormas_db, fromDate, toDate){
                        resulting_case_sum = sum(!is.na(resultingcase_id_eventpart) )
                        ) %>% # counting number of ep and resulting cases per event
     dplyr::right_join(., event, c("event_id_eventpart" = "id_event") ) %>% # merging with event, use right join to keep events with no ep
-    tidyr::replace_na(list(eventPart_sum = 0, resulting_case_sum = 0)) # replacing na with 0
+    tidyr::replace_na(list(eventPart_sum = 0, resulting_case_sum = 0, event_identification_source = "MISSING" )) # replacing missing values (NA) with o or "MISSING"
   
   return(event_data = eventPartEvent)  
 }
 save(eventExport, file = "./utils/eventExport.R")
-eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
+# eventData = eventExport(sormas_db, fromDate = fromDate, toDate = toDate)   
 ### end of event export
 
 # # compute_eventlocation_category
@@ -1444,7 +1506,7 @@ pieChartPlot = function(variable){
                 insidetextorientation='radial') 
   return(fig)
 }
-save(pieChartPlot, file = "pieChartPlot.R")
+save(pieChartPlot, file = "./utils/pieChartPlot.R")
 pieChartPlot(variable = eventData$eventmanagementstatus)
 ## end of pie chart
 
@@ -1470,10 +1532,8 @@ barplotEventStatusByJurisdiction  = function(data, Var1, count = TRUE){
   fig = ggplotly(fig)  
   return(fig)
 }
-save(barplotEventStatusByJurisdiction, file = "barplotEventStatusByJurisdiction.R")
+save(barplotEventStatusByJurisdiction, file = "./utils/barplotEventStatusByJurisdiction.R")
 # end of event bar plot 
-
-
 
 # univariabte bar plot
 univariate_barplot = function(var, count=FALSE, x_verticalLayout = FALSE){
@@ -1535,7 +1595,7 @@ factorLevelCountEvent = function(data,  rowName){ #takes a data and rerun the co
   globalCount = data.frame(Name,Total, nlast24hrs, eventinvestigationstatusTotal, eventstatusTotal,managementstatusTotal, typeofplaceTotal, nosocomialTotal, srctypeTotal,risklevelTotal, archivedTotal)
   return(globalCount)
 }
-save(factorLevelCountEvent, file = "factorLevelCountEvent.R")
+save(factorLevelCountEvent, file = "./utils/factorLevelCountEvent.R")
 
 # cuntbyRegionDistrictEvent takes  eventData and return the count by region or district and certain event varaibles defined in the  factorLevelCountEvent function
 # this function depends on factorLevelCountEvent
@@ -1569,7 +1629,7 @@ cuntbyRegionDistrictEvent = function(data, byRegion = TRUE){  # depends on facto
   return(countByJurisdictionVaribles)
 }
 #eventByJurisdiction = cuntbyRegionDistrictEvent(data = eventData, byRegion = FALSE) 
-save(cuntbyRegionDistrictEvent, file = "cuntbyRegionDistrictEvent.R")
+save(cuntbyRegionDistrictEvent, file = "./utils/cuntbyRegionDistrictEvent.R")
 
 ## event_variable_category_maper: adding a mapper to map event varaibles to categories
 event_variable_category_maper = function(cuntbyRegionTableEvent){
@@ -1587,7 +1647,7 @@ event_variable_category_maper = function(cuntbyRegionTableEvent){
   return(event_variable_category)
 }
 #event_variable_data = event_variable_category_maper(cuntbyRegionTableEvent = cuntbyRegionTableEvent)
-save(event_variable_category_maper, file = "event_variable_category_maper.R")
+save(event_variable_category_maper, file = "./utils/event_variable_category_maper.R")
 
 
 
@@ -1987,7 +2047,7 @@ timeSeriesPlotDay = function(data, cum){
   }
   return(fig)
 }
-save(timeSeriesPlotDay, file = "timeSeriesPlotDay.R")
+save(timeSeriesPlotDay, file = "./utils/timeSeriesPlotDay.R")
 ##
 timeSeriesPlotWeek = function(data){
   f <- list(
@@ -2008,7 +2068,7 @@ timeSeriesPlotWeek = function(data){
   fig <- fig %>% layout(xaxis = x, yaxis = y)
   return(fig)
 }
-save(timeSeriesPlotWeek, file = "timeSeriesPlotWeek.R")
+save(timeSeriesPlotWeek, file = "./utils/timeSeriesPlotWeek.R")
 ##
 timeSeriesPlotMonth = function(data){
   f <- list(
@@ -2029,7 +2089,7 @@ timeSeriesPlotMonth = function(data){
   fig <- fig %>% layout(xaxis = x, yaxis = y)
   return(fig)
 }
-save(timeSeriesPlotMonth, file = "timeSeriesPlotMonth.R")
+save(timeSeriesPlotMonth, file = "./utils/timeSeriesPlotMonth.R")
 ## time series by region 
 timeSeriesPlotDayRegion = function(data, cum){
   f <- list(
@@ -2065,7 +2125,7 @@ timeSeriesPlotDayRegion = function(data, cum){
   }
   return(fig)
 }
-save(timeSeriesPlotDayRegion, file = "timeSeriesPlotDayRegion.R")
+save(timeSeriesPlotDayRegion, file = "./utils/timeSeriesPlotDayRegion.R")
 ## epidemic curve by date
 epicurveDate = function(data){
   #sorting data by case clessification nefore plotting to have the legends right
@@ -2092,7 +2152,7 @@ epicurveDate = function(data){
   fig <- fig %>% layout(xaxis = x, yaxis = y)
   return(fig)
 }
-save(epicurveDate, file = "epicurveDate.R")
+save(epicurveDate, file = "./utils/epicurveDate.R")
 ##
 epicurveMonth = function(data){
   # initial formatting
@@ -2115,7 +2175,7 @@ epicurveMonth = function(data){
   return(ggplotly(p4))
   
 }
-save(epicurveMonth, file = "epicurveMonth.R")
+save(epicurveMonth, file = "./utils/epicurveMonth.R")
 ##
 ### map of incidence ot case count by region
 regionMapPlot = function(data , lnd)
@@ -2129,7 +2189,7 @@ regionMapPlot = function(data , lnd)
   return(p)
   
 }
-save(regionMapPlot, file = "regionMapPlot.R")
+save(regionMapPlot, file = "./utils/regionMapPlot.R")
 
 ## function to plot district shapes based on case count or incidence
 districtMapPlot = function(data , districtShapes){
@@ -2143,7 +2203,7 @@ districtMapPlot = function(data , districtShapes){
   return(p)
   
 }
-save(districtMapPlot, file = "districtMapPlot.R")
+save(districtMapPlot, file = "./utils/districtMapPlot.R")
 ###
 ## Function to plot Rt
 # weekly estimate of Rt, week is default but can be latered in config
@@ -2177,7 +2237,28 @@ RtPlot = function(mean_si, std_si, method="parametric_si", burnin = 1000, dateSu
   rt_mean = res$R$`Mean(R)` # vector containing average of estimated rt values
   return(list(rt_fig = rt_fig, rt_mean = rt_mean))
 }
-#test_res = RtPlot(mean_si = 5, std_si = 2.5, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase, si_data = si_data,  dist = distUI)
+# test run
+casePersontest = casePerson
+casePersontest$total = 1
+dateSumCase = stats::aggregate(formula = total ~  reportdate, data = casePersontest, FUN = sum, na.rm = T)
+dateSumCase =  dateSumCase %>%
+  dplyr::mutate(Date = as.Date(reportdate)) %>%
+  tidyr::complete(Date = seq.Date(min(Date), max(Date), by="day"), fill = list(total = 0))
+dateSumCase = dateSumCase[,c(1,3)] # dropping old uncompletted date
+colnames(dateSumCase) = c("dates","I")
+
+temp = infectorInfecteeData  # data having SI as column
+# extracting SI values that are not NA, negative and fall in the range specifird by user
+temp =  temp %>%
+  dplyr::filter((serial_interval > 0) & (serial_interval <= input$siUi))
+n = nrow(temp)
+si_data = data.frame(matrix(0,n,5))
+si_data[,2] = 1
+si_data[,3] = c(temp$serial_interval -1)
+si_data[,4] = temp$serial_interval
+colnames(si_data) =  c("EL", "ER", "SL", "SR", "type")
+si_data[,-5] = apply(si_data[,-5], 2, as.integer) # all columns except type should be integer
+test_res = RtPlot(mean_si = 5, std_si = 2.5, method = "parametric_si",  burnin = 1000, dateSumCase = dateSumCase, si_data = si_data,  dist = "G")
 save(RtPlot, file = "./utils/RtPlot.R")
 
 ##### Table of case count by regions and other case variables: classification, outcome, quarantine, etc
@@ -2195,7 +2276,7 @@ factorLevelCount = function(data,  rowName){ #takes a data and rerun the counts 
   globalCount = data.frame(Name,Total, nlast24hrs, caseByClassTotal, caseByOutcomeTotal, caseByOriginTotal, caseByQuarantineTotal)
   return(globalCount)
 }
-save(factorLevelCount, file = "factorLevelCount.R")
+save(factorLevelCount, file = "./utils/factorLevelCount.R")
 
 # cuntbyRegionDistrictCase takes the data of cases and return the case count by region or district and certain case varaibles defined by factorLevelCount function
 cuntbyRegionDistrictCase = function(data, byRegion = TRUE){  # depends on factorLevelCount function
@@ -2228,7 +2309,7 @@ cuntbyRegionDistrictCase = function(data, byRegion = TRUE){  # depends on factor
   
   return(countByRegionVaribles)
 }
-save(cuntbyRegionDistrictCase, file = "cuntbyRegionDistrictCase.R")
+save(cuntbyRegionDistrictCase, file = "./utils/cuntbyRegionDistrictCase.R")
 
 # proportionByregion: this function takes the table of number of cases by retion returned by cuntbyRegion function and computes the proportion for each cell
 proportionByregion = function(data){
@@ -2245,10 +2326,7 @@ proportionByregion = function(data){
   percentage_by_region = cbind(temp1, rowPercent)
   return(percentage_by_region)
 }
-save(proportionByregion, file = "proportionByregion.R")
-
-
-
+save(proportionByregion, file = "./utils/proportionByregion.R")
 
 fixBirthDate = function(person){
   # cases with birth year set!!!
@@ -2272,7 +2350,7 @@ fixBirthDate = function(person){
   person = rbind(birthYear, noBirthYear)
   return (person)
 }
-save(fixBirthDate, file = "fixBirthDate.R")
+save(fixBirthDate, file = "./utils/fixBirthDate.R")
 
 ######## infectorInfecteeExport #############
 # This function connects to the sormas db generate the data specified by issue https://github.com/hzi-braunschweig/SORMAS-Stats/issues/87
@@ -2285,7 +2363,7 @@ save(fixBirthDate, file = "fixBirthDate.R")
 # 
 # library(RPostgreSQL)
 # library(DBI)
-# library(lubridate)
+# library(lubridate) 
 # library(dplyr)
 # sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT) # should be replaced when doin gpull request
 #load("fixBirthDate.R") # to load this method
@@ -2301,37 +2379,18 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
   # loading tables from sormas db
   # load cases
   queryCase <- paste0("SELECT  DISTINCT uuid AS case_uuid, id AS case_id, disease, reportdate AS report_date_case, creationdate AS creation_date_case, person_id AS person_id_case,
-    region_id AS region_id_case, district_id AS district_id_case, caseclassification AS case_classification, caseorigin AS case_origin, symptoms_id
+    responsibleregion_id AS region_id_case, responsibledistrict_id AS district_id_case, caseclassification AS case_classification, caseorigin AS case_origin, symptoms_id
                           FROM public.cases 
                           WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ")
   case = dbGetQuery(sormas_db,queryCase)
-  # 
-  # case = dbGetQuery(
-  #   sormas_db,
-  #   "SELECT uuid AS case_uuid, id AS case_id, disease, reportdate AS report_date_case, creationdate AS creation_date_case, person_id AS person_id_case,
-  #   region_id AS region_id_case, district_id AS district_id_case, caseclassification AS case_classification, caseorigin AS case_origin, symptoms_id
-  #   FROM cases
-  #   WHERE deleted = FALSE and caseclassification != 'NO_CASE' "
-  # )
   
   #load contacts
   queryContact <- paste0("SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
     person_id AS person_id_contact, reportdatetime AS report_date_contact, creationdate AS creation_date_contact, lastcontactdate AS lastcontact_date_contact,
     contactproximity AS contact_proximity, resultingcase_id, contactstatus, contactclassification
                           FROM public.contact
-                          WHERE deleted = FALSE and caze_id IS NOT NULL and contactclassification = 'CONFIRMED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+                          WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ") 
   contact = dbGetQuery(sormas_db,queryContact)
-  # 
-  # contact = dbGetQuery(
-  #   sormas_db,
-  #   "SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
-  #   person_id AS person_id_contact, reportdatetime AS report_date_contact, creationdate AS creation_date_contact, lastcontactdate AS lastcontact_date_contact,
-  #   contactproximity AS contact_proximity, resultingcase_id, contactstatus, contactclassification
-  #   FROM public.contact
-  #   WHERE deleted = FALSE and caze_id IS NOT NULL and contactclassification = 'CONFIRMED'" 
-  #   # no need to add "unconfirmed" and  "not a contact" because our focus is only on contacts that resulted to cases
-  #   # only confirmed contacts are permitted to result to cases in app
-  # )
   
   #loading symptom data
   symptoms = dbGetQuery(
@@ -2340,12 +2399,15 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
                          from public.symptoms"
   )
   
-  # load person data
-  person = dbGetQuery(
-    sormas_db,
-    "SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
-    FROM person"
-  ) 
+  ### loading person data  ###
+  # only persons linkded to cases or contacts, events and ep persons are not included in this export
+  # since the goal is to get pairs on infectors and infectees with corresponding onset dates to be used to estimate serial interval
+  queryPerson <- sprintf("SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
+                        FROM public.person
+                        WHERE id  in (%s)", paste("'", base::unique(c(case$person_id_case, contact$person_id_contact )), "'",collapse=",") ) 
+  person = dbGetQuery(sormas_db, queryPerson)
+  
+  
   
   # load region
   region = dbGetQuery(
@@ -2378,9 +2440,8 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     dplyr::mutate(onset_date = as.Date(format(onset_date, "%Y-%m-%d")))
   
   # fixing birth date of person. 
-  person = fixBirthDate(person) # This method assign the birhdate of the person as first January of the year of birth. Improvement will follow
-  person = person %>%
-    dplyr::select(person_id, sex, date_of_birth) #dropping unused varaibles
+  person = fixBirthDate(person) %>% # This method assign the birhdate of the person as first January of the year of birth. Improvement will follow
+        dplyr::select(person_id, sex, date_of_birth, ) #dropping unused varaibles
   
   ## Obtaining dataset to the exported
   # The primary dataset to begin with is the contact since the goel is to export the contact data
@@ -2437,7 +2498,7 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     )
   return(ret)
 }
-save(infectorInfecteeExport, file = "infectorInfecteeExport.R")
+save(infectorInfecteeExport, file = "./utils/infectorInfecteeExport.R")
 
 
 # fixContactJurisdiction, method assign the jurisdiction contacts with mission region and district using that of their source cases
@@ -2451,8 +2512,8 @@ fixContactJurisdiction = function(contCase){
   res = rbind(temp1, temp2)
   return(res)
 }
-save(fixContactJurisdiction, file = "fixContactJurisdiction.R")
-
+save(fixContactJurisdiction, file = "./utils/fixContactJurisdiction.R")
+ 
 ###########  serialIntervalPlot ##############
 # infectorInfecteePair = infectorInfecteeData
 serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi = NULL, maxSi = NULL, niter = 51){ 
@@ -2475,7 +2536,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
   if(distr == "Normal"){
     fit  = selData %>%
       dplyr::pull(serial_interval) %>% # extracting si
-      fitdistrplus::fitdist(data = ., distr = 'norm')  # fiting a normal distribution to the data
+      fitdistrplus::fitdist(data = ., distr = "norm")  # fiting a normal distribution to the data
     
     # Estimating CI for mean and standard deviation by bootstrap method 
     #  1001 were used by default for bootstraping, Add a parameter for this at front end later if needed
@@ -2513,7 +2574,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
-    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% percentile CI", "97.5% percentile CI")
+    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
     siEstmate = round(siEstmate, 2)
     
     #Plotting 
@@ -2542,7 +2603,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
-    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% percentile CI", "97.5% percentile CI")
+    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
     siEstmate = round(siEstmate, 2)
     
     #Plotting 
@@ -2571,7 +2632,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
     
     # extracting estimates
     siEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
-    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% percentile CI", "97.5% percentile CI")
+    colnames(siEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
     siEstmate = round(siEstmate, 2)
     
     #Plotting 
@@ -2599,7 +2660,7 @@ fit_distribution = function(serial_interval){
   serial_interval = serial_interval[is.na(serial_interval) == FALSE] # dropping NA
   #fitting normal dist
   # Parameter1 = mean, Parameter2 = sd
-  nfit  = fitdistrplus::fitdist(data = serial_interval, distr = 'norm')  # fit a normal distribution to the data
+  nfit  = fitdistrplus::fitdist(data = serial_interval, distr = "norm")  # fit a normal distribution to the data
   ## fitting log normal dist
   # Parameter1 = meanlog, Parameter2 = sdlog
   lnfit  = serial_interval[serial_interval > 0]  %>%  # lnorm can not be used to describe a random varaible with negative or 0 values
@@ -2644,7 +2705,7 @@ fitdist_plot = function(x){
   # fitting models. All compared fits must have been obtained with the same dataset, thus we drop all records <=0
   x = x[is.na(x) == FALSE] ## lnorm, gamma, weibull can not be used to describe a random varaible with negative or 0 values
   x = x[x > 0]
-  nfit  = fitdistrplus::fitdist(data = x, distr = 'norm')  # fit a normal distribution to the data
+  nfit  = fitdistrplus::fitdist(data = x, distr = "norm")  # fit a normal distribution to the data
   # Parameter1 = meanlog, Parameter2 = sdlog
   lnfit  = fitdistrplus::fitdist(data = x, distr = "lnorm")  
   # Parameter1 = shape, Parameter2 = scale
@@ -2658,7 +2719,7 @@ fitdist_plot = function(x){
   plot.new() ## clean up device
   # plotting histrogram and theretical densities
   denscomp(list(wfit, gfit, lnfit, nfit), legendtext=c("Weibull", "gamma", "lognormal", "normal"),
-           main = NULL, probability = FALSE, fitlwd = 2 )
+           main = NULL, probability = TRUE, fitlwd = 2 )
   density <- recordPlot() # saving immage
   plot.new() ## clean up device
   # plotting Q-Q plot
@@ -2685,14 +2746,14 @@ summary_statistics = function(x){
   # compute nunber and proportion of records <=0
   n = length(x)
   n_asymp_trans = length(x[x<=0])
-  p_asymp_trans = round(n_asymp_trans/n*100, 2)
-  ret = data.frame(n, summary_temp, n_asymp_trans, p_asymp_trans)
+  ret = data.frame(n, summary_temp, n_asymp_trans)
   ret = ret %>%
-    dplyr::rename(N = n, Minimum = Min., Maximum = Max.,  Quart.1 = X1st.Qu., Quart.3 = X3rd.Qu., "n_value <= 0" = n_asymp_trans, "prop_value <= 0" = p_asymp_trans)
+    dplyr::rename(N = n, Minimum = Min., Maximum = Max.,  Quart.1 = X1st.Qu., Quart.3 = X3rd.Qu., "n_value <= 0" = n_asymp_trans)
+  rownames(ret) = c("")
   return(ret)
 }
 save(summary_statistics, file = "./utils/summary_statistics.R")
-#ben = summary_statistics(x = serial_interval)
+#ben = summary_statistics(x = infectorInfecteeData$serial_interval)
 
 #fit distributions specofied by user to serial intervals and compute CI for sample mean
 serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = NULL, maxSi = NULL){ 
@@ -2702,20 +2763,24 @@ serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = N
   # minSi and maxSi are the min and max user specified values of si to be used for the analysis
   # fiting Normal, Weibull, Gamma, Lognormal distributions to serial intervals 
   
-  # filtering based on user specified min and max values of serial interval.
+  # dropping rows with missing values for serial interval. This can heppen when one of the pairs has a missing onset date
+  selData = infectorInfecteePair[is.na(infectorInfecteePair$serial_interval) == FALSE, ] # dplyr::filter(serial_interval != 'NA')
+  
+  # filtering selData based on user specified min and max values of serial interval.
+  # return a vextor of SI values called x
   if(any(is.null(c(minSi, maxSi)))) {
-    minSi = min(infectorInfecteePair$serial_interval, na.rm = T)
-    maxSi = max(infectorInfecteePair$serial_interval, na.rm = T)
+    minSi = min(selData$serial_interval, na.rm = T)
+    maxSi = max(selData$serial_interval, na.rm = T)
   }
   siVector = c(minSi: maxSi)
-  selData <- infectorInfecteePair %>%
-    dplyr::filter(serial_interval != 'NA' & serial_interval %in% siVector)
+  x <- selData %>%
+    dplyr::filter(serial_interval %in% siVector) %>% 
+    pull(serial_interval) # or .$serial_interval
   
-  x = selData$serial_interval
-  x = x[is.na(x) == FALSE]  # dropping NA
+  # Fitting user specified distribution to SI
   ## normal distribution
   if(distr == "Normal"){
-    fit  = fitdistrplus::fitdist(data = x, distr = 'norm')  # fit a normal distribution to the data
+    fit  = fitdistrplus::fitdist(data = x, distr = "norm")  # fit a normal distribution to the data
     # Computing 95% CI using pivot method
     n = fit$n # number of data points used to fit the model
     mean_si = fit$estimate[1] # the sample mean
@@ -2728,6 +2793,7 @@ serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = N
   }
   
   ## log normal
+  # ref: https://stats.stackexchange.com/questions/469311/how-to-calculate-mean-and-sd-of-lognormal-distribution-based-on-meanlog-an
   if(distr == "Lognormal"){
     fit  = x[x > 0]  %>%  # lnorm can not be used to describe a random varaible with negative or 0 values
       fitdistrplus::fitdist(data = ., distr = "lnorm")  
@@ -2736,8 +2802,7 @@ serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = N
     mu = fit$estimate[1] # mean in log scale ie meanlog
     sigma = fit$estimate[2]  # # sd in log scale ie sdlog
     mean_si = exp(mu + sigma^2/2 ) # mean = exp (mu + sigma^2/2)
-    Varaince_mean_si = (exp(sigma^2) -1 ) * exp(2*mu + sigma^2) # varaince  = (exp(sigma^2) -1) * ( exp(2*mu+sigma^2))
-    sd_mean = sqrt(Varaince_mean_si)
+    sd_mean = (exp(mu + 1/2*sigma^2)) * sqrt( exp(sigma^2)-1) # OR  sqrt(varaince)  = sqrt((exp(sigma^2) -1) * ( exp(2*mu+sigma^2)))
     # 95% CI
     ll = mean_si - 1.96*sd_mean/sqrt(n)
     ul = mean_si + 1.96*sd_mean/sqrt(n) # this can also be computed using  confint(fit, level = 0.95)
@@ -2787,21 +2852,29 @@ save(serial_interval_mean_CI, file = "./utils/serial_interval_mean_CI.R")
 #serial_interval_mean_CI( infectorInfecteePair = infectorInfecteeData, distr = "Normal", minSi = NULL, maxSi = NULL )
 
 ## offspringDistPlot ------
-offspringDistPlot = function(infectorInfecteePair, niter = 51){ 
+# This method used the output data called infectorInfecteePair
+# This method fit a NB dist to the offsprint distr data and estimate R and k
+offspringDistPlot = function(infectorInfecteePair, niter = 51, polyDegree = NA){ 
+  # Deleting duplicate pairs of infector-infectee
+  # The data for infectorInfecteePair can have duplicates since a person can infect the same person more than once
+  # The infectorInfecteePair should have unique infector-infectee pairs
+  infectorInfecteePair = infectorInfecteePair %>% 
+  dplyr::distinct_at(. , vars(person_id_case_infector, person_id_case_infectee), .keep_all = TRUE)
+  
   #counting the number of offsprings per infector
   offspring <- infectorInfecteePair %>%
-    dplyr::select(case_id_infector) %>%
-    dplyr::group_by(case_id_infector) %>%
+    dplyr::select(person_id_case_infector) %>%
+    dplyr::group_by(person_id_case_infector) %>%
     dplyr::count() %>%
     dplyr::arrange(desc(n))
   
   # extracting infectee nodes
   infectee <- infectorInfecteePair %>%
-    dplyr::select(case_id_infectee) %>%
-    tidyr::gather() #%>%
+    dplyr::select(person_id_case_infectee) %>%
+    tidyr::gather() 
   #extracting infector nodes
   infector <-  infectorInfecteePair %>%
-    dplyr::select(case_id_infector) %>%
+    dplyr::select(person_id_case_infector) %>%
     tidyr::gather()
   
   # selecting nodes that are linked to both infectors and infectees, thus duplicates
@@ -2811,7 +2884,7 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51){
     dplyr::select(value) %>% # keep only id
     dplyr::distinct()   # selecte distict node id, this should be person id in this case.
   
-  # selecting terminal infectees nodes and sum them. 
+  # selecting terminal infectee nodes and sum them. 
   # This is a subset of termainal doses in the db because of infectorInfecteePair data
   nterminal_infectees <- infectee %>%
     dplyr::select(value) %>%
@@ -2820,44 +2893,50 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51){
     nrow() 
   
   #create vector of complete offspring distribution with terminal cases having zero secondary cases
-  complete_offspringd <- enframe(c(offspring$n, rep(0,nterminal_infectees))) # convert vector to dataframe
+  complete_offspringd <- tibble::enframe(c(offspring$n, rep(0,nterminal_infectees))) # convert vector to dataframe
   
   #fit negative binomial distribution to the final offspring distribution
   fit <- complete_offspringd %>%
     dplyr::pull(value) %>%
-    fitdistrplus::fitdist(., distr = 'nbinom')
-  
+    fitdistrplus::fitdist(., distr = "nbinom", method = "mle")
+  # fit$estimate[[1]] = k or overdispersion parameter and fit$estimate[[1]]  = mu/ mean/ R
   # Estimating CI by bootstrap method 
   fit_boot <- summary(fitdistrplus::bootdist(fit, niter = niter))  
   
   # extracting estimates
   rkEstmate = dplyr::bind_cols(data.frame(fit$estimate), data.frame(fit_boot$CI) ) # extracting estimates and CI as a data frame
-  colnames(rkEstmate) = c("Estimate", "Bootstrap median", "2.5% percentile CI", "97.5% percentile CI")
-  rkEstmate = round(rkEstmate, 2) # mu = nbfit$estimate[[2]] = mean = overall reporoduction number and  size = nbfit$estimate[[1]] = dispersion parameter k 
-  rownames(rkEstmate) = c("Reproduction number (R)" , "Dispersion parameter (k)" )
+  colnames(rkEstmate) = c("Estimate", "Bootstrap median", "2.5% PCI", "97.5% PCI")
+  rkEstmate = round(rkEstmate, 3) # mu = nbfit$estimate[[2]] = mean = overall reporoduction number and  size = nbfit$estimate[[1]] = dispersion parameter k 
+  rownames(rkEstmate) = c("k" , "R" )
   #plot offspring distribution with negative binomial parameters
   #Setting polynomial degree
-  polyDegree = length(unique(complete_offspringd$value))
-  if(polyDegree > 9){
-    polyDegreePlot = 9 # Think of adding parameter for user defined if need be.
-  } else {
-    polyDegreePlot = polyDegree-1 # polyDegreePlot should be less than the number of unique values
+  if(is.na(polyDegree) == TRUE){
+    polyDegree = length(unique(complete_offspringd$value))
+    if(polyDegree > 9){
+      polyDegreePlot = 9 # Think of adding parameter for user defined if need be.
+    } else {
+      polyDegreePlot = polyDegree-1 # polyDegreePlot should be less than the number of unique values
+    }
+  } else{
+    polyDegreePlot = polyDegree
   }
   offspringDistributionPlot = ggplot(data = complete_offspringd) +
     geom_histogram(aes(x=value, y = ..density..), fill = "#dedede", colour = "Black", binwidth = 1) +
-    geom_point(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), size = 1.5) +
-    stat_smooth(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), method = 'lm', formula = y ~ poly(x, polyDegreePlot), se = FALSE, size = 0.5, colour = 'black') +
+    geom_point(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), size = 1) +
+    stat_smooth(aes(x = value, y = dnbinom(x = value, size = fit$estimate[[1]], mu = fit$estimate[[2]])), method = 'lm', 
+                formula = y ~ poly(x, polyDegreePlot), se = FALSE, size = 0.8, colour = 'black', linetype = 2) +
     expand_limits(x = 0, y = 0) +
-    scale_x_continuous("Secondary cases per infector", expand = c(0, 0), breaks = seq(min(complete_offspringd$value), max(complete_offspringd$value), by = 5))  +
-    scale_y_continuous("Proportion of onward transmission", limits = c(0,0.7), expand = c(0, 0)) +
+    scale_x_continuous("Secondary cases per infector", expand = c(0, 0), breaks = seq(min(complete_offspringd$value), max(complete_offspringd$value), by = 1))  +
+    scale_y_continuous("Proportion of onward transmission", expand = c(0, 0)) +
     theme_classic() +
-    theme(aspect.ratio = 1)
-  ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot)  # list object: table of estimates and image
+    theme(aspect.ratio = 0.7)
+  # extracting node degree
+  offspringDegree = complete_offspringd$value
+  ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot, offspringDegree = offspringDegree)  # list object: table of estimates and image
   
 }
 save(offspringDistPlot, file = "./utils/offspringDistPlot.R")
-#retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
-
+# retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
 
 ########## contactDataExport ############
 contactDataExport = function(sormas_db){
@@ -3074,8 +3153,6 @@ contactDataExport = function(sormas_db){
   
   return(list(contRegionDist = contCaseRegionDist, nodeLineList = nodeListCombined, elist = elistCombined)) 
 }
-save(contactDataExport, file = "contactDataExport.R")
-
-
+save(contactDataExport, file = "./utils/contactDataExport.R")
 
 #################"

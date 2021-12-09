@@ -15,16 +15,15 @@ shinyUI(bootstrapPage(
                        sidebarLayout(
                          #div( id ="Sidebar",
                          sidebarPanel(
-                           
                            # Filter specific to network diagram only
-                           span(tags$i(h6("Filter options for network diagram. Please filter by region, district and click on Visualize network diagram to plot network diagram.")), style="color:#045a8d"),
+                           span(tags$i(h5("Please select filter options and click on the `Apply changes` icon below. Click on `Visualize network diagram` to plot the network diagram.")), style="color:#045a8d"),
                            pickerInput("diseaseUi", "Disease", 
                                        choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
                                                    "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
                                        selected = c("CORONAVIRUS"),
                                        multiple = FALSE),
                            #br(),
-                           dateRangeInput("reportdateUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
+                           dateRangeInput("reportdateUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                                           max = NULL, format = "dd-mm-yyyy", startview = "month",
                                           weekstart = 0, language = "en", separator = " to ", width = NULL,
                                           autoclose = TRUE),  # replace start = Sys.Date()-30 in case you need to show default statistics for last 30 days only
@@ -43,9 +42,6 @@ shinyUI(bootstrapPage(
                           ),
                           # filter by district
                           uiOutput('pickerInputDistrict2'),
-                          # checkboc to plot notwork diagram
-                          checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", TRUE),
-                          
                           # filter by entity type
                           pickerInput(
                             inputId = "contactEntitiyTypeUi", 
@@ -97,11 +93,11 @@ shinyUI(bootstrapPage(
                             selected = NULL,
                             multiple = TRUE
                           ),
-                          
-                          checkboxInput("resultingCaseOnlyUi", "Only exposures with resulting cases ?", TRUE),
+                          checkboxInput("resultingCaseOnlyUi", "Only chains with resulting cases ?", TRUE),
                           checkboxInput("excludeHealthyEventPartUi", "Exclude healthy event participant ?", FALSE),
-                          checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
                           checkboxInput("activeEventsOnlyUi", "Only chains with active events ?", FALSE),
+                          checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
+                          checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", TRUE),
                          selectizeInput(
                            inputId = "visSelectedChainsUi"
                            , label = h5("Source infector node IDs (comma delimited)")
@@ -112,20 +108,26 @@ shinyUI(bootstrapPage(
                          numericInput("nodeDegreeMinUi", h5("Minimum source infector node contact"), value = 1, min = 1),
                         textInput("visSingleNodeUi", label = h5("Only contacts of this ID"),
                                   value = "", placeholder = "Enter uuid of node ..." ),
+                        
+                        # adding action button to apply filters
+                       actionButton(inputId = "transChainAction", label = "Apply changes", icon =  icon("running"),
+                                     class = "btn-primary", width = '65%'), #  class = "btn-primary" for normal size icon, ref: https://www.jquery-az.com/boots/demo.php?ex=12.0_1
+                       #span(tags$i(h6("Click this button to update the output displayed on this dashboard each time you modify the filters.")), style="color:#045a8d"),
+                       
                         # add logout button to UI
-                        shinyauthr::logoutUI(id = "logout")
+                         shinyauthr::logoutUI(id = "logout"),
                           #br(),
                           #hr(),
                           #h6("Powered by:"),
                           # tags$img(src = "HZI_Logo.jpg", height = 50, width = 200) #addtiing HZI logo to sidebar panel
-                           ,
                           width = 2),
                          #), #end of div to activate option to dis sidebar panel 
                          
                          mainPanel(
                            width = 10,
                            # add login panel UI function
-                           shinyauthr::loginUI(id = "login", title = "Please authenticate to visualize results"),
+                           shinyauthr::loginUI(id = "login", title = "Please authenticate to begin analysis. For Demo users, use
+                                              username: Demo password: TYFBF5-X6GF5W"),
                            # add logout button to UI
                            # div(class = "pull-right", shinyauthr::logoutUI(id = "logout")), # can also be "pull-left" or "pull-middle"
                            
@@ -217,7 +219,7 @@ shinyUI(bootstrapPage(
                                               status ="primary", #  "success", # or "warning", 
                                               solidHeader = FALSE,
                                               collapsible = TRUE,
-                                              collapsed = TRUE,
+                                              collapsed = FALSE,
                                               width = 15,
                                               #height = 142, # 118, # 142,
                                               verbatimTextOutput("nodeBetweenessSummary")
@@ -241,7 +243,7 @@ shinyUI(bootstrapPage(
                                               status ="primary", #  "success", # or "warning", 
                                               solidHeader = FALSE,
                                               collapsible = TRUE,
-                                              collapsed = TRUE,
+                                              collapsed = FALSE,
                                               width = 15,
                                              #height = 142, # 118, # 142,
                                               verbatimTextOutput("nodeDegreeSummary")
@@ -253,126 +255,21 @@ shinyUI(bootstrapPage(
                        ) 
                        
              ),
-## end of network diagram analysis              
-             
-##### contat data analysis -----
-tabPanel("Contact data analysis", icon = icon("handshake"),
-         sidebarLayout( position = "left",
-                        sidebarPanel(
-                          span(tags$i(h6("Visualization options.")), style="color:#045a8d"),
-                          width = 2,
-                          pickerInput("diseaseContactUi", "Disease", 
-                                      choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
-                                                  "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
-                                      selected = c("CORONAVIRUS"),
-                                      multiple = FALSE),
-                          #br(),
-                          dateRangeInput("reportdateContactUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
-                                         max = NULL, format = "dd-mm-yyyy", startview = "month",
-                                         weekstart = 0, language = "en", separator = " to ", width = NULL,
-                                         autoclose = TRUE),
-                          
-                          # Filter specific event region and district
-                          pickerInput(
-                            inputId = "regionContactUi",
-                            label = 'Region of contact',
-                            choices = sort(levels(as.factor(contRegionDist$region_name))),
-                            options = list(
-                              `actions-box` = TRUE,
-                              size = 12
-                            ),
-                            selected = NULL,
-                            multiple = TRUE
-                          )
-                        ),
-                        
-                      mainPanel(
-                        tabsetPanel(
-                          tabPanel("Contact dashboard",
-                                   wellPanel(style = "background: white", 
-                                            #h4('Contact classification'),
-                                             fluidRow(width = 12,
-                                               column(2, infoBoxOutput("allCont", width = 12)),
-                                               column(2, infoBoxOutput("contConfirmed", width = 12)),
-                                               column(2, infoBoxOutput("contUnconfirmed", width = 12)),
-                                               column(2, infoBoxOutput("contNot", width = 12)),
-                                               column(2,infoBoxOutput("activeCont", width = 12)),
-                                               column(2,infoBoxOutput("convertedToCase", width = 12))
-                                             )
-                                             ,
-                                             # h4('Contact status'),
-                                             fluidRow(width=12,
-                                                      # column(2,infoBoxOutput("activeCont", width = 12)),
-                                                      # column(2,infoBoxOutput("convertedToCase", width = 12)),
-                                                      column(2,infoBoxOutput("dropped", width = 12)),
-                                                      column(2,infoBoxOutput("inactiveCont", width = 12)),
-                                                      column(2, infoBoxOutput("minConPerCase", width = 12)),
-                                                      column(2,infoBoxOutput("medianConPerCase", width = 12)),
-                                                      column(2, infoBoxOutput("meanConPerCase", width = 12)),
-                                                      column(2,infoBoxOutput("maxConPerCase", width = 12))
-                                                      )
-                                             
-                                   ),
-                                   
-                                   plotOutput("plot", width = "100%", height = "90vh"),downloadButton("downloadBarplot", "Download this plot")
-                                   , tags$br(),tags$br(),
-                                   " Each bar in this plot represents a region or district and the height of the bar corresponds to the number of contacts 
-                                      in the region or district.")
-                          ,
-                          tabPanel("Contacts per case", plotOutput("plotContPerCase", width = "100%", height = "90vh"),  downloadButton("downloadContPerCasePlot", "Download this plot"), tags$br(),tags$br(),
-                                   " Contact per case."),
-                          tabPanel("Contacts per case export",
-                                   numericInput("maxrows", "Rows to show", 20),
-                                   verbatimTextOutput("conPerCaseExpTable"),
-                                   downloadButton("conPerCaseExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                   "Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table"),
-                          tabPanel("Contact by region export",
-                                   numericInput("maxrowsContByRegion", "Rows to show", 20),
-                                   verbatimTextOutput("conPerGerionExpTable"),
-                                   downloadButton("conPerGerionExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                   "Each row in this data is a region with corresponding number of contacts.
-                                         The data was obtained by summing the number of contacts in each region.
-                                         The resgion of the source case was used in case the region of the contact was missing."
-                          ),
-                          tabPanel("Serial Interval Export", icon = icon("table"),
-                                   width = 10,
-                                  mainPanel(width=12,
-                                             dashboardPage(
-                                               # dashboardHeader(title = "SI"),
-                                               dashboardHeader( ),
-                                               dashboardSidebar( disable = TRUE,
-                                                                 pickerInput("conPerson", "Contact entity type", choices = c("Contact", "Contact person"), # option to view contact or contact person
-                                                                             selected = c("Contact"),
-                                                                             multiple = FALSE)
-                                               )
-                                               ,
-                                               dashboardBody(
-                                                 numericInput("maxrowsContSI", "Rows to show", 20),
-                                                 verbatimTextOutput("siExpTable"),
-                                                 downloadButton("siExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                                 "Each row in this data is a contact between a case person and a contact person.
-                                         The data was obtained by calculating the number of days between the symptom onset of the source case person and that of the secondary case (contact) person.
-                                         Only contacts that resulted to a case were cosidered."
-                                               )
-                                             ))
-                          ),
-                          tabPanel("Detailed contact export",
-                                   numericInput("maxrowsContactDetailed", "Rows to show", 20),
-                                   verbatimTextOutput("conRegionDistExpTable"),
-                                   downloadButton("conRegionDistExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                   "Each row in this data is a contact between a case person and a contact person. The data was obtained by merging contacts and their cases, thus the columns contains variables for contacts and cases.",
-                                   "Contacts wihout source cases or cases without contacts are not included in this section of contact data analysis")
-                          )
-                        , width = 10)
-              )
-         ),
-             
+## end of network diagram analysis      
+         
 ##### Case data analysis ######## 
              tabPanel( "Case data analysis", icon = icon("procedures"),
                        sidebarLayout(
                          sidebarPanel( 
-                           span(tags$i(h6("Visualization options.")), style="color:#045a8d"),
-                           
+                           span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
+                           actionButton(inputId = "caseDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+                                        class = "btn-primary", width = '55%'),
+                           hr(),
+                           conditionalPanel(condition = "input.tabs1==0",
+                                            radioButtons("caseDashboardIndicatorTypeUi","Indicator type",  
+                                                         choices = c("Count","Proportion"),
+                                                         selected = c("Count")) 
+                           ),
                            conditionalPanel(condition = "input.tabs1==1",
                                             radioButtons("timeUnitEpicurveUi","Choose an option",  choices = c("Day","Epi-week", "Month"),selected = c("Epi-week"))
                                             ),
@@ -388,7 +285,7 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                            conditionalPanel(condition = "input.tabs1==4",
                                             radioButtons("caseMapshapesUi","Map shapes",  choices = c("By region","By district"),selected = c("By region")),
                                             #radioButtons("caseleafletMapUi","Map type",  choices = c("Shapfiles","Leaflet"),selected = c("Shapfiles")),
-                                            radioButtons("caseIndicatorTypeMapUi","Indicator type",  choices = c("Count","Proportion", "Incidence proportion / 100,000"),selected = c("Incidence proportion / 100,000")),
+                                            radioButtons("caseIndicatorTypeMapUi","Indicator type",  choices = c("Count","Proportion", "Incidence proportion / 100,000"),selected = c("Count")),
                                             # filter map by Region of case
                                             # Only shapes of the selected regions would be plotted
                                             pickerInput(
@@ -404,12 +301,6 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                             )
                                             ),
                            conditionalPanel(condition = "input.tabs1==5",
-                                            span(tags$i(h6("Estimation methods for Rt, t = week. We first need to estimate the serial interval (SI) and use it to estimate Rt. 
-                                                           SI can be estimated parametrically by specifying the mean and std for SI OR by using the observed tramission network data.")), style="color:#045a8d"),
-                                            radioButtons("rtMethodUi", h5("SI estimation method"),  choices = c("Parametric distribution","Transmission data"),
-                                                         selected = c("Parametric distribution")),
-                                            
-                                           # numericInput("si_rt_UI", label = h5("Specify SI mean"), value = 5.2),
                                             # serial interval distribution to use in estimating Rt
                                             pickerInput(
                                               inputId = "si_rt_UI",
@@ -425,49 +316,39 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                               selected = "Gamma",
                                               multiple = FALSE
                                             ),
+                                           radioButtons("rtMethodUi", h5("SI estimation method"),  choices = c("Parametric distribution","Transmission data"),
+                                                        selected = c("Parametric distribution")),
                                            # Only show mean and sd when method == parametric
                                            # ref: https://mran.microsoft.com/snapshot/2015-06-24/web/packages/shinyjs/README.html
                                            shinyjs::hidden(
                                              div(id = "showMeanSdSIUI",
-                                                 numericInput("mean_siUI", label = h5("Specify SI mean"), value = 5.2),
-                                                 numericInput("std_siUI", label = h5("Specify SI Std Dev"), value = 2.3 )
+                                                 numericInput("mean_siUI", label = h5("Specify SI mean"), value = 5.2, min = 1), # Mean SI must be > 1 for parametric distribution
+                                                 numericInput("std_siUI", label = h5("Specify SI Std Dev"), value = 2.3, min =0.01 )
                                              )
                                            ), 
                                            
-                                            sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 0, 
+                                            sliderInput("siUi", label = h5("Choose maximum value for SI"), min = 1, 
                                                         max = 30, step = 1, value = 14),
                                             radioButtons("rsiUi", h5("Ploting parameters"),  choices = c("all","R","SI"), selected = c("R"), inline = TRUE),
-                                            checkboxInput("rtLegandUi", label= h5("Show legend of estimated Rt plot?"), value = FALSE)
+                                            checkboxInput("rtLegandUi", label= h5("Show legend of estimated Rt plot?"), value = FALSE),
+                                           span(tags$i(h5("This section estimates the time dependent reproduction number Rt, t = week. 
+                                            The data used are the case-based incidence data and transmission network data.")), style="color:#045a8d"),
+                                           span(tags$i(h5("We begin by estimating the serial interval (SI) distribution and use it to estimate Rt. 
+                                                           The SI distribution can be estimated parametrically by specifying the mean and std for SI OR by using the tramission network data.")), 
+                                                style="color:#045a8d"),
+                                           
+                                           span(tags$i(h5("For `SI estimation method` using transmission data, the analysis is based on 1500 MCMC iterations and may take some time, depenting on your data size.")), 
+                                                style="color:#045a8d")
+                                           
                                             ),
                            conditionalPanel(condition = "input.tabs1==6",
-                                            pickerInput("diseaseCaseUi", "Disease", 
-                                                        choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA","CSM","EVD","NEW_INFLUENZA", "PLAGUE",
-                                                                    "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
-                                                        selected = c("CORONAVIRUS"),
-                                                        multiple = FALSE),
-                                            dateRangeInput("reportdateCaseUi","Report date (dd-mm-yyyy)" , start = Sys.Date()-delay, end = Sys.Date(), min = NULL,
-                                                           max = NULL, format = "dd-mm-yyyy", startview = "month",
-                                                           weekstart = 0, language = "en", separator = " to ", width = NULL,
-                                                           autoclose = TRUE),
-                                            # filter by Region of case                 
-                                            pickerInput(
-                                              inputId = "regionCaseUi",
-                                              label = 'Region of case',
-                                              choices = sort(levels(as.factor(casePersonRegionDist$region_name))),
-                                              options = list(
-                                                `actions-box` = TRUE,
-                                                size = 12
-                                              ),
-                                              selected = NULL,
-                                              multiple = TRUE
-                                            ),
-                                            # # filter by district
-                                            uiOutput('pickerInputdistrictCaseUi'),
-                                            radioButtons("caseByRegionIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion", "Incidence Proportion / 100,000"),selected = c("Count"))
+                                            radioButtons("caseByRegionIndicatorTypeUi","Indicator type",  
+                                                         choices = c("Count","Proportion", "Incidence Proportion / 100,000"),
+                                                         selected = c("Count")) 
                                             ),
                            conditionalPanel(condition = "input.tabs1==7",
                                             sliderInput("serialIntervalRangeUi", label = h5("Choose the serial interval range"), min = -30, 
-                                                        max = 50, step = 1, value = c(0, 30)),
+                                                        max = 50, step = 1, value = c(1, 30)),
                                             pickerInput(
                                               inputId = "siDistMethodUi", 
                                               label = h5('Choose distribution with best fit'),
@@ -481,21 +362,87 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                 maxOptions = 2
                                               )
                                             ),
-                                            #checkboxInput("boot_CI_SI_UI", h5("Compute 95% CI of model parameters by bootstrap ?"), FALSE),
-                                            numericInput("niter_SI_UI", label = h5("Specify number of bootstrap iteration"), value = 51),
+                                            numericInput("niter_SI_UI", label = h5("Specify number of bootstrap iteration"), value = 100),
                                             checkboxInput("showModelDiagnosticsPanel_SI",  "Show model disgnostics plots", FALSE),
                                             br(),
-                                            span(tags$i(h5(" This section estimates the serial interval (SI), and superspreading parameter (k). 
-                                                           Different distributions are fitted to the observed SI. After choosing the distribution with best fit based on smallest AIC, 
-                                                           the system would then estimate the mean SI and 95% CI. The 95% percentile confidence in interval of the chosen model is 
-                                                           estimated by bootstrap. A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
-                                                           The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the superspreading parameter (k).")), style="color:#045a8d"),
-                                            
+                                            span(tags$i(h5(" This section estimates the serial interval (SI). The data used here is the case-based data of infector-infertee 
+                                                           pairs extracted from thet transmission network data."
+                                                           )), style="color:#045a8d"),
+                                            span(tags$i(h5("Different distributions are fitted to the observed SI. After choosing the distribution with best fit based on smallest AIC, 
+                                                           the app then estimate the mean SI and 95% CI using bootstrap." 
+                                                           )), style="color:#045a8d")
+                           ), 
+                           conditionalPanel(condition = "input.tabs1==8",
+                                            numericInput("niter_Rk_UI", label = h5("Specify number of bootstrap iteration"), value = 100, min = 50, max=5000),
+                                            numericInput("polyDegree_RtK_UI", label = h5("Specify degree of the polynomial curve"),  min = 1, max=9, value = NA),
+                                            br(),
+                                            span(tags$i(h5("This section estimates the superspreading parameter (k) and effective reproduction number (R). 
+                                                           The data used here is the case-based infector-infertee pairs extracted from thet transmission network data."
+                                            )), style="color:#045a8d"),
+                                            span(tags$i(h5("A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
+                                                           The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the 
+                                                           superspreading parameter (k). The 95% percentile confidence interval is estimated by bootstrap.
+                                                           ")), style="color:#045a8d")
                            ),
-                                            width = 2),
-                         mainPanel( 
-                           tabsetPanel(id="tabs1",
-                                       tabPanel("Case dashboard", value = 6,
+                           width = 2),
+                         
+                         mainPanel(
+                           fluidRow(
+                             column(2, 
+                                   pickerInput("diseaseCaseUi", "Disease",
+                                               choices = sort(levels(as.factor(casePerson$disease))),
+                                                selected = c("CORONAVIRUS"),
+                                                multiple = FALSE)
+                                    ),
+                             column(2,
+                                    dateRangeInput("reportdateCaseUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
+                                                   max = NULL, format = "dd-mm-yyyy", startview = "month",
+                                                   weekstart = 0, language = "en", separator = " to ", width = NULL,
+                                                   autoclose = TRUE)
+                             ),
+                             column(2, 
+                                    pickerInput(
+                                      inputId = "regionCaseUi",
+                                      label = 'Region of case',
+                                      choices = sort(levels(as.factor(casePersonRegionDist$region_name))),
+                                      options = list(
+                                        `actions-box` = TRUE,
+                                        size = 12
+                                      ),
+                                      selected = NULL,
+                                      multiple = TRUE
+                                    )
+                             ),
+                             column(2, 
+                                    uiOutput('pickerInputdistrictCaseUi') # ui element for district
+                             ),
+                             column(2, pickerInput(
+                               inputId = "classificationCaseUi",
+                               label = 'Classification of case',
+                               choices = sort(levels(as.factor(casePersonRegionDist$caseclassification))),
+                               options = list(
+                                 `actions-box` = TRUE,
+                                 size = 12
+                               ),
+                               selected = NULL,
+                               multiple = TRUE
+                             )),
+                             column(2, pickerInput(
+                               inputId = "facilityCaseUi",
+                               label = 'Facility id of case',
+                               choices = sort(levels(as.factor(casePersonRegionDist$healthfacility_id))),
+                               options = list(
+                                 `actions-box` = TRUE,
+                                 size = 12
+                               ),
+                               selected = NULL,
+                               multiple = TRUE
+                             ))
+                           )
+                           ,
+                           #  br(),
+                           tabsetPanel( id="tabs1",
+                                       tabPanel("Case dashboard", value = 0,
                                                 wellPanel(style = "background: white",
                                                           h4('Case classification'),
                                                           fluidRow(width = 12,
@@ -589,7 +536,8 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                                  wellPanel(
                                                                    h4(helpText("Medel selection: Goodness-of-fit criteria and statistics.  
                                                                                      Model with smallest values correspond to distribtion with best fit." )),
-                                                                   div( DT::dataTableOutput("si_model_fitTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
+                                                                   div( DT::dataTableOutput("si_model_fitTable", width = "100%", height = "auto"), 
+                                                                        style = "font-size: 100%; width: 100%")
                                                                  )
                                                           )
                                                 ), ## end of flud row
@@ -632,20 +580,26 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                           ),
                                                           column(6,
                                                                  wellPanel(
-                                                                    h4(helpText("Meam estimate and 95% CI for serial interval based on distribtion with best fit to the data" )),
-                                                                   # div( DT::dataTableOutput("si_mean_CI_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
-                                                                   fluidRow(
-                                                                     width = 12,
-                                                                     div( DT::dataTableOutput("si_mean_CI_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
-                                                                   ),
-                                                                   br(),
-                                                                   hr(),
-                                                                   hr(),
-                                                                   
                                                                    fluidRow(
                                                                      width = 12,
                                                                      box(
                                                                        h4(helpText("Summary statistics for observed serial interval")),
+                                                                       #footer = "Node degree",
+                                                                       status ="primary", #  "success", # or "warning",
+                                                                       solidHeader = FALSE,
+                                                                       collapsible = TRUE,
+                                                                       collapsed = FALSE,
+                                                                       width = 15,
+                                                                       # height = 148, # 118, # 142,
+                                                                       # verbatimTextOutput("si_summaryTable"),
+                                                                       div(DT::dataTableOutput("si_summaryTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
+                                                                       h5(helpText("n_value <= 0: number of records with negative or zero serial interval. This corresponds to assymptomatic transmissiion."))
+                                                                     )
+                                                                   ),
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     box(
+                                                                       h4(helpText("Parameter estimate and 95% CI of distribtion with best fit to the data")),
                                                                        #footer = "Node degree",
                                                                        status ="primary", #  "success", # or "warning", 
                                                                        solidHeader = FALSE,
@@ -653,72 +607,90 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                                        collapsed = FALSE,
                                                                        width = 15,
                                                                        # height = 148, # 118, # 142,
-                                                                       verbatimTextOutput("si_summaryTable"),
-                                                                       h6(helpText("n_value <= 0: number of records with negative of zero serial interval. This corresponds to assymptomatic transmissiion.
-                                                                                    prop_value <= 0: Proportion of  assymptomatic transmissiion pairs"))
+                                                                       div( DT::dataTableOutput("SI_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
+                                                                       h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
+                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
+                                                                                  to complete."))
+                                                                     )
+                                                                   ),
+                                                                   fluidRow(
+                                                                     width = 12,
+                                                                     box(
+                                                                       h4(helpText("Estimate of mean serial interval")),
+                                                                       #footer = "Node degree",
+                                                                       status ="primary", #  "success", # or "warning",
+                                                                       solidHeader = FALSE,
+                                                                       collapsible = TRUE,
+                                                                       collapsed = FALSE,
+                                                                       width = 15,
+                                                                       # height = 148, # 118, # 142,
+                                                                       # verbatimTextOutput("si_summaryTable"),
+                                                                       div( DT::dataTableOutput("si_mean_CI_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
                                                                      )
                                                                    )
                                                                    )
                                                           )
                                                 ), ## end of flud row
                                                 fluidRow( width = 10,
-                                                          column(6,
+                                                          column(12,
                                                                  wellPanel(
-                                                                   h4(helpText("Serial interval and fitted distribtion")),
+                                                                   h4(helpText("Serial interval and fitted distribtion for model with best fit to the data")),
                                                                    fluidRow(
                                                                      width = 12,
                                                                      plotOutput("distribution_SI_plot", width = "100%", height = "60vh")
                                                                    )
-                                                                   ,
-                                                                   fluidRow(
-                                                                     width = 12,
-                                                                     box(
-                                                                       h4(helpText("Estimates of serial interval")),
-                                                                       #footer = "Node degree",
-                                                                       status ="primary", #  "success", # or "warning", 
-                                                                       solidHeader = FALSE,
-                                                                       collapsible = TRUE,
-                                                                       collapsed = FALSE,
-                                                                       width = 15,
-                                                                      # height = 148, # 118, # 142,
-                                                                       verbatimTextOutput("SI_estimate"),
-                                                                      h6(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
-                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
-                                                                                  to complete."))
-                                                                     )
-                                                                   )
-                                                                 )
-                                                          )
-                                                          ,
-                                                          column(6,
-                                                                 wellPanel(
-                                                                   h4(helpText("Distributions of number of infectee per infector (offsping distribution)")),
-                                                                   fluidRow(
-                                                                     width = 12,
-                                                                     plotOutput("distribution_k_plot", width = "100%", height = "60vh")
-                                                                   ),
-                                                                   fluidRow(
-                                                                     width = 12,
-                                                                     box(
-                                                                       h4(helpText("Estimates of reproduction number and dispersion parameter using NB distribution")),
-                                                                       #footer = "Node degree",
-                                                                       status ="primary", #  "success", # or "warning", 
-                                                                       solidHeader = FALSE,
-                                                                       collapsible = TRUE,
-                                                                       collapsed = FALSE,
-                                                                       width = 15,
-                                                                       #height = 158, # 118, # 142,
-                                                                       verbatimTextOutput("k_estimate"),
-                                                                       h6(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
-                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
-                                                                                  to complete."))
-                                                                     )
-                                                                   )
                                                                  )
                                                           )
                                                 ) ## end of flud row
-                                     )
-                                     ,
+                                     ),
+                                     tabPanel("Dispersion analysis", value = 8,  
+                                              fluidRow( width = 10,                                                        
+                                                        column(6,
+                                                               wellPanel(
+                                                                 h4(helpText("Distributions of number of infectee per infector (offsping distribution)")),
+                                                                 fluidRow(
+                                                                   width = 12,
+                                                                   plotOutput("distribution_k_plot", width = "100%", height = "60vh")
+                                                                 )
+                                                               )
+                                                               ),
+                                                        column(6,
+                                                               wellPanel(
+                                                                 fluidRow(
+                                                                   width = 12,
+                                                                   box(
+                                                                     h4(helpText("Summary statistics for observed offsring distribution")),
+                                                                     #footer = "Node degree",
+                                                                     status ="primary", #  "success", # or "warning", 
+                                                                     solidHeader = FALSE,
+                                                                     collapsible = TRUE,
+                                                                     collapsed = FALSE,
+                                                                     width = 15,
+                                                                     div( DT::dataTableOutput("nodedegree_summaryTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
+                                                                     h5(helpText("n_value <= 0: number of terminal infectee nodes. This corresponds to cases that were infected but did not infect further cases."))
+                                                                   )
+                                                                 ),
+                                                                 fluidRow(
+                                                                   width = 12,
+                                                                   box(
+                                                                     h4(helpText("Estimates of reproduction number (R) and dispersion parameter (k) using NB distribution")),
+                                                                     #footer = "Node degree",
+                                                                     status ="primary", #  "success", # or "warning", 
+                                                                     solidHeader = FALSE,
+                                                                     collapsible = TRUE,
+                                                                     collapsed = FALSE,
+                                                                     width = 15,
+                                                                     #height = 158, # 118, # 142,
+                                                                     div( DT::dataTableOutput("k_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
+                                                                     h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
+                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
+                                                                                  to complete."))
+                                                                     )
+                                                                 )
+                                                               )
+                                                        )
+                                              ) ## end of flud row
+                                     ),
                                      tabPanel("Reproduction number (Rt)", value = 5, 
                                               wellPanel(
                                                 h4(helpText("Estimate of time dependent reproduction number Rt")) ,
@@ -738,10 +710,10 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                     collapsed = FALSE,
                                                     width = 12,
                                                     #height = 142, # 118, # 142,
-                                                    verbatimTextOutput("rtSummary")
+                                                    #verbatimTextOutput("rtSummary")
+                                                    div( DT::dataTableOutput("rtSummary_table", width = "50%", height = "auto"), style = "font-size: 100%; width: 100%"),
                                                   )
                                                 )
-                                                
                                               )
                                               )
                                      , 
@@ -750,7 +722,6 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                        verbatimTextOutput("casebyRegionVarTable"),
                                                        downloadButton("caseRegionVarExpCsv", "Download as CSV"),tags$br(),tags$br(),
                                                        "Each row in this data a case. The data was obtained by merging case, person, region and district tables")
-                            
                            ),
                            width = 10)                       
                        )
@@ -759,84 +730,115 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
 
 #### Event data analysis ----
 tabPanel( "Event data analysis", icon = icon("procedures"),
-          sidebarLayout( position = "left",
-            sidebarPanel(
-              span(tags$i(h6("Filter options for events.")), style="color:#045a8d"),
-              width = 2,
-              pickerInput("diseaseEventUi", "Disease", 
-                          choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
-                                      "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
-                          selected = c("CORONAVIRUS"),
-                          multiple = FALSE),
-              
-              dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date()- event_delay, end = Sys.Date(), min = NULL,
-                             max = NULL, format = "dd-mm-yyyy", startview = "month",
-                             weekstart = 0, language = "en", separator = " to ", width = NULL,
-                             autoclose = TRUE),
-              span(tags$i(h6("Relevant date uses date of event and if missing, impute with report date.")), style="color:#045a8d"),
-              
-              # Filter specific event region and district
-              # filter by Region of event
-              pickerInput(
-                inputId = "regionEventUi",
-                label = 'Region of event',
-                choices = sort(levels(as.factor(eventData$region_name))),
-                options = list(
-                  `actions-box` = TRUE, 
-                  size = 12
-                ),
-                selected = NULL,
-                multiple = TRUE
+          sidebarLayout(position = "left",
+            sidebarPanel(width = 2,
+              span(tags$i(h5("Please select filter options and click on `Apply changes` to run analysis.")), style="color:#045a8d"),
+              span(tags$i(h5("The relevant date filter uses  the date of event and if missing, impute with report date.")), style="color:#045a8d"),
+              actionButton(inputId = "eventDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+                           class = "btn-primary", width = '55%'),
+              hr(),
+            conditionalPanel(condition =  "input.tabEvent == 1",
+                pickerInput(
+                  inputId = "eventTableColumnVaribleUi", 
+                  label = 'Choose table columns',
+                  choices = c(levels(as.factor(event_variable_data$event_variable)) ) ,
+                  selected = c("Name", "Total", "Event status"),
+                  multiple = TRUE,
+                  options = pickerOptions(
+                    actionsBox = TRUE,
+                    header = "Choose variables to use for table columns",
+                  ))
               ),
-              # filter by district
-              uiOutput('pickerInputdistrictEventUi'),
-              
-              radioButtons("EventIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion", "Incidence Proportion / 100,000"),selected = c("Count"))
-              ,
-              pickerInput(
-                inputId = "eventTableColumnVaribleUi", 
-                label = 'Event by Jurisdictions table',
-                choices = c(levels(as.factor(event_variable_data$event_variable)) ) ,
-                selected = c("Name", "Total", "Event status"),
-                multiple = TRUE,
-                options = pickerOptions(
-                  actionsBox = TRUE,
-                  header = "Choose variables to use for table columns",
-                )
+              conditionalPanel(condition =  "input.tabEvent == 2",
+                pickerInput(
+                  inputId = "twoByTwotableEventVariblesUi", 
+                  label = 'Choose variables to plot 2X2 table',
+                  choices = c(levels(as.factor(colnames(eventData)))),
+                  multiple = TRUE,
+                  options = pickerOptions(
+                                   actionsBox = TRUE,
+                                   title = "Please select 2 varibles",
+                                   header = "Only 2 variables can be selected",
+                                   maxOptions = 2
+                                 )
+                    ),
+                 checkboxInput("transpose2x1TableEventUi", "Transpose 2 X 2 table ?", TRUE),
+                 pickerInput(
+                      "piechartEventVaribleUi", 'Choose variable to plot Pie chart',
+                       choices = c("Event Status",levels(as.factor(colnames(eventData)))) ,
+                       selected = "Event Status",
+                       multiple = FALSE
+                            ),
+                 pickerInput(
+                      "barplotEventVaribleUi", 'Choose variable to plot bar graph',
+                       choices = c("Location category",levels(as.factor(colnames(eventData)))) ,
+                       selected = "Location category",
+                       multiple = FALSE
+                            )
               ),
-              pickerInput(
-                inputId = "twoByTwotableEventVariblesUi", 
-                label = 'Choose variables to plot 2X2 table',
-                choices = c(levels(as.factor(colnames(eventData)))),
-                multiple = TRUE,
-                options = pickerOptions(
-                  actionsBox = TRUE,
-                  title = "Please select 2 varibles",
-                  header = "Only 2 variables can be selected",
-                  maxOptions = 2
-                )
-              ),
-              checkboxInput("transpose2x1TableEventUi", "Transpose 2 X 2 table ?", TRUE),
-              pickerInput(
-                "piechartEventVaribleUi", 'Choose variable to plot Pie chart',
-                choices = c("Event Status",levels(as.factor(colnames(eventData)))) ,
-                selected = "Event Status",
-                multiple = FALSE
-              ),
-              pickerInput(
-                "barplotEventVaribleUi", 'Choose variable to plot bar graph',
-                choices = c("Location category",levels(as.factor(colnames(eventData)))) ,
-                selected = "Location category",
-                multiple = FALSE
-              ),
-              
-              radioButtons("eventMapShapesUi","Choose map administrative area",  choices = c("Region","Departement", "Commune"),
-                           selected = c("Region")),
-              sliderInput("eventMapTextSizeUi", label = "Choose text size for map", min = 0, 
+              conditionalPanel(condition =  "input.tabEvent == 3",
+               radioButtons("eventMapShapesUi","Choose map administrative area",  choices = c("Region","Departement", "Commune"),
+                                           selected = c("Region")),
+               sliderInput("eventMapTextSizeUi", label = "Choose text size for map", min = 0, 
                           max = 2, step = 0.2, value = 1.2)
-            ),
+              )               
+            ), 
+            
             mainPanel(width = 10,
-              tabsetPanel(tabPanel("Event dashboard", value = 6,
+                      fluidRow(
+                        # filter by disease of event 
+                        column(2, 
+                               pickerInput("diseaseEventUi", "Disease", choices = sort(levels(as.factor(casePerson$disease))), 
+                                           selected = c("CORONAVIRUS"),multiple = FALSE)
+                        ),
+                        # filter by date of event 
+                        column(2, 
+                               dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
+                                              max = NULL, format = "dd-mm-yyyy", startview = "month",
+                                              weekstart = 0, language = "en", separator = " to ", width = NULL,
+                                              autoclose = TRUE)
+                        ),
+                        # filter by Region of event
+                        column(2,
+                               pickerInput(
+                                 inputId = "regionEventUi",
+                                 label = 'Region of event',
+                                 choices = sort(levels(as.factor(eventData$region_name))),
+                                 options = list(
+                                   `actions-box` = TRUE, 
+                                   size = 12
+                                 ),
+                                 selected = NULL,
+                                 multiple = TRUE
+                               )
+                        ),
+                        # filter by district of event
+                        column(2, 
+                               uiOutput('pickerInputdistrictEventUi')
+                        ),
+                        # filter by event identification source
+                        column(2,
+                               pickerInput(
+                                 inputId = "eventIdentificationSourceUi",
+                                 label = 'Identification source',
+                                 choices = sort(levels(as.factor(eventData$event_identification_source))),
+                                 #choices = sort(levels(as.factor( c("forward_tracing", "backward_tracing", "unknown", "NA")  ))),
+                                 options = list(
+                                   `actions-box` = TRUE, 
+                                   size = 12
+                                 ),
+                                 selected = NULL,
+                                 multiple = TRUE
+                               ) 
+                        ),
+                        # choosing indicator type
+                        column(2, 
+                               radioButtons("EventIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion"),selected = c("Count"), inline = TRUE)
+                        ) 		   
+                      ) ,  
+                      
+              tabsetPanel( id= "tabEvent",
+                tabPanel("Event dashboard", value = 0,
                                    wellPanel(style = "background: white", 
                                              fluidRow(
                                                column(2, infoBoxOutput("totalEvent", width = 12)),
@@ -895,13 +897,13 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                                    
               )
               ,
-              tabPanel("Event by Jurisdiction",
+              tabPanel("Event by Jurisdiction",  value = 1,
                        fluidRow(
                          column(12, DT::dataTableOutput("eventCountbyJurisdictionTable") )    
                        )
                        )
               ,
-              tabPanel("Custom indicators",
+              tabPanel("Custom indicators",  value = 2,
                        wellPanel(
                          h4(helpText("2 X 2 table. Click on 'Choose variables to plot 2X2 table' to generate the same table for other attributes.")) ,
                          DT::dataTableOutput("dynamic2x2TableEventUi")
@@ -919,12 +921,12 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                                           div(plotlyOutput("barChartEventUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
                                         )              
                                  )
-                       ), ## end of flud row
-                       )
-              ,
-              tabPanel("Event time series" ),
-              tabPanel("Shapfile map", plotOutput("eventMapUi", width = "100%", height = "95vh")),
-              tabPanel("Leaflet map",     # leafletOutput("eventLeafletMapUi", width = "100%", height = 900)  
+                       ) ## end of flud row
+                       ),
+              # tabPanel("Event time series" ), # to be added later
+              tabPanel("Shapfile map", value = 3,
+                       plotOutput("eventMapUi", width = "100%", height = "95vh")),
+              tabPanel("Leaflet map",  #  value = 10, 
                        leafletOutput("map", width = "100%", height = 900),
                        #leafletOutput("eventLeafletMapUi", width = "100%", height = 900), 
                        absolutePanel(top = 10, right = 10,
@@ -934,17 +936,133 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                                      selectInput("colors", "Choose color Scheme to plot entities",
                                                  rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
                                      ),
-                                     checkboxInput("legend", "Show legend", TRUE)
-                       )
-                    ),
-              tabPanel("Event management" )
-            ),
+                                     checkboxInput("legend", "Show legend", TRUE)                       
+                                     )
+                    )
+             # tabPanel("Event management" ) # to be added
+            ) #,
           ) # clossing main panel                       
         )  # clossing sidbarlayout
 ),
 
 ### Backward tracing including cases, contacts and events
 # tabPanel("Backward tracing" ),
+
+##### contat data analysis -----
+tabPanel("Contact data analysis", icon = icon("handshake"),
+         sidebarLayout( position = "left",
+                        sidebarPanel( width = 2,
+                          span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
+                          
+                          actionButton(inputId = "contactDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+                                       class = "btn-primary", width = '55%'),
+                          hr(),
+                          
+                          pickerInput("diseaseContactUi", "Disease", 
+                                      choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
+                                                  "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
+                                      selected = c("CORONAVIRUS"),
+                                      multiple = FALSE),
+                          #br(),
+                          dateRangeInput("reportdateContactUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
+                                         max = NULL, format = "dd-mm-yyyy", startview = "month",
+                                         weekstart = 0, language = "en", separator = " to ", width = NULL,
+                                         autoclose = TRUE),
+                          
+                          # Filter specific event region and district
+                          pickerInput(
+                            inputId = "regionContactUi",
+                            label = 'Region of contact',
+                            choices = sort(levels(as.factor(contRegionDist$region_name))),
+                            options = list(
+                              `actions-box` = TRUE,
+                              size = 12
+                            ),
+                            selected = NULL,
+                            multiple = TRUE
+                          )
+                        ),
+                        
+                        mainPanel(
+                          tabsetPanel(
+                            tabPanel("Contact dashboard",
+                                     wellPanel(style = "background: white", 
+                                               #h4('Contact classification'),
+                                               fluidRow(width = 12,
+                                                        column(2, infoBoxOutput("allCont", width = 12)),
+                                                        column(2, infoBoxOutput("contConfirmed", width = 12)),
+                                                        column(2, infoBoxOutput("contUnconfirmed", width = 12)),
+                                                        column(2, infoBoxOutput("contNot", width = 12)),
+                                                        column(2,infoBoxOutput("activeCont", width = 12)),
+                                                        column(2,infoBoxOutput("convertedToCase", width = 12))
+                                               )
+                                               ,
+                                               # h4('Contact status'),
+                                               fluidRow(width=12,
+                                                        # column(2,infoBoxOutput("activeCont", width = 12)),
+                                                        # column(2,infoBoxOutput("convertedToCase", width = 12)),
+                                                        column(2,infoBoxOutput("dropped", width = 12)),
+                                                        column(2,infoBoxOutput("inactiveCont", width = 12)),
+                                                        column(2, infoBoxOutput("minConPerCase", width = 12)),
+                                                        column(2,infoBoxOutput("medianConPerCase", width = 12)),
+                                                        column(2, infoBoxOutput("meanConPerCase", width = 12)),
+                                                        column(2,infoBoxOutput("maxConPerCase", width = 12))
+                                               )
+                                               
+                                     ),
+                                     
+                                     plotOutput("plot", width = "100%", height = "90vh"),downloadButton("downloadBarplot", "Download this plot")
+                                     , tags$br(),tags$br(),
+                                     " Each bar in this plot represents a region or district and the height of the bar corresponds to the number of contacts 
+                                      in the region or district.")
+                            ,
+                            tabPanel("Contacts per case", plotOutput("plotContPerCase", width = "100%", height = "90vh"),  downloadButton("downloadContPerCasePlot", "Download this plot"), tags$br(),tags$br(),
+                                     " Contact per case."),
+                            tabPanel("Contacts per case export",
+                                     numericInput("maxrows", "Rows to show", 20),
+                                     verbatimTextOutput("conPerCaseExpTable"),
+                                     downloadButton("conPerCaseExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                                     "Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table"),
+                            tabPanel("Contact by region export",
+                                     numericInput("maxrowsContByRegion", "Rows to show", 20),
+                                     verbatimTextOutput("conPerGerionExpTable"),
+                                     downloadButton("conPerGerionExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                                     "Each row in this data is a region with corresponding number of contacts.
+                                         The data was obtained by summing the number of contacts in each region.
+                                         The resgion of the source case was used in case the region of the contact was missing."
+                            ),
+                            tabPanel("Serial Interval Export", icon = icon("table"),
+                                     width = 10,
+                                     mainPanel(width=12,
+                                               dashboardPage(
+                                                 # dashboardHeader(title = "SI"),
+                                                 dashboardHeader( ),
+                                                 dashboardSidebar( disable = TRUE,
+                                                                   pickerInput("conPerson", "Contact entity type", choices = c("Contact", "Contact person"), # option to view contact or contact person
+                                                                               selected = c("Contact"),
+                                                                               multiple = FALSE)
+                                                 )
+                                                 ,
+                                                 dashboardBody(
+                                                   numericInput("maxrowsContSI", "Rows to show", 20),
+                                                   verbatimTextOutput("siExpTable"),
+                                                   downloadButton("siExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                                                   "Each row in this data is a contact between a case person and a contact person.
+                                         The data was obtained by calculating the number of days between the symptom onset of the source case person and that of the secondary case (contact) person.
+                                         Only contacts that resulted to a case were cosidered."
+                                                 )
+                                               ))
+                            ),
+                            tabPanel("Detailed contact export",
+                                     numericInput("maxrowsContactDetailed", "Rows to show", 20),
+                                     verbatimTextOutput("conRegionDistExpTable"),
+                                     downloadButton("conRegionDistExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                                     "Each row in this data is a contact between a case person and a contact person. The data was obtained by merging contacts and their cases, thus the columns contains variables for contacts and cases.",
+                                     "Contacts wihout source cases or cases without contacts are not included in this section of contact data analysis")
+                          )
+                          , width = 10)
+         )
+),
 
 # Model specification ----
 tabPanel("Model specification",
@@ -986,14 +1104,15 @@ h5(" Mote txt to add ...")
 ),
 
 # Footer ------
+tags$footer(
 hr(style = "border-color: #cbcbcb;"),
 fluidRow(
   column(9,
          p('All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://sormasorg.helmholtz-hzi.de/", 'SORMAS', target = '_blank'), '.', style = "font-size: 85%"),
-         p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
+         p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
-         p(tags$em("Last updated: September 23, 2021"), style = 'font-size:75%'))
+         p(tags$em("Last updated: November 15, 2021"), style = 'font-size:75%'))
   ,
   column(3, align = "right",
          p('Powered by:', tags$a(href = " ", target = '_blank'), '', style = "font-size: 85%"),
@@ -1003,6 +1122,7 @@ fluidRow(
          p(tags$a(href = "https://www.giz.de/en/html/index.html", 'GIZ', target = '_blank'), '', style = "font-size: 85%")
   )
   )
+)##
 )
 ))
 

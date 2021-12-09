@@ -1,18 +1,12 @@
 # Base image https://hub.docker.com/u/rocker/
-FROM rocker/shiny:latest
+# FROM rocker/shiny:latest 
+FROM rocker/shiny:4.1.2
 
 # system libraries of general use
 ## install debian packages
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     libxml2-dev \
-    libcairo2-dev \
-    libsqlite3-dev \
-    libmariadbd-dev \
-	libmariadbclient-dev \
     libpq-dev \
-    libssh2-1-dev \
-    unixodbc-dev \
-    libcurl4-openssl-dev \
     libssl-dev \
     && install2.r --error \
     --deps TRUE \
@@ -33,12 +27,8 @@ RUN apt-get update && \
 # Install missing debian/ubuntu packages
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-       libv8-dev \
        libudunits2-dev \
-	   libmysqlclient-dev \
        libgdal-dev \
-       perl \ 
-       libcompress-raw-zlib-perl \
        libsodium-dev \
  && apt-get -y autoremove \
  && apt-get clean \
@@ -46,7 +36,7 @@ RUN apt-get update \
 
 # copy necessary files
 ## renv.lock file
-COPY /sormas-stats-app/renv.lock ./renv.lock
+COPY /sormas-stats-app/renv.lock ./renv.lock 
 ## app folder
 COPY /sormas-stats-app ./app
 
@@ -55,7 +45,8 @@ RUN mkdir -p /var/log/shiny-server \
   && chmod 664 /var/log/shiny-server
 
 # install renv & restore packages
-RUN Rscript -e 'install.packages("renv")'
+RUN Rscript -e 'install.packages("renv")' 
+RUN Rscript -e 'renv::consent(provided = TRUE)'
 RUN Rscript -e 'renv::restore()'
 
 # expose port
