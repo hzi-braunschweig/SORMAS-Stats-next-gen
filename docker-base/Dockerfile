@@ -29,16 +29,16 @@ RUN apt-get update -qq && apt-get upgrade -y \
   && rm -rf /var/lib/apt/lists/*		
 
   
-#RUN install2.r --error \
-#    --deps TRUE \
+RUN install2.r --error \
+    --deps TRUE \
 #    tidyverse \
 #    dplyr \
 #    devtools \
-#    formatR \
+    formatR \
 #    remotes \
 #    selectr \
-#    caTools \
-#  && rm -rf /tmp/downloaded_packages 
+    caTools \
+  && rm -rf /tmp/downloaded_packages 
 
 RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
 
