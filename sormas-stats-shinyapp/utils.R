@@ -2475,7 +2475,7 @@ serialIntervalPlot = function(infectorInfecteePair, distr = "Lognormal", minSi =
   if(distr == "Normal"){
     fit  = selData %>%
       dplyr::pull(serial_interval) %>% # extracting si
-      fitdistrplus::fitdist(data = ., distr = 'norm')  # fiting a normal distribution to the data
+      fitdistrplus::fitdist(data = ., distr = "norm")  # fiting a normal distribution to the data
     
     # Estimating CI for mean and standard deviation by bootstrap method 
     #  1001 were used by default for bootstraping, Add a parameter for this at front end later if needed
@@ -2599,7 +2599,7 @@ fit_distribution = function(serial_interval){
   serial_interval = serial_interval[is.na(serial_interval) == FALSE] # dropping NA
   #fitting normal dist
   # Parameter1 = mean, Parameter2 = sd
-  nfit  = fitdistrplus::fitdist(data = serial_interval, distr = 'norm')  # fit a normal distribution to the data
+  nfit  = fitdistrplus::fitdist(data = serial_interval, distr = "norm")  # fit a normal distribution to the data
   ## fitting log normal dist
   # Parameter1 = meanlog, Parameter2 = sdlog
   lnfit  = serial_interval[serial_interval > 0]  %>%  # lnorm can not be used to describe a random varaible with negative or 0 values
@@ -2644,7 +2644,7 @@ fitdist_plot = function(x){
   # fitting models. All compared fits must have been obtained with the same dataset, thus we drop all records <=0
   x = x[is.na(x) == FALSE] ## lnorm, gamma, weibull can not be used to describe a random varaible with negative or 0 values
   x = x[x > 0]
-  nfit  = fitdistrplus::fitdist(data = x, distr = 'norm')  # fit a normal distribution to the data
+  nfit  = fitdistrplus::fitdist(data = x, distr = "norm")  # fit a normal distribution to the data
   # Parameter1 = meanlog, Parameter2 = sdlog
   lnfit  = fitdistrplus::fitdist(data = x, distr = "lnorm")  
   # Parameter1 = shape, Parameter2 = scale
@@ -2658,7 +2658,7 @@ fitdist_plot = function(x){
   plot.new() ## clean up device
   # plotting histrogram and theretical densities
   denscomp(list(wfit, gfit, lnfit, nfit), legendtext=c("Weibull", "gamma", "lognormal", "normal"),
-           main = NULL, probability = FALSE, fitlwd = 2 )
+           main = NULL, probability = TRUE, fitlwd = 2 )
   density <- recordPlot() # saving immage
   plot.new() ## clean up device
   # plotting Q-Q plot
@@ -2715,7 +2715,7 @@ serial_interval_mean_CI = function(infectorInfecteePair, distr = NULL, minSi = N
   x = x[is.na(x) == FALSE]  # dropping NA
   ## normal distribution
   if(distr == "Normal"){
-    fit  = fitdistrplus::fitdist(data = x, distr = 'norm')  # fit a normal distribution to the data
+    fit  = fitdistrplus::fitdist(data = x, distr = "norm")  # fit a normal distribution to the data
     # Computing 95% CI using pivot method
     n = fit$n # number of data points used to fit the model
     mean_si = fit$estimate[1] # the sample mean
