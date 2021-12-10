@@ -15,7 +15,7 @@ caseData = caseExportLineList(sormas_db = sormas_db, fromDate = fromDate, toDate
 populationData = populationExport(sormas_db = sormas_db)
 
 # Import shape files
-
+geoshapesData = geoshapesExport(sormas_db = sormas_db)
 
 # Disconnect from sormas_db ---- 
 dbDisconnect(sormas_db)
