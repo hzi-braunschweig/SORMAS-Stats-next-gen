@@ -3,7 +3,9 @@
 ## General functions ----
 
 ## Functions to export data from sormas ----
-base::source(file.path("./utils", "function_name.R"))
+# base::source(file.path("./utils", "function_name.R"))
+base::source("utils/caseExportLineList.R")
+
 
 ## Functions for data analysis ----
 
