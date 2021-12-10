@@ -12,7 +12,7 @@ sormas_db = DBI::dbConnect(RPostgres::Postgres(),
 caseData = caseExportLineList(sormas_db = sormas_db, fromDate = fromDate, toDate = toDate)
 
 # Import population data
-
+populationData = populationExport(sormas_db = sormas_db)
 
 # Import shape files
 
