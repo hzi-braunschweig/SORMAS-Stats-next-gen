@@ -10,12 +10,12 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     libssl-dev \
     && install2.r --error \
     --deps TRUE \
-    tidyverse \
-    dplyr \
-    devtools \
+    # tidyverse \
+    # dplyr \
+    # devtools \
     formatR \
-    remotes \
-    selectr \
+    # remotes \
+    # selectr \
     caTools \
   && rm -rf /tmp/downloaded_packages
 

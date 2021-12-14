@@ -233,22 +233,24 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
     dplyr::mutate(id_elist = paste(from_uuid_person, to_uuid_person, sep = "-"), .keep = "all")
   
   ############### determining serial interval  ###########
+  # This section is commented since siDat export is deactivated in app
+  # This section can be deleted later
   # selecting unique case id from contats table
-  temp = contRegionDist[,colnames(contRegionDist) %in% c("resultingcase_id", "caze_id", "disease", "region_name", "district_name","reportdatetime" )] # these varibales are used to filter commands from ui latter
-  selCases = temp[is.na(temp$resultingcase_id) == F,] # edge table with casee id for source cases and resulting cases. We only use data for cases whose contacts became cases
-  uniqCaseId = base::unique(c(selCases$caze_id, selCases$resultingcase_id))
+  # temp = contRegionDist[,colnames(contRegionDist) %in% c("resultingcase_id", "caze_id", "disease", "region_name", "district_name","reportdatetime" )] # these varibales are used to filter commands from ui latter
+  # selCases = temp[is.na(temp$resultingcase_id) == F,] # edge table with casee id for source cases and resulting cases. We only use data for cases whose contacts became cases
+  # uniqCaseId = base::unique(c(selCases$caze_id, selCases$resultingcase_id))
+  # 
+  # #merging uniqCaseId with case table to know the syptom of the cases 
+  # temp = case[case$caze_id %in% uniqCaseId, c("caze_id", "symptoms_idcase") ]  # cases in involved in contact network
+  # #merging with syptoms
+  # caseSymp = base::merge(temp,symptoms, by.x = "symptoms_idcase", by.y = "id", all.x = T, all.y = F)
+  # caseSymp = caseSymp[, colnames(caseSymp) != "symptoms_idcase"]
+  # #merging caseSymp with selCases
+  # selCasesSympCase  = base::merge(selCases, caseSymp, by = "caze_id", all.x = T, all.y = F)
+  # selCasesSympResultCase = base::merge(selCasesSympCase, caseSymp, by.x = "resultingcase_id", by.y = "caze_id", all.x = T, all.y = F)
+  # selCasesSympResultCase$si = as.numeric(c(selCasesSympResultCase$onsetdate.y - selCasesSympResultCase$onsetdate.x))
+  # siDat = selCasesSympResultCase[, colnames(selCasesSympResultCase) %in% c("si","reportdatetime", "disease", "region_name","district_name" )]
+  # siDat = siDat[is.na(siDat$si) == F,]  # dropping missing values
   
-  #merging uniqCaseId with case table to know the syptom of the cases 
-  temp = case[case$caze_id %in% uniqCaseId, c("caze_id", "symptoms_idcase") ]  # cases in involved in contact network
-  #merging with syptoms
-  caseSymp = base::merge(temp,symptoms, by.x = "symptoms_idcase", by.y = "id", all.x = T, all.y = F)
-  caseSymp = caseSymp[, colnames(caseSymp) != "symptoms_idcase"]
-  #merging caseSymp with selCases
-  selCasesSympCase  = base::merge(selCases, caseSymp, by = "caze_id", all.x = T, all.y = F)
-  selCasesSympResultCase = base::merge(selCasesSympCase, caseSymp, by.x = "resultingcase_id", by.y = "caze_id", all.x = T, all.y = F)
-  selCasesSympResultCase$si = as.numeric(c(selCasesSympResultCase$onsetdate.y - selCasesSympResultCase$onsetdate.x))
-  siDat = selCasesSympResultCase[, colnames(selCasesSympResultCase) %in% c("si","reportdatetime", "disease", "region_name","district_name" )]
-  siDat = siDat[is.na(siDat$si) == F,]  # dropping missing values
-  
-  return(list(contRegionDist = contRegionDist, nodeLineList = nodeListCaseEvent, elist = elistCaseEvent, siDat = siDat))
+  return(list(contRegionDist = contRegionDist, nodeLineList = nodeListCaseEvent, elist = elistCaseEvent))
 }

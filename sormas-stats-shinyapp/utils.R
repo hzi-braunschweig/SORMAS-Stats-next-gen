@@ -2853,8 +2853,11 @@ save(serial_interval_mean_CI, file = "./utils/serial_interval_mean_CI.R")
 
 ## offspringDistPlot ------
 # This method used the output data called infectorInfecteePair
-# This method fit a NB dist to the offsprint distr data and estimate R and k
-offspringDistPlot = function(infectorInfecteePair, niter = 51, polyDegree = NA){ 
+# This method fit a NB dist to the offsprint distr data and estimate R and k using MASS package
+
+
+
+offspringDistPlot_fitdistplus_archived = function(infectorInfecteePair, niter = 51, polyDegree = NA){ 
   # Deleting duplicate pairs of infector-infectee
   # The data for infectorInfecteePair can have duplicates since a person can infect the same person more than once
   # The infectorInfecteePair should have unique infector-infectee pairs
@@ -2935,7 +2938,7 @@ offspringDistPlot = function(infectorInfecteePair, niter = 51, polyDegree = NA){
   ret = list(rkEstmate = rkEstmate, offspringDistributionPlot = offspringDistributionPlot, offspringDegree = offspringDegree)  # list object: table of estimates and image
   
 }
-save(offspringDistPlot, file = "./utils/offspringDistPlot.R")
+#save(offspringDistPlot, file = "./utils/offspringDistPlot.R")
 # retOffspring = offspringDistPlot(infectorInfecteePair = infectorInfecteeData)
 
 ########## contactDataExport ############

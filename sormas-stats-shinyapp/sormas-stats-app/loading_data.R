@@ -22,7 +22,7 @@ importDataFrontEndOutput = mergingDataFromDB(sormas_db = sormas_db, fromDate = f
 contRegionDist = importDataFrontEndOutput$contRegionDist
 nodeLineList = importDataFrontEndOutput$nodeLineList  # id here is person id
 elist = importDataFrontEndOutput$elist  # id here is contact id
-siDat = importDataFrontEndOutput$siDat 
+#siDat = importDataFrontEndOutput$siDat 
 
 ## The code below would need to be transformed in to independent functions later
 #### loading case -----
