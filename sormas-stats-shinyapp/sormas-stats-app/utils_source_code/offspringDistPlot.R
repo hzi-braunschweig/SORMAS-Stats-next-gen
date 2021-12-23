@@ -1,10 +1,11 @@
 # This method fit a NB dist to the offsprint distr data and estimate R and k
 # It uses the data called infectorInfecteeData
-offspringDistPlot = function(infectorInfecteePair, polyDegree = NA){ 
+offspringDistPlot = function(infectorInfecteePair, polyDegree = NA, maxValue = NA){ 
   # Deleting duplicate pairs of infector-infectee
   # The data for infectorInfecteePair can have duplicates since a person can infect the same person more than once
   # The infectorInfecteePair should have unique infector-infectee pairs
   infectorInfecteePair = infectorInfecteePair %>% 
+    dplyr::filter(!is.na(person_id_case_infector))  %>% # deleting records with missing person id for 
     dplyr::distinct_at(. , vars(person_id_case_infector, person_id_case_infectee), .keep_all = TRUE)
   
   #counting the number of offsprings per infector
@@ -39,7 +40,12 @@ offspringDistPlot = function(infectorInfecteePair, polyDegree = NA){
     nrow() 
   
   #create vector of complete offspring distribution with terminal cases having zero secondary cases
-  complete_offspringd <- tibble::enframe(c(offspring$n, rep(0,nterminal_infectees))) # convert vector to dataframe
+  if(is.na(maxValue) == TRUE){
+    complete_offspringd <- tibble::enframe(c(offspring$n, rep(0,nterminal_infectees)))
+  } else {
+    complete_offspringd <- tibble::enframe(c(offspring$n, rep(0,nterminal_infectees))) %>%   # convert vector to dataframe
+      dplyr::filter(value <= maxValue) 
+  }
   
   # fit negative binomial distribution to the final offspring distribution using MASS package
   # We used MASS package because if the data is sparse, fitdistrplus::fitdist estimate the se with bias

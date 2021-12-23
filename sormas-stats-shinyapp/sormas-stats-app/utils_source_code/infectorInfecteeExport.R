@@ -101,8 +101,8 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     dplyr::mutate(onset_date_infector = onset_date, .keep = "unused") %>%  #renaming
     dplyr::left_join(., symptoms, by = c("symptoms_id_infectee" = "symptom_id" )) %>%  # merging with symptom table to get symptoms details of  infectee person
     dplyr::mutate(onset_date_infectee = onset_date, .keep = "unused") %>% # renaming
-    dplyr::filter(person_id_case_infectee != "NA") %>%  # dropping records with person_id_case_infectee == NA, this can hapen when the report date of resulting case is not in time interval
-    
+    dplyr::filter((person_id_case_infectee != "NA") | (person_id_case_infector != "NA") ) %>%  # dropping records with person_id_case_infectee == NA, this can hapen when the report date of resulting case is not in time interval
+    # or if the infectee person was infected by a case that is not among the selected cases, resuling in NA infector person id.
     # computing derived variables 
     dplyr::mutate(age_at_report_infector = floor(as.numeric(report_date_infector - date_of_birth_infector)/365),
                   age_at_report_infectee = floor(as.numeric(report_date_infectee - date_of_birth_infectee)/365),

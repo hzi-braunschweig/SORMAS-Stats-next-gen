@@ -279,7 +279,7 @@ output$transChain <- renderVisNetwork({
   output$totalInfectorInfecteePair <- renderInfoBox({
     req(credentials()$user_auth)
     temp =  elistSel2ResCaseSourseCase() %>%
-      dplyr::filter(resultingcase_id != "NA")
+      dplyr::filter(resultingcase_id != "NA") # deleting records with missing person id for infector
     # no need to count unique pairs of person since elist has unique pairs of nodes when exported from sormas db
     infoBox(
       title = NULL, 
