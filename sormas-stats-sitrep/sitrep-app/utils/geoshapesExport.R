@@ -11,8 +11,8 @@ geoshapesExport <- function(sormas_db){
   
   # Reading in geo_shapes data
   geoshapes_data <- readRDS(files_geo) %>%
-    dplyr::select(NAME_2, geometry) %>% 
-    dplyr::rename(district_name_geo = NAME_2)
+    dplyr::select(NAME_1, NAME_2, geometry) %>% 
+    dplyr::rename(region_name_geo = NAME_1, district_name_geo = NAME_2)
   
   ## Merging geo data and sormas district names using a table key
   
