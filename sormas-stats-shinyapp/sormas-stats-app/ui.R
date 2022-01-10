@@ -681,7 +681,8 @@ shinyUI(bootstrapPage(
                                                                      width = 15,
                                                                      #height = 158, # 118, # 142,
                                                                      div( DT::dataTableOutput("k_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
-                                                                     h5(helpText("SD: standard deviation, CI: confidence interval"))
+                                                                     h5(helpText("SD: standard deviation, CI: confidence interval, k > 0 implies overdispersion,  k < 0 implies overdispersion,
+                                                                                  a lower dispersion parameter indicates  higher transmission heterogeneity."))
                                                                      )
                                                                  )
                                                                )
