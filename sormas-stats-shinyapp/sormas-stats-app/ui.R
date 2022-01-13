@@ -157,7 +157,7 @@ shinyUI(bootstrapPage(
                                     p('* High risk => Type of contact is Face_to_face_long, Medical_unsave, Touched_fluid, Touched_cloth, Physical_contact, otherwise, Low risk', style = "font-size: 95%"),
                                     p('* Right click on the network diagram or legend to download or copy.', style = "font-size: 95%"),
                                     p("* The filters on the left panel are based on complete data, thus entities with missing values (NULL or UNKNOWN) for the variable used for filtering are dropped.", style = "font-size: 95%"),
-                                    p('* All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://sormasorg.helmholtz-hzi.de/", 'SORMAS', target = '_blank'), '.', style = "font-size: 95%")
+                                    p('* All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), '.', style = "font-size: 95%")
                                    )
                            )
                          ) # end of main panel
@@ -1123,7 +1123,7 @@ tags$footer(
 hr(style = "border-color: #cbcbcb;"),
 fluidRow(
   column(9,
-         p('All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://sormasorg.helmholtz-hzi.de/", 'SORMAS', target = '_blank'), '.', style = "font-size: 85%"),
+         p('All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), '.', style = "font-size: 85%"),
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
