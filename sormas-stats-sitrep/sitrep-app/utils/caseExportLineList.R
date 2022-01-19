@@ -16,29 +16,28 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
   ## Loading tables from SORMAS DB
   
   # Case table SQL query
-  queryCases <- paste0("SELECT  DISTINCT id AS case_id,
-    district_id,
-    region_id,
-    caseclassification AS case_classification,
-    EndOfIsolationReason AS case_end_of_iso_reason,
+  queryCases <- base::sprintf("SELECT  DISTINCT id AS id_case,
+    district_id AS id_district,
+    region_id AS id_region,
+    caseclassification AS caseclassification_case,
+    EndOfIsolationReason AS end_of_iso_reason_case,
     reportdate AS report_date_case,
-    disease,
-    symptoms_id,
-    person_id,
-    hospitalization_id 
+    disease AS disease_case,
+    symptoms_id AS id_symptoms,
+    person_id AS id_person,
+    hospitalization_id AS id_hospitalization
   
     FROM public.cases 
     
     WHERE deleted = FALSE 
     and caseclassification != 'NO_CASE'
-    and reportdate between '", fromDate, "' and '", toDate, "' 
-    and disease = 'CORONAVIRUS' 
-                       ")
+    and reportdate between '%s' and '%s'
+                       ", fromDate, toDate)
   cases <- DBI::dbGetQuery(sormas_db,queryCases)
   
   
   # Person table SQL query
-  queryPersons <- paste0("SELECT DISTINCT id AS person_id,
+  queryPersons <- base::sprintf("SELECT DISTINCT id AS id_person,
     approximateAge AS age_person,
     sex AS sex_person,
     deathDate AS death_date_person,
@@ -46,53 +45,47 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
 
     FROM public.person
 
-    WHERE id IN (SELECT person_id FROM public.cases
-      WHERE deleted = FALSE 
-      and caseclassification != 'NO_CASE'
-      and reportdate between '", fromDate, "' and '", toDate, "' 
-      and disease = 'CORONAVIRUS')
-                         ")
+    WHERE id IN (%s)", paste("'", base::unique(c(cases$id_person)), "'",collapse=","))
+  
   # Only persons with a person_id that also appears in a case 
   # are queried from the database
   persons <- DBI::dbGetQuery(sormas_db,queryPersons)
   
   # Symptoms table SQL query
-  querySymptoms <- paste0("SELECT DISTINCT id AS symptoms_id,
-    onsetDate AS onset_date
+  querySymptoms <- base::sprintf("SELECT DISTINCT id AS id_symptoms,
+    onsetDate AS onset_date_symptoms
     
     FROM public.symptoms
     
     WHERE id IN (SELECT symptoms_id FROM public.cases
       WHERE deleted = FALSE 
       and caseclassification != 'NO_CASE'
-      and reportdate between '", fromDate, "' and '", toDate, "' 
-      and disease = 'CORONAVIRUS')
-                          ")
+      and reportdate between '%s' and '%s')
+                          ", fromDate, toDate)
   # Only symptoms with a symptoms_id that also appears in a case 
   # are queried from the database
   symptoms <- DBI::dbGetQuery(sormas_db, querySymptoms)
   
   # Hospitalizations table query 
-  queryHospitalizations <- paste0("SELECT DISTINCT id AS hospitalization_id,
-    admittedToHealthFacility AS admitted_to_health_facility,
-    admissionDate AS admission_date,
-    hospitalizationReason AS hospitalization_reason
+  queryHospitalizations <- base::sprintf("SELECT DISTINCT id AS id_hospitalization,
+    admittedToHealthFacility AS admitted_to_health_facility_hospitalization,
+    admissionDate AS admission_date_hospitalization,
+    hospitalizationReason AS reason_hospitalization
     
     FROM public.hospitalization
     
     WHERE id in (SELECT hospitalization_id FROM public.cases
       WHERE deleted = FALSE 
       and caseclassification != 'NO_CASE'
-      and reportdate between '", fromDate, "' and '", toDate, "' 
-      and disease = 'CORONAVIRUS')
-                            ")
+      and reportdate between '%s' and '%s')
+                            ", fromDate, toDate)
   # Only hospitalizations with a hospitalization_id that also appears in a
   # case are queried from the database
   hospitalizations <- DBI::dbGetQuery(sormas_db, queryHospitalizations)
   
   # District table SQL query
-  queryDistrict <- paste0("SELECT DISTINCT id AS district_id,
-    name AS district_name
+  queryDistrict <- paste0("SELECT DISTINCT id AS id_district,
+    name AS name_district
     
     FROM public.district
     
@@ -101,8 +94,8 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
   districts <- DBI::dbGetQuery(sormas_db, queryDistrict)
   
   # Region table SQL query
-  queryRegions <- paste0("SELECT DISTINCT id AS region_id,
-    name AS region_name
+  queryRegions <- paste0("SELECT DISTINCT id AS id_region,
+    name AS name_region
     
     FROM public.region 
     
@@ -114,14 +107,14 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
   # Merging data from cases, persons, hospitalizations, districts and regions 
   # exports into one line listed DataFrame with every row being a case 
   line_list_cases <- cases %>% 
-    dplyr::left_join(., persons, by = 'person_id') %>% 
-    dplyr::left_join(., symptoms, by = 'symptoms_id') %>% 
-    dplyr::left_join(., hospitalizations, by = 'hospitalization_id') %>% 
-    dplyr::left_join(., districts, by = 'district_id') %>% 
-    dplyr::left_join(., regions, by = 'region_id') %>% 
+    dplyr::left_join(., persons, by = 'id_person') %>% 
+    dplyr::left_join(., symptoms, by = 'id_symptoms') %>% 
+    dplyr::left_join(., hospitalizations, by = 'id_hospitalization') %>% 
+    dplyr::left_join(., districts, by = 'id_district') %>% 
+    dplyr::left_join(., regions, by = 'id_region') %>% 
     dplyr::mutate(report_date_case = as.Date(format(report_date_case, "%Y-%m-%d")),
-                  admission_date = as.Date(format(admission_date, "%Y-%m-%d")),
-                  onset_date = as.Date(format(onset_date, "%Y-%m-%d"))) 
+                  admission_date = as.Date(format(admission_date_hospitalization, "%Y-%m-%d")),
+                  onset_date = as.Date(format(onset_date_symptoms, "%Y-%m-%d"))) 
   
   # Return the output table
   return(line_list_cases)
