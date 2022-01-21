@@ -26,9 +26,7 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
     symptoms_id AS id_symptoms,
     person_id AS id_person,
     hospitalization_id AS id_hospitalization
-  
     FROM public.cases 
-    
     WHERE deleted = FALSE 
     and caseclassification != 'NO_CASE'
     and reportdate between '%s' and '%s'
@@ -42,9 +40,7 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
     sex AS sex_person,
     deathDate AS death_date_person,
     causeOfDeathDisease AS cause_of_death_disease_person
-
     FROM public.person
-
     WHERE id IN (%s)", paste("'", base::unique(c(cases$id_person)), "'",collapse=","))
   
   # Only persons with a person_id that also appears in a case 
@@ -54,14 +50,8 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
   # Symptoms table SQL query
   querySymptoms <- base::sprintf("SELECT DISTINCT id AS id_symptoms,
     onsetDate AS onset_date_symptoms
-    
-    FROM public.symptoms
-    
-    WHERE id IN (SELECT symptoms_id FROM public.cases
-      WHERE deleted = FALSE 
-      and caseclassification != 'NO_CASE'
-      and reportdate between '%s' and '%s')
-                          ", fromDate, toDate)
+    FROM public.symptoms 
+    WHERE id IN (%s)", paste("'", base::unique(c(cases$id_symptoms)), "'",collapse=","))
   # Only symptoms with a symptoms_id that also appears in a case 
   # are queried from the database
   symptoms <- DBI::dbGetQuery(sormas_db, querySymptoms)
@@ -71,14 +61,8 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
     admittedToHealthFacility AS admitted_to_health_facility_hospitalization,
     admissionDate AS admission_date_hospitalization,
     hospitalizationReason AS reason_hospitalization
-    
-    FROM public.hospitalization
-    
-    WHERE id in (SELECT hospitalization_id FROM public.cases
-      WHERE deleted = FALSE 
-      and caseclassification != 'NO_CASE'
-      and reportdate between '%s' and '%s')
-                            ", fromDate, toDate)
+    FROM public.hospitalization 
+    WHERE id IN (%s)", paste("'", base::unique(c(cases$id_hospitalization)), "'",collapse=","))
   # Only hospitalizations with a hospitalization_id that also appears in a
   # case are queried from the database
   hospitalizations <- DBI::dbGetQuery(sormas_db, queryHospitalizations)
@@ -86,9 +70,7 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
   # District table SQL query
   queryDistrict <- paste0("SELECT DISTINCT id AS id_district,
     name AS name_district
-    
     FROM public.district
-    
     WHERE archived = FALSE
                           ")
   districts <- DBI::dbGetQuery(sormas_db, queryDistrict)
@@ -96,9 +78,7 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
   # Region table SQL query
   queryRegions <- paste0("SELECT DISTINCT id AS id_region,
     name AS name_region
-    
     FROM public.region 
-    
     WHERE archived = FALSE
                          ")
   regions <- DBI::dbGetQuery(sormas_db, queryRegions)

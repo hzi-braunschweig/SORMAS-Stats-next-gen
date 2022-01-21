@@ -2,27 +2,6 @@ populationExport <- function(sormas_db){
   # This function outputs a table containing population data.
   # It contains data on the population by agegroup and gender in each district.
   
-  # District table SQL query
-  queryDistrict <- paste0("SELECT DISTINCT id AS id_district,
-    name AS name_district
-    
-    FROM public.district
-    
-    WHERE archived = FALSE
-                          ")
-  districts <- DBI::dbGetQuery(sormas_db, queryDistrict)
-  
-  # Region table SQL query
-  queryRegions <- paste0("SELECT DISTINCT id AS id_region,
-    name AS name_region
-    
-    FROM public.region 
-    
-    WHERE archived = FALSE
-                         ")
-  regions <- DBI::dbGetQuery(sormas_db, queryRegions)
-  
-  
   # Populationdata table SQL query 
   queryPopulation <- paste0("SELECT DISTINCT id AS id_population,
                             district_id AS id_district,
@@ -34,6 +13,23 @@ populationExport <- function(sormas_db){
                             FROM public.populationdata
                             ")
   population_data <- DBI::dbGetQuery(sormas_db, queryPopulation)
+  
+  # District table SQL query
+  queryDistrict <- paste0("SELECT DISTINCT id AS id_district,
+    name AS name_district
+    FROM public.district
+    WHERE archived = FALSE
+                          ")
+  districts <- DBI::dbGetQuery(sormas_db, queryDistrict)
+  
+  # Region table SQL query
+  queryRegions <- paste0("SELECT DISTINCT id AS id_region,
+    name AS name_region
+    FROM public.region 
+    WHERE archived = FALSE
+                         ")
+  regions <- DBI::dbGetQuery(sormas_db, queryRegions)
+  
   
   # Merging population data with district and region names
   population_data <- population_data %>% 
