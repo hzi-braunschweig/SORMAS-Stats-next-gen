@@ -1,4 +1,4 @@
-caseExportLineList <- function(sormas_db, fromDate, toDate){
+CaseExportLineList <- function(sormas_db, fromDate, toDate){
   
   # This function creates a table containing a line listing of all cases
   # reported in the defined time period. This line listing of cases includes
@@ -93,8 +93,8 @@ caseExportLineList <- function(sormas_db, fromDate, toDate){
     dplyr::left_join(., districts, by = 'id_district') %>% 
     dplyr::left_join(., regions, by = 'id_region') %>% 
     dplyr::mutate(report_date_case = as.Date(format(report_date_case, "%Y-%m-%d")),
-                  admission_date = as.Date(format(admission_date_hospitalization, "%Y-%m-%d")),
-                  onset_date = as.Date(format(onset_date_symptoms, "%Y-%m-%d"))) 
+                  admission_date_hospitalization = as.Date(format(admission_date_hospitalization, "%Y-%m-%d")),
+                  onset_date_symptoms = as.Date(format(onset_date_symptoms, "%Y-%m-%d"))) 
   
   # Return the output table
   return(line_list_cases)

@@ -1,4 +1,4 @@
-geoshapesExport <- function(sormas_db){
+GeoshapesExport <- function(sormas_db){
   # This function outputs a table containing geoshapes of each district.
  
   ## Provisory geo shapes export: 
