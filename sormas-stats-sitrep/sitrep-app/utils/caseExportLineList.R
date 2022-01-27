@@ -1,4 +1,4 @@
-CaseExportLineList <- function(sormas_db, fromDate, toDate){
+caseExportLineList <- function(sormas_db, fromDate, toDate){
   
   # This function creates a table containing a line listing of all cases
   # reported in the defined time period. This line listing of cases includes
