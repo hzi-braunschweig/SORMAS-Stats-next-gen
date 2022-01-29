@@ -1,4 +1,4 @@
-populationExport <- function(sormas_db){
+PopulationExport <- function(sormas_db){
   # This function outputs a table containing population data.
   # It contains data on the population by agegroup and gender in each district.
   
