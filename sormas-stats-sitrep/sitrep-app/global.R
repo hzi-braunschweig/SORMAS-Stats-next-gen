@@ -6,8 +6,8 @@ toDate = as.character(Sys.Date() + 1) # or toDate = as.character("yyyy-mm-dd"), 
 
 
 # Defining connection to db
-DB_USER = "sormas_user"
-DB_PASS = "password"
+DB_USER = "postgres"
+DB_PASS = "HZIsormas"
 DB_HOST = "127.0.0.1"
 DB_PORT = "5432"
 DB_NAME = "sormas"
