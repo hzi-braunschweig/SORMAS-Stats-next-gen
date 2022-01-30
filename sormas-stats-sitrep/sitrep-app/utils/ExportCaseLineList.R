@@ -1,11 +1,27 @@
-CaseExportLineList <- function(sormas_db, fromDate, toDate){
-  
-  # This function creates a table containing a line listing of all cases
-  # reported in the defined time period. This line listing of cases includes
-  # all the variables as columns that are necessary for the creation of the
-  # SitRep, apart from population and geo shapes data which can be exported 
-  # using the populationExport() & geoshapesExport() functions.
-  
+#' Export Line Listing of Cases
+#'
+#' @param sormas_db Connection to SORMAS database
+#' 
+#' @param fromDate Start date of export as character string.
+#' @param toDate End date of export as character string.
+#'
+#' @return  Returns a table containing a line listing of all cases
+#'  that fulfill one of the following conditions:
+#'  - the report date is in the defined time period
+#'  - the hospitalization date is in the defined time period
+#'  - the death date is in the defined period
+#'  This line listing of cases includes
+#'  all the variables as columns that are necessary for the creation of the
+#'  SitRep, apart from population and geo shapes data which can be exported 
+#'  using the ExportPopulation() & ExportGeoshapes() functions.
+#' 
+#' @seealso [ExportPopulation()] and [ExportGeoshapes()]
+#' 
+#' @export
+#'
+#' @examples
+#' 
+ExportCaseLineList <- function(sormas_db, fromDate, toDate){
   
   ## Computing default time based on 365 days in the past if not provided by user
   if(missing(fromDate) | missing(toDate)){
