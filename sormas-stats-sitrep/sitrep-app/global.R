@@ -11,7 +11,7 @@ DB_PASS = "password"
 DB_HOST = "127.0.0.1"
 DB_PORT = "5432"
 DB_NAME = "sormas"
-## end of configuratiion
+## end of configuration
 
 # Loading packages -----
 base::source(file.path(".", "loading_packages.R"))
