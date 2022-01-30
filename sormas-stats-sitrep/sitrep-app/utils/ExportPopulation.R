@@ -1,6 +1,16 @@
-populationExport <- function(sormas_db){
-  # This function outputs a table containing population data.
-  # It contains data on the population by agegroup and gender in each district.
+#' Export Population
+#'
+#' @param sormas_db Connection to SORMAS data base.
+#'
+#' @return Returns a table containing population data from SORMAS.
+#'  It contains data on the population by agegroup and gender in each district.
+#' 
+#' @seealso [ExportCaseLineList()] and [ExportGeoshapes()]
+#' 
+#' @export
+#'
+#' @examples
+ExportPopulation <- function(sormas_db){
   
   # Populationdata table SQL query 
   queryPopulation <- paste0("SELECT DISTINCT id AS id_population,

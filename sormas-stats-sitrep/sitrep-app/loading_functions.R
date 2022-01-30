@@ -4,9 +4,9 @@
 
 ## Functions to export data from sormas ----
 # base::source(file.path("./utils", "function_name.R"))
-base::source("utils/caseExportLineList.R")
-base::source("utils/populationExport.R")
-base::source("utils/geoshapesExport.R")
+base::source("utils/ExportCaseLineList.R")
+base::source("utils/ExportPopulation.R")
+base::source("utils/ExportGeoshapes.R")
 
 ## Functions for data analysis ----
 
