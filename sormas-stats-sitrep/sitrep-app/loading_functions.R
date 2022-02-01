@@ -7,10 +7,10 @@
 base::source("utils/ExportCaseLineList.R")
 base::source("utils/ExportPopulation.R")
 base::source("utils/ExportGeoshapes.R")
-base::source("utils/AggregateCountsByVariable.R")
 
 ## Functions for data analysis ----
-
+base::source("utils/AggregateCountsByVariable.R")
+base::source("utils/AggregateCountsByDate.R")
 
 
 
