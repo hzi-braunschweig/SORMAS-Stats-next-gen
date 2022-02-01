@@ -7,6 +7,7 @@
 base::source("utils/caseExportLineList.R")
 base::source("utils/populationExport.R")
 base::source("utils/geoshapesExport.R")
+base::source("utils/AggregateCountsByVariable.R")
 
 ## Functions for data analysis ----
 
