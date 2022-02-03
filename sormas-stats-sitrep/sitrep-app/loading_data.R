@@ -9,7 +9,7 @@ sormas_db = DBI::dbConnect(RPostgres::Postgres(),
                       port=DB_PORT)
 
 # Import case data line listing
-case_data_list = ExportCaseLineList(sormas_db = sormas_db, fromDate = fromDate, toDate = toDate)
+case_data_line_list = ExportCaseLineList(sormas_db = sormas_db, fromDate = fromDate, toDate = toDate)
 
 # Import population data
 population_data = ExportPopulation(sormas_db = sormas_db)
