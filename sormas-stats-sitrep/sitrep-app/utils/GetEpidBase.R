@@ -49,7 +49,7 @@ GetEpidBase <- function(data_line_list = case_data_line_list){
   
   epid_base_cases <- total_cases_district %>% 
     dplyr::full_join(new_cases_district, by = "id_district") %>% 
-    tidyr::replace_na(0) %>% ##
+    tidyr::replace_na(0) %>% ## replace na with 0
     dplyr::mutate(TOTAL_CONFIRMED_CASES = rowSums(across(starts_with("TOT_CONFIRMED")), na.rm = TRUE)) %>% 
     dplyr::mutate(TOTAL_NEW_CONFIRMED_CASES = rowSums(across(starts_with("NEW_CONFIRMED")), na.rm = TRUE))
   
