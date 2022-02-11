@@ -23,7 +23,7 @@ AggregateCountsByDate <- function(data_line_list = case_data_line_list,
   
   # Error if date_variable is not a date variable.
   base::stopifnot("This function only aggregates by date variables."=
-                  base::grepl("_date", by_date, fixed = TRUE))
+                  class(data_line_list[[by_date]])=="Date")
   
   # Build data frame with one column of dates
   date_df <- data.frame(date = seq.Date(as.Date(start_date),
