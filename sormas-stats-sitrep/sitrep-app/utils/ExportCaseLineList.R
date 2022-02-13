@@ -66,8 +66,8 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
   
   # Case table SQL query
   queryCases <- base::sprintf("SELECT  DISTINCT id AS id_case,
-    district_id AS id_district,
-    region_id AS id_region,
+    responsibledistrict_id AS id_district,
+    responsibleregion_id AS id_region,
     caseclassification AS caseclassification_case,
     EndOfIsolationReason AS end_of_iso_reason_case,
     reportdate AS report_date_case,
