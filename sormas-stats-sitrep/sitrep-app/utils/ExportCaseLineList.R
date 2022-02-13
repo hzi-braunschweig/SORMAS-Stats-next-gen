@@ -33,15 +33,11 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
   
   # Person table SQL query
   queryPersons <- base::sprintf("SELECT DISTINCT id AS id_person,
-    approximateAge AS age_person,
-    sex AS sex_person,
     deathDate AS death_date_person,
     causeOfDeathDisease AS cause_of_death_disease_person
     FROM public.person
     WHERE deathDate between '%s' and '%s'", fromDate, toDate)
   
-  # Only persons with a person_id that also appears in a case 
-  # are queried from the database
   persons <- DBI::dbGetQuery(sormas_db,queryPersons)
   
   # Symptoms table SQL query
@@ -49,8 +45,7 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
     onsetDate AS onset_date_symptoms
     FROM public.symptoms 
     WHERE onsetDate between '%s' and '%s'", fromDate, toDate)
-  # Only symptoms with a symptoms_id that also appears in a case 
-  # are queried from the database
+  
   symptoms <- DBI::dbGetQuery(sormas_db, querySymptoms)
   
   # Hospitalizations table query 
@@ -60,8 +55,7 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
     hospitalizationReason AS reason_hospitalization
     FROM public.hospitalization 
     WHERE admissionDate between '%s' and '%s'", fromDate, toDate)
-  # Only hospitalizations with a hospitalization_id that also appears in a
-  # case are queried from the database
+  
   hospitalizations <- DBI::dbGetQuery(sormas_db, queryHospitalizations)
   
   # Case table SQL query
@@ -88,6 +82,17 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
   
   cases <- DBI::dbGetQuery(sormas_db,queryCases)
   
+  # Separate query for birthdate and sex
+  queryBirthdateSex <- base::sprintf("SELECT DISTINCT id AS id_person,
+    birthdate_dd as birthdate_dd_person,
+    birthdate_mm as birthdate_mm_person,
+    birthdate_yyyy as birthdate_yyyy_person,
+    sex AS sex_person
+    FROM public.person
+    WHERE id IN (%s)", paste("'", base::unique(c(cases$id_person)), "'",collapse=","))
+  
+  birthdate_sex <- DBI::dbGetQuery(sormas_db, queryBirthdateSex)
+  
   
   # District table SQL query
   queryDistrict <- paste0("SELECT DISTINCT id AS id_district,
@@ -106,10 +111,12 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
   regions <- DBI::dbGetQuery(sormas_db, queryRegions)
   
   
-  # Merging data from cases, persons, hospitalizations, districts and regions 
-  # exports into one line listed DataFrame with every row being a case 
+  # Merging data from cases, persons, hospitalizations, birhtdate_sex,
+  # districts and regions exports into one line listed data frame
+  # with every row being a case 
   line_list_cases <- cases %>% 
     dplyr::left_join(., persons, by = 'id_person') %>% 
+    dplyr::left_join(., birthdate_sex, by = 'id_person') %>% 
     dplyr::left_join(., symptoms, by = 'id_symptoms') %>% 
     dplyr::left_join(., hospitalizations, by = 'id_hospitalization') %>% 
     dplyr::left_join(., districts, by = 'id_district') %>% 
