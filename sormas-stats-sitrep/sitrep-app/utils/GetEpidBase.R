@@ -25,9 +25,6 @@
 #' @examples
 GetEpidBase <- function(data_line_list = case_data_line_list){
   
-  # Define latest date
-  latest_date <- c(Sys.Date(), Sys.Date()-1)# as.character(as.Date(toDate)-1) #  example 
-  
   # Get dataframe with base indicators for cases
   
   ## Get total cases per district
@@ -37,14 +34,7 @@ GetEpidBase <- function(data_line_list = case_data_line_list){
     dplyr::rename_with(.cols = !id_district, function(x){paste0("TOT_", x)})
   
   ## Get new cases per district
-  ### First filter data for new cases based on reporting date
-  new_cases_district <- data_line_list %>% 
-    dplyr::filter(report_date_case %in% latest_date)  %>%  # check if report date is in vector
-    AggregateCountsByVariable(data_line_list = .,
-                              count_values = "caseclassification_case",
-                              by_variable = "id_district") %>%
-    dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_", x)})
-  
+
   ## Join on id_district and summarize confirmed cases
   
   epid_base_cases <- total_cases_district %>% 

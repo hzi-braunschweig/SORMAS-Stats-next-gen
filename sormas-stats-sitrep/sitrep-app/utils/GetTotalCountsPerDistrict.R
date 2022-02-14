@@ -1,6 +1,7 @@
 #' Get Total Counts per District
 #' 
-#' @description Gets the total counts of a variable on district level.
+#' @description Gets the total counts of a variable in the output table of the 
+#'  ExportCaseLineList function on district level.
 #'
 #' @param variable Column in the case_data_line_list output of the 
 #'  ExportCaseLineList function.
@@ -17,4 +18,6 @@ GetTotalCountsPerDistrict <- function(variable = "caseclassification_case"){
                                                      count_values = variable,
                                                      by_variable = "id_district") %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("TOT_", x)})
+  
+  return(total_counts_district)
 }

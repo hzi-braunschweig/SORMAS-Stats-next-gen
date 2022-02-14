@@ -11,6 +11,8 @@ base::source("utils/ExportGeoshapes.R")
 ## Functions for data analysis ----
 base::source("utils/AggregateCountsByVariable.R")
 base::source("utils/AggregateCountsByDate.R")
+base::source("utils/GetTotalCountsPerDistrict.R")
+base::source("utils/GetNewCountsPerDistrict.R")
 base::source("utils/GetEpidBase.R")
 
 
