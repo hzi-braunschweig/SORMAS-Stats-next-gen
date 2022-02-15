@@ -14,6 +14,7 @@ base::source("utils/AggregateCountsByDate.R")
 base::source("utils/GetTotalCountsPerDistrict.R")
 base::source("utils/GetNewCountsPerDistrict.R")
 base::source("utils/GetEpidBase.R")
+base::source("utils/GetCompleteDistrictsCategoriesDf.R")
 
 
 

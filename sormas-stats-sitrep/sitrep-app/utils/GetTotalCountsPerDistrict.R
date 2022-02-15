@@ -16,8 +16,6 @@ GetTotalCountsPerDistrict <- function(variable = "caseclassification_case"){
   
   total_counts_district <- AggregateCountsByVariable(data_line_list = case_data_line_list,
                                                      count_values = variable,
-                                                     by_variable = "id_district") %>% 
-    dplyr::rename_with(.cols = !id_district, function(x){paste0("TOT_", x)})
-  
+                                                     by_variable = "id_district")   
   return(total_counts_district)
 }

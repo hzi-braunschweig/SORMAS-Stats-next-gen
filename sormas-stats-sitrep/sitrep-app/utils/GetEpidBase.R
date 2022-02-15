@@ -25,6 +25,15 @@
 #' @examples
 GetEpidBase <- function(data_line_list = case_data_line_list){
   
+  # TO RENAME ALL COLUMNS EXCEPT ONE  
+  # dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_", x)})
+  # dplyr::rename_with(.cols = !id_district, function(x){paste0("TOT_", x)})
+  
+  # Get base data frame with all districs as rows and the comlplete categories
+  # as columns
+  epid_base_df <- GetCompleteDistrictsCategoriesDf()
+  
+  
   # Get dataframe with base indicators for cases
   
   ## Get total cases per district
@@ -61,9 +70,9 @@ GetEpidBase <- function(data_line_list = case_data_line_list){
   # Get dataframe with base indicators for deaths
 
   ## Get total deaths per district
-  total_deaths_district = GetTotalCountsPerDistrict(variable = "cause_of_death_disease_person")
+  total_deaths_district = GetTotalCountsPerDistrict(variable = "cause_of_death_person")
   ## Get new deaths per district
-  new_deaths_district = GetNewCountsPerDistrict(variable = "cause_of_death_disease_person",
+  new_deaths_district = GetNewCountsPerDistrict(variable = "cause_of_death_person",
                                                 date_type = "death_date_person")
   ## Join on id_district
   epid_base_deaths <- total_deaths_district %>% 
