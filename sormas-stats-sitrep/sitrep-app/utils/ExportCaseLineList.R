@@ -34,7 +34,7 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
   # Person table SQL query
   queryPersons <- base::sprintf("SELECT DISTINCT id AS id_person,
     deathDate AS death_date_person,
-    causeOfDeathDisease AS cause_of_death_disease_person
+    causeOfDeath AS cause_of_death_person
     FROM public.person
     WHERE deathDate between '%s' and '%s'", fromDate, toDate)
   
