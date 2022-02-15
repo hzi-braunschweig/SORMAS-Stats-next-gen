@@ -28,18 +28,16 @@ GetEpidBase <- function(data_line_list = case_data_line_list){
   # Get dataframe with base indicators for cases
   
   ## Get total cases per district
-  total_cases_district <- AggregateCountsByVariable(data_line_list = data_line_list,
-                                                    count_values = "caseclassification_case",
-                                                    by_variable = "id_district") %>% 
-    dplyr::rename_with(.cols = !id_district, function(x){paste0("TOT_", x)})
+  total_cases_district <- GetTotalCountsPerDistrict(variable = "caseclassification_case")
   
-  ## Get new cases per district
+  ## Get new cases per district based on reporting date
+  new_cases_district <- GetNewCountsPerDistrict(variable = "caseclassification_case",
+                                                date_type = "report_date_case")
 
   ## Join on id_district and summarize confirmed cases
-  
   epid_base_cases <- total_cases_district %>% 
     dplyr::full_join(new_cases_district, by = "id_district") %>% 
-    tidyr::replace_na(0) %>% ## replace na with 0
+    dplyr::mutate(across(everything(), ~tidyr::replace_na(.x, 0))) %>%
     dplyr::mutate(TOTAL_CONFIRMED_CASES = rowSums(across(starts_with("TOT_CONFIRMED")), na.rm = TRUE)) %>% 
     dplyr::mutate(TOTAL_NEW_CONFIRMED_CASES = rowSums(across(starts_with("NEW_CONFIRMED")), na.rm = TRUE))
   
@@ -48,18 +46,11 @@ GetEpidBase <- function(data_line_list = case_data_line_list){
   # Get dataframe with base indicators for hospitalizations
   
   ## Get total hospitalizations per district
-  total_hospitalizations_district <- AggregateCountsByVariable(data_line_list = data_line_list,
-                                                               count_values = "admission_date_hospitalization",
-                                                               by_variable = "id_district") %>% 
-    dplyr::rename_with(.cols = !id_district, function(x){paste0("TOT_", x)})
+  total_hospitalizations_district <- GetTotalCountsPerDistrict(variable = "admitted_to_health_facility_hospitalization")
     
   ## Get new hospitalizations per district
-  new_hospitalizations_district <- data_line_list %>% 
-    dplyr::filter(admission_date_hospitalization == latest_date) %>% 
-    AggregateCountsByVariable(.,
-                              count_values = "reason_hospitalization",
-                              by_variable = "id_district") %>% 
-    dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_", x)})
+  new_hospitalizations_district <- GetNewCountsPerDistrict(variable = "admitted_to_health_facility_hospitalization",
+                                                           date_type = "admission_date_hospitalization")
   
   ## Join on id_district
   epid_base_hospitalizations <- total_hospitalizations_district %>% 
@@ -68,12 +59,15 @@ GetEpidBase <- function(data_line_list = case_data_line_list){
   ###########################
   
   # Get dataframe with base indicators for deaths
-  
+
   ## Get total deaths per district
-  
+  total_deaths_district = GetTotalCountsPerDistrict(variable = "cause_of_death_disease_person")
   ## Get new deaths per district
-  
+  new_deaths_district = GetNewCountsPerDistrict(variable = "cause_of_death_disease_person",
+                                                date_type = "death_date_person")
   ## Join on id_district
+  epid_base_deaths <- total_deaths_district %>% 
+    dplyr::full_join(new_deaths_district, by = "id_district")
   
   ###########################
   
