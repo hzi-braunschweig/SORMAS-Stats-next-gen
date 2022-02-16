@@ -47,8 +47,7 @@ GetEpidBase <- function(){
 
   ## Join on id_district and summarize confirmed cases
   epid_base_cases <- total_cases_district %>% 
-    dplyr::full_join(new_cases_district, by = "id_district") %>% 
-    dplyr::mutate(across(everything(), ~tidyr::replace_na(.x, 0))) 
+    dplyr::full_join(new_cases_district, by = "id_district") 
   
   ###########################
   
@@ -92,7 +91,7 @@ GetEpidBase <- function(){
     dplyr::full_join(epid_base_deaths, by = "id_district") %>% 
     dplyr::mutate(TOTAL_CONFIRMED_CASES = rowSums(across(starts_with("CASE_CONFIRMED")), na.rm = TRUE)) %>%
     dplyr::mutate(TOTAL_NEW_CONFIRMED_CASES = rowSums(across(starts_with("NEW_CASE_CONFIRMED")), na.rm = TRUE)) %>% 
-    dplyr::select(-NEW_CASE_n, -NEW_HOSP_n, -NEW_DEATH_n)
+    dplyr::select(-any_of(c("CASE_n", "NEW_CASE_n", "HOSP_n", "NEW_HOSP_n", "DEATH_n", "NEW_DEATH_n")))
   
   # Update the empty df with the epid base computed above
   epid_base <- dplyr::rows_update(empty_df, epid_base, by = "id_district")

@@ -22,7 +22,9 @@ GetNewCountsPerDistrict <- function(variable = "caseclassification_case", date_t
     dplyr::filter(.data[[date_type]] %in% latest_date)  %>%
     AggregateCountsByVariable(data_line_list = .,
                               count_values = variable,
-                              by_variable = "id_district") 
+                              by_variable = "id_district")  %>% 
+    dplyr::mutate(across(everything(), ~replace_na(.,0))) # %>% 
+    # dplyr::select(-contains("n"))
   
   return(new_counts_district)
 }
