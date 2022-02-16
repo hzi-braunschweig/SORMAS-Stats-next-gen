@@ -18,7 +18,7 @@
 GetCompleteDistrictsCategoriesDf <- function(){
   
   # Initialize data frame
-  df0 <- data.frame(matrix(NA, ncol = 25, nrow = nrow(geoshapes_data)))
+  df0 <- data.frame(matrix(NA, ncol = 31, nrow = nrow(geoshapes_data)))
   
   
   ####### HARD CODED COMPLETE VARIABLE CATEGORIES #########
@@ -31,6 +31,7 @@ GetCompleteDistrictsCategoriesDf <- function(){
                      "CASE_CONFIRMED_NO_SYMPTOMS",
                      "CASE_CONFIRMED_UNKNOWN_SYMPTOMS",
                      "CASE_NO_CASE",
+                     "TOTAL_CONFIRMED_CASES",
                      "NEW_CASE_NOT_CLASSIFIED",
                      "NEW_CASE_SUSPECT",
                      "NEW_CASE_PROBABLE",
@@ -38,23 +39,28 @@ GetCompleteDistrictsCategoriesDf <- function(){
                      "NEW_CASE_CONFIRMED_NO_SYMPTOMS",
                      "NEW_CASE_CONFIRMED_UNKNOWN_SYMPTOMS",
                      "NEW_CASE_NO_CASE",
+                     "TOTAL_NEW_CONFIRMED_CASES",
                      "HOSP_YES",
                      "HOSP_NO",
                      "HOSP_UNKNOWN",
+                     "HOSP_NA",
                      "NEW_HOSP_YES",
                      "NEW_HOSP_NO",
                      "NEW_HOSP_UNKNOWN",
+                     "NEW_HOSP_NA",
                      "DEATH_EPIDEMIC_DISEASE",
                      "DEATH_OTHER_CAUSE",
+                     "DEATH_NA",
                      "NEW_DEATH_EPIDEMIC_DISEASE",
-                     "NEW_DEATH_OTHER_CAUSE"
+                     "NEW_DEATH_OTHER_CAUSE",
+                     "NEW_DEATH_NA"
     
   )
 
   ####### COMPLETE DISTRICTS ##############################
   
   ## Use geoshapes data to obtain a complete list of district ids
-  df0$id_district <- geoshapes_data$id_district
+  df0$id_district <- 
   
   return(df0)
 }
