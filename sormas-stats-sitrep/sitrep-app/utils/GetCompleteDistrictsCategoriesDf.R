@@ -18,7 +18,7 @@
 GetCompleteDistrictsCategoriesDf <- function(){
   
   # Initialize data frame
-  df0 <- data.frame(matrix(NA, ncol = 31, nrow = nrow(geoshapes_data)))
+  df0 <- data.frame(matrix(0, ncol = 31, nrow = nrow(districts)))
   
   
   ####### HARD CODED COMPLETE VARIABLE CATEGORIES #########
@@ -60,7 +60,7 @@ GetCompleteDistrictsCategoriesDf <- function(){
   ####### COMPLETE DISTRICTS ##############################
   
   ## Use geoshapes data to obtain a complete list of district ids
-  df0$id_district <- 
+  df0$id_district <- districts$id_district
   
   return(df0)
 }
