@@ -2,8 +2,11 @@
 #'
 #' @param sormas_db Connection to SORMAS data base.
 #'
-#' @return Returns a table containing population data from SORMAS.
+#' @return Returns a list contatinig three tables.
+#'  First a table containing population data from SORMAS.
 #'  It contains data on the population by agegroup and gender in each district.
+#'  Additionally the list contains a complete table of all districts and
+#'  a complete table of all regions.
 #' 
 #' @seealso [ExportCaseLineList()] and [ExportGeoshapes()]
 #' 
@@ -47,5 +50,7 @@ ExportPopulation <- function(sormas_db){
     dplyr::left_join(., regions, by = 'id_region')
   
   #return output table
-  return(population_data)
+  return(list("population_data"=population_data,
+              "districts" = districts,
+              "regions" = regions))
 }

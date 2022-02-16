@@ -11,8 +11,17 @@ sormas_db = DBI::dbConnect(RPostgres::Postgres(),
 # Import case data line listing
 case_data_line_list = ExportCaseLineList(sormas_db = sormas_db, fromDate = fromDate, toDate = toDate)
 
-# Import population data
-population_data = ExportPopulation(sormas_db = sormas_db)
+# Import population data, districts and regions
+export_list = ExportPopulation(sormas_db = sormas_db)
+
+# Population data
+population_data = export_list$population_data
+
+# Districts
+districts = export_list$districts
+
+# Regions
+regions = export_list$regions
 
 # Import shape files
 geoshapes_data = ExportGeoshapes(sormas_db = sormas_db)
