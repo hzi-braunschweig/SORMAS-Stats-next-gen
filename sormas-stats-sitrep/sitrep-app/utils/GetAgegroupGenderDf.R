@@ -12,6 +12,7 @@
 #' @export
 #'
 #' @examples
+#' 
 GetAgegroupGenderDf <- function(){
   
   genders <- c("MALE",
