@@ -20,54 +20,49 @@ GetCompleteDistrictsCategoriesDf <- function(){
   ####### HARD CODED COMPLETE VARIABLE CATEGORIES #########
   
   columns <- c("id_district",
-                     "name_district",
-                     "CASE_NOT_CLASSIFIED",
-                     "CASE_SUSPECT",
-                     "CASE_PROBABLE",
-                     "CASE_CONFIRMED",
-                     "CASE_CONFIRMED_NO_SYMPTOMS",
-                     "CASE_CONFIRMED_UNKNOWN_SYMPTOMS",
-                     "CASE_NO_CASE",
-                     "TOTAL_CONFIRMED_CASES",
-                     "NEW_CASE_NOT_CLASSIFIED",
-                     "NEW_CASE_SUSPECT",
-                     "NEW_CASE_PROBABLE",
-                     "NEW_CASE_CONFIRMED",
-                     "NEW_CASE_CONFIRMED_NO_SYMPTOMS",
-                     "NEW_CASE_CONFIRMED_UNKNOWN_SYMPTOMS",
-                     "NEW_CASE_NO_CASE",
-                     "TOTAL_NEW_CONFIRMED_CASES",
-                     "HOSP_YES",
-                     "HOSP_NO",
-                     "HOSP_UNKNOWN",
-                     "HOSP_NA",
-                     "NEW_HOSP_YES",
-                     "NEW_HOSP_NO",
-                     "NEW_HOSP_UNKNOWN",
-                     "NEW_HOSP_NA",
-                     "DEATH_EPIDEMIC_DISEASE",
-                     "DEATH_OTHER_CAUSE",
-                     "DEATH_NA",
-                     "NEW_DEATH_EPIDEMIC_DISEASE",
-                     "NEW_DEATH_OTHER_CAUSE",
-                     "NEW_DEATH_NA"
-    
-  )
-
-  ####### COMPLETE DISTRICTS ##############################
-  
-  ## Use geoshapes data to obtain a complete list of district ids and names
-  id_district <- districts$id_district
-  name_district <- districts$name_district
-  
+               "name_district",
+               "id_region",
+               "name_region",
+               "CASE_NOT_CLASSIFIED",
+               "CASE_SUSPECT",
+               "CASE_PROBABLE",
+               "CASE_CONFIRMED",
+               "CASE_CONFIRMED_NO_SYMPTOMS",
+               "CASE_CONFIRMED_UNKNOWN_SYMPTOMS",
+               "CASE_NO_CASE",
+               "TOTAL_CONFIRMED_CASES",
+               "NEW_CASE_NOT_CLASSIFIED",
+               "NEW_CASE_SUSPECT",
+               "NEW_CASE_PROBABLE",
+               "NEW_CASE_CONFIRMED",
+               "NEW_CASE_CONFIRMED_NO_SYMPTOMS",
+               "NEW_CASE_CONFIRMED_UNKNOWN_SYMPTOMS",
+               "NEW_CASE_NO_CASE",
+               "TOTAL_NEW_CONFIRMED_CASES",
+               "HOSP_YES",
+               "HOSP_NO",
+               "HOSP_UNKNOWN",
+               "HOSP_NA",
+               "NEW_HOSP_YES",
+               "NEW_HOSP_NO",
+               "NEW_HOSP_UNKNOWN",
+               "NEW_HOSP_NA",
+               "DEATH_EPIDEMIC_DISEASE",
+               "DEATH_OTHER_CAUSE",
+               "DEATH_NA",
+               "NEW_DEATH_EPIDEMIC_DISEASE",
+               "NEW_DEATH_OTHER_CAUSE",
+               "NEW_DEATH_NA")
   
   # Initialize data frame
-  df0 <- data.frame(matrix(0, ncol = length(columns), nrow = nrow(districts)))
+  df0 <- data.frame(matrix(0, ncol = length(columns), nrow = nrow(geographic_units)))
   # Assign column names
   colnames(df0) <- columns
-  # input id_district and name_district
-  df0$id_district <- id_district
-  df0$name_district <- name_district
+  # input id_district, name_district, id_region and name_region
+  df0$id_district <- geographic_units$id_district
+  df0$name_district <- geographic_units$name_district
+  df0$id_region <- geographic_units$id_region
+  df0$name_region <- geographic_units$name_region
   
   return(df0)
 }
