@@ -17,11 +17,8 @@ export_list = ExportPopulation(sormas_db = sormas_db)
 # Population data
 population_data = export_list$population_data
 
-# Districts
-districts = export_list$districts
-
-# Regions
-regions = export_list$regions
+# Geographic units
+geographic_units = export_list$geographic_units
 
 # Import shape files
 geoshapes_data = ExportGeoshapes(sormas_db = sormas_db)

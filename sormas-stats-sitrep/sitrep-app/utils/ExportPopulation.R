@@ -29,7 +29,8 @@ ExportPopulation <- function(sormas_db){
   
   # District table SQL query
   queryDistrict <- paste0("SELECT DISTINCT id AS id_district,
-    name AS name_district
+    name AS name_district,
+    region_id AS id_region
     FROM public.district
     WHERE archived = FALSE
                           ")
@@ -44,13 +45,18 @@ ExportPopulation <- function(sormas_db){
   regions <- DBI::dbGetQuery(sormas_db, queryRegions)
   
   
+  # Join districts with regions
+  geographic_units <- districts %>% 
+    dplyr::full_join(regions, by = "id_region")
+  
   # Merging population data with district and region names
   population_data <- population_data %>% 
     dplyr::left_join(., districts, by = 'id_district' ) %>% 
+    dplyr::select(-id_region.y) %>% 
+    dplyr::rename(id_region = id_region.x) %>% 
     dplyr::left_join(., regions, by = 'id_region')
   
   #return output table
   return(list("population_data"=population_data,
-              "districts" = districts,
-              "regions" = regions))
+              "geographic_units" = geographic_units))
 }
