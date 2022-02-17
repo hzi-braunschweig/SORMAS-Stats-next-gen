@@ -15,11 +15,4 @@ base::source("utils/GetTotalCountsPerDistrict.R")
 base::source("utils/GetNewCountsPerDistrict.R")
 base::source("utils/GetEpidBase.R")
 base::source("utils/GetCompleteDistrictsCategoriesDf.R")
-
-
-
-
-
-
-
-
+base::source("utils/CalculateBirthdateAge.R")

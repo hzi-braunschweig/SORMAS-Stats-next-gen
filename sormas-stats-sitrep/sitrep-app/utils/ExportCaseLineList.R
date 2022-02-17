@@ -125,7 +125,11 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
                   admission_date_hospitalization = as.Date(format(admission_date_hospitalization, "%Y-%m-%d")),
                   onset_date_symptoms = as.Date(format(onset_date_symptoms, "%Y-%m-%d"))) %>% 
     dplyr::mutate(birthdate_person = as.Date(paste(birthdate_yyyy_person, birthdate_mm_person, birthdate_dd_person, sep = "-"), "%Y-%m-%d")) %>% 
-    dplyr::select(-birthdate_yyyy_person, -birthdate_mm_person, -birthdate_dd_person)
+    dplyr::select(-birthdate_yyyy_person, -birthdate_mm_person, -birthdate_dd_person) %>% 
+    dplyr::mutate(report_date_age = CalculateBirthdateAge(birthdate_person, report_date_case)) %>% 
+    dplyr::mutate(admission_date_age = CalculateBirthdateAge(birthdate_person, admission_date_hospitalization)) %>%
+    dplyr::mutate(onset_date_age = CalculateBirthdateAge(birthdate_person, onset_date_symptoms)) %>%
+    dplyr::mutate(death_age =  CalculateBirthdateAge(birthdate_person, death_date_person))
   
   # Return the output table
   return(line_list_cases)
