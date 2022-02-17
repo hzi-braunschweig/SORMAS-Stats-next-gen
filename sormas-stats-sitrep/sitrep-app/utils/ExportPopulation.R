@@ -47,7 +47,7 @@ ExportPopulation <- function(sormas_db){
   
   # Join districts with regions
   geographic_units <- districts %>% 
-    dplyr::full_join(regions, by = "id_region")
+    dplyr::left_join(regions, by = "id_region")
   
   # Merging population data with district and region names
   population_data <- population_data %>% 
