@@ -17,13 +17,10 @@
 #' @examples
 GetCompleteDistrictsCategoriesDf <- function(){
   
-  # Initialize data frame
-  df0 <- data.frame(matrix(0, ncol = 31, nrow = nrow(districts)))
-  
-  
   ####### HARD CODED COMPLETE VARIABLE CATEGORIES #########
   
-  colnames(df0) <- c("id_district",
+  columns <- c("id_district",
+                     "name_district",
                      "CASE_NOT_CLASSIFIED",
                      "CASE_SUSPECT",
                      "CASE_PROBABLE",
@@ -59,8 +56,18 @@ GetCompleteDistrictsCategoriesDf <- function(){
 
   ####### COMPLETE DISTRICTS ##############################
   
-  ## Use geoshapes data to obtain a complete list of district ids
-  df0$id_district <- districts$id_district
+  ## Use geoshapes data to obtain a complete list of district ids and names
+  id_district <- districts$id_district
+  name_district <- districts$name_district
+  
+  
+  # Initialize data frame
+  df0 <- data.frame(matrix(0, ncol = length(columns), nrow = nrow(districts)))
+  # Assign column names
+  colnames(df0) <- columns
+  # input id_district and name_district
+  df0$id_district <- id_district
+  df0$name_district <- name_district
   
   return(df0)
 }
