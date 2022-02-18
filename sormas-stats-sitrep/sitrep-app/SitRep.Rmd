@@ -66,7 +66,10 @@ PLOT AGEGROUP GENDER DATA
 ## Region level table
 `r text["STATE_TBL.docx",1]`
 
-DISPLAY STATE TABLE
+```{r}
+DisplayRegionEpidTable()
+```
+
 
 ## District level map
 `r text["COUNTY_MAP.docx",1]`
