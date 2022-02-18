@@ -1,0 +1,37 @@
+---
+title: "Situation Report"
+author: "HZI Analysis, Output and Research"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  bookdown::word_document2:
+    reference_docx: data/text/template.docx
+    number_sections: true
+    fig_width: 7
+    fig_height: 6
+    fig_caption: yes
+bibliography: data/text/references.bib
+link-citations: yes
+---
+
+```{r setup, include = FALSE}
+# setting knitr chunk options
+knitr::opts_chunk$set(echo = FALSE, tab.cap.style = "Table Caption")
+```
+
+```{r flextable settings, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
+# In this SitRep the package 'flextable' is used to display tables in word.
+# Here we set the default options for the flextable package.
+# The flextable package automatically splits long tables over different pages 
+# and repeats the headings.
+
+set_flextable_defaults(big.mark = " ",
+  font.size = 9, theme_fun = theme_vanilla,
+  padding.bottom = 6,
+  padding.top = 6,
+  padding.left = 5,
+  padding.right = 5,
+  background.color = "#EFEFEF")
+
+```
+
+
