@@ -29,3 +29,9 @@ dbDisconnect(sormas_db)
 # Import text and references
 text_files<- readtext::readtext("data/text/*.docx")
 text <- data.frame(text_files[,-1], row.names=text_files[,1])
+
+# Preparing data
+# epidemic overview
+epid_base = GetEpidBase()
+# death counts per agegroup and gender
+death_counts_agegroup_gender = GetDeathCountsPerAgegroupGender()
