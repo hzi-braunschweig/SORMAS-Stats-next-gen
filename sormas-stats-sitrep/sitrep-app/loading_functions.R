@@ -18,3 +18,6 @@ base::source("utils/GetCompleteDistrictsCategoriesDf.R")
 base::source("utils/CalculateBirthdateAge.R")
 base::source("utils/GetAgegroupGenderDf.R")
 base::source("utils/GetDeathCountsPerAgegroupGender.R")
+
+## Functions for displaying data
+base::source("utils/DisplayRegionEpidTable.R")
