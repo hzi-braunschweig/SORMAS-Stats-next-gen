@@ -20,31 +20,28 @@ GetAgegroupGenderDf <- function(){
                   "OTHER",
                   "UNKNOWN")
   
-  agegroups <- c("0-4",
-               "5-9",
-               "10-14",
-               "15-19",
-               "20-24",
-               "25-29",
-               "30-34",
-               "35-39",
-               "40-44",
-               "45-49",
-               "50-54",
-               "55-59",
-               "60-64",
-               "65-69",
-               "70-74",
-               "75-79",
-               "80+",
+  age_groups <- c("(0,5]",
+               "(5,10]",
+               "(10,15]",
+               "(15,20]",
+               "(20,25]",
+               "(25,30]",
+               "(30,35]",
+               "(35,40]",
+               "(40,45]",
+               "(45,50]",
+               "(50,55]",
+               "(55,60]",
+               "(60,65]",
+               "(65,70]",
+               "(70,75]",
+               "(75,80]",
+               "(80,150]",
                "UNKNOWN")
   
   # initialize data frame
-  df0 <- data.frame(matrix(0, ncol = length(genders), nrow = length(agegroups)))
-  
-  # Assign column and row names
-  row.names(df0) <- agegroups
-  colnames(df0) <- genders
+  df0 <- data.frame(gender = rep(genders, each = length(age_groups)),
+                    age_group = rep(age_groups, 4))
   
   return(df0)
   
