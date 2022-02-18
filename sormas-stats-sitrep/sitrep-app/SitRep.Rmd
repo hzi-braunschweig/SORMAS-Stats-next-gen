@@ -18,6 +18,11 @@ link-citations: yes
 knitr::opts_chunk$set(echo = FALSE, tab.cap.style = "Table Caption")
 ```
 
+```{r sitrep_data_setup, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
+base::source(file.path(".", "global.R"))
+```
+
+
 ```{r flextable settings, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
 # In this SitRep the package 'flextable' is used to display tables in word.
 # Here we set the default options for the flextable package.
@@ -34,4 +39,73 @@ set_flextable_defaults(big.mark = " ",
 
 ```
 
+# Introduction
+`r text["INTRO.docx",1]` 
 
+## Overview
+`r text["OVERVIEW.docx",1]`
+
+DISPLAY OVERVIEW TABLE
+
+# Epidemic Dynamic
+`r text["EPID_DYN.docx",1]` 
+
+## Time series data
+`r text["TIME_SER.docx",1]`
+
+PLOT TIMESERIES DATA
+
+## Death incidences by age groups
+`r text["DEATH_INC.docx",1]`
+
+PLOT AGEGROUP GENDER DATA
+
+# Regional Situation
+`r text["REG_SIT.docx",1]`
+
+## Region level table
+`r text["STATE_TBL.docx",1]`
+
+DISPLAY STATE TABLE
+
+## District level map
+`r text["COUNTY_MAP.docx",1]`
+
+DISPLAY DISTRICT LEVEL MAP
+
+# Remarks 
+`r text["REMARKS.docx",1]`
+
+# References
+```{r references, echo = FALSE, warning=FALSE, message=FALSE}
+# References to papers can be included via the references.bib and the .docx
+# files in the /text folder.
+# First, the user needs to copy the BibTex reference of the paper he or she 
+# wants to cite in the references.bib file. 
+# Then, to define the place of the refence within the text, the user simply 
+# needs to put '[@refname]' in the text of the .docx file where the citation
+# should be. 
+# To cite multiple references at once: '[@refname1;@refname2]'.
+# refname is the BibTex reference name of the paper to be cited.
+
+# For crossreferences to section headings the user needs to type 
+# 'Section \@ref(label)' in the text witin the .docx file in the /text
+# folder.
+# 'label' is the Section ID of the section to be cited, which is defined by
+# through Pandoc as e.g. 'heading-one' for a Section named '# Heading one'.
+# The user can define section IDs by adding '{#userdefinedID}' behind a
+# heading, e.g. '# Heading {#userdefinedID}'.
+
+# For crossreferences to figures the user needs to type 
+# 'Figure \@ref(fig:FigName)' in the text witin the .docx file in the /text
+# folder.
+# FigName is the name of the figure to be cited, which is defined in the chunk
+# options of this Situation-Report.Rmd file.
+
+# For crossreferences to tables the user needs to type 
+# 'Table \@ref(tab:TabName)' in the text witin the .docx file in the /text
+# folder.
+# TabName is the name of the table to be cited, which is defined in the chunk
+# options of this Situation-Report.Rmd file.
+
+```
