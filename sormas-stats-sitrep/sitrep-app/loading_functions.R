@@ -21,3 +21,4 @@ base::source("utils/GetDeathCountsPerAgegroupGender.R")
 
 ## Functions for displaying data
 base::source("utils/DisplayRegionEpidTable.R")
+base::source("utils/DisplayOverviewEpidTable.R")
