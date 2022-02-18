@@ -26,4 +26,9 @@ geoshapes_data = ExportGeoshapes(sormas_db = sormas_db)
 # Disconnect from sormas_db ---- 
 dbDisconnect(sormas_db)
 
+# Preparing data
+# epidemic overview
+epid_base = GetEpidBase()
+# death counts per agegroup and gender
+death_counts_agegroup_gender = GetDeathCountsPerAgegroupGender()
 
