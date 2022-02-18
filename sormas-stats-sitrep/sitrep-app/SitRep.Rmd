@@ -45,7 +45,9 @@ set_flextable_defaults(big.mark = " ",
 ## Overview
 `r text["OVERVIEW.docx",1]`
 
-DISPLAY OVERVIEW TABLE
+```{r}
+DisplayOverviewEpidTable()
+```
 
 # Epidemic Dynamic
 `r text["EPID_DYN.docx",1]` 
