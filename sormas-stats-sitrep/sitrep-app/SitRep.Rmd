@@ -1,7 +1,7 @@
 ---
 title: "Situation Report"
 author: "HZI Analysis, Output and Research"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: "Placeholder for reportDate"
 output: 
   bookdown::word_document2:
     reference_docx: data/text/template.docx
@@ -14,6 +14,7 @@ link-citations: yes
 ---
 
 ```{r setup, include = FALSE}
+# "`r format(Sys.time(), '%d %B, %Y')`" 
 # setting knitr chunk options
 knitr::opts_chunk$set(echo = FALSE, tab.cap.style = "Table Caption")
 ```

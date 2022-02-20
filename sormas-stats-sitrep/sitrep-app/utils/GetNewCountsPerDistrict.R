@@ -12,10 +12,12 @@
 #' @export
 #'
 #' @examples
-GetNewCountsPerDistrict <- function(variable = "caseclassification_case", date_type = "report_date_case"){
+GetNewCountsPerDistrict <- function(variable = "caseclassification_case",
+                                    date_type = "report_date_case"
+                                    ){
   
   # Define latest date
-  latest_date <- c(Sys.Date(), Sys.Date()-1) # as.character(as.Date(toDate)-1) #  example 
+  latest_date <- c(Sys.Date() -1, Sys.Date()) # as.character(as.Date(toDate)-1)
   
   ### First filter data for new counts on date type
   new_counts_district <- case_data_line_list %>% 
