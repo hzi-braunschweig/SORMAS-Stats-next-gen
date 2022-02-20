@@ -33,4 +33,3 @@ twoByTwoTablefunction = function(data,Var1, Var2, spread=FALSE, Proportion = FAL
   ret = as.data.frame(ret)
   return(ret)
 }
-save(twoByTwoTablefunction, file = "./utils/twoByTwoTablefunction.R")
