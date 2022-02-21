@@ -35,7 +35,6 @@ AggregateCountsByDate <- function(data_line_list = case_data_line_list,
     dplyr::group_by(.data[[by_date]]) %>% 
     dplyr::count(.data[[count_values]]) %>% 
     tidyr::pivot_wider(names_from = .data[[count_values]],
-                       names_prefix= (base::gsub("date.*", "", by_date)),
                        values_from = n) %>% 
     dplyr::rename(date = .data[[by_date]])  %>% 
     tidyr::drop_na(date)
