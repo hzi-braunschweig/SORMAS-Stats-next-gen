@@ -27,8 +27,12 @@ geoshapes_data = ExportGeoshapes(sormas_db = sormas_db)
 dbDisconnect(sormas_db)
 
 # Preparing data
-# epidemic overview
+
+# Epidemic overview
 epid_base = GetEpidBase()
-# death counts per agegroup and gender
+
+# Death counts per agegroup and gender
 death_counts_agegroup_gender = GetDeathCountsPerAgegroupGender()
 
+# Timeseries data 
+timeseries_data <- GetTimeseriesData(case_data_line_list, as.Date(fromDate), as.Date(toDate))
