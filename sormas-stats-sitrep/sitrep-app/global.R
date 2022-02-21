@@ -4,7 +4,7 @@ fromDate = as.character(Sys.Date() - delay - 1) #  you can directly define fromD
 toDate = as.character(Sys.Date() + 1) # or toDate = as.character("yyyy-mm-dd"), +1 is added because between sql commant does not consider end of intervals
 
 # Defining connection to db
-DB_USER = "postgres"
+DB_USER = "sormas_user"
 DB_PASS = "password"
 DB_HOST = "127.0.0.1"
 DB_PORT = "5432"
