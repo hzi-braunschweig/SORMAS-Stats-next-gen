@@ -1,4 +1,3 @@
-
 # Defining parameters to be used to sample data from external database (sormas database)
 delay = 365 # number of days to count backward from today for entities without specific delay parameters,  default = 90 days in the past
 fromDate = as.character(Sys.Date() - delay - 1) #  you can directly define fromDate as: fromDate = as.character("yyyy-mm-dd")

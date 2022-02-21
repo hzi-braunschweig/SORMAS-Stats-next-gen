@@ -23,19 +23,20 @@ AggregateCountsByDate <- function(data_line_list = case_data_line_list,
   
   # Error if date_variable is not a date variable.
   base::stopifnot("This function only aggregates by date variables."=
-                  base::grepl("_date", by_date, fixed = TRUE))
+                  class(data_line_list[[by_date]])=="Date")
   
   # Build data frame with one column of dates
   date_df <- data.frame(date = seq.Date(as.Date(start_date),
                                         as.Date(end_date),
-                                        by = "day"))
+                                        by = "day")) 
+  # %>% 
+    # dplyr::mutate(across(everything(), ~replace_na(.,0)))
   
   # Get data aggregated by date
   date_aggregation <- data_line_list %>% 
     dplyr::group_by(.data[[by_date]]) %>% 
     dplyr::count(.data[[count_values]]) %>% 
     tidyr::pivot_wider(names_from = .data[[count_values]],
-                       names_prefix= (base::gsub("date.*", "", by_date)),
                        values_from = n) %>% 
     dplyr::rename(date = .data[[by_date]])  %>% 
     tidyr::drop_na(date)
@@ -43,6 +44,10 @@ AggregateCountsByDate <- function(data_line_list = case_data_line_list,
   # Join date_aggregation with date_df
   date_aggregation <- date_df %>% 
     dplyr::left_join(., date_aggregation, by = "date")
+  
+  # replace NAs with 0 
+  date_aggregation <- date_aggregation %>% 
+    dplyr::mutate(across(-date, ~replace_na(.,0)))
   
   # Returning the reshaped data
   return(date_aggregation)

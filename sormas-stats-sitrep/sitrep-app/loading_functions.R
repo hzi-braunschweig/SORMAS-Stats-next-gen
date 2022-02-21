@@ -18,7 +18,14 @@ base::source("utils/GetCompleteDistrictsCategoriesDf.R")
 base::source("utils/CalculateBirthdateAge.R")
 base::source("utils/GetAgegroupGenderDf.R")
 base::source("utils/GetDeathCountsPerAgegroupGender.R")
+base::source("utils/GetTimeseriesDfs.R")
+base::source("utils/GetTimeseriesData.R")
 
-## Functions for displaying data
+## Functions for plots and displaying data
 base::source("utils/DisplayRegionEpidTable.R")
 base::source("utils/DisplayOverviewEpidTable.R")
+base::source("utils/BarplotCountsPerAgegroup.R")
+base::source("utils/DisplayDeathCountsPerAgegroupGender.R")
+base::source("utils/DisplayEpidDistrictMap.R")
+base::source("utils/TimeseriesGraph.R")
+base::source("utils/DisplayTimeseriesGraphs.R")
