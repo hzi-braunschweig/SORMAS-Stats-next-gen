@@ -42,7 +42,8 @@ GetEpidBase <- function(){
   
   ## Get new cases per district based on reporting date
   new_cases_district <- GetNewCountsPerDistrict(variable = "caseclassification_case",
-                                                date_type = "report_date_case") %>% 
+                                                date_type = "report_date_case",
+                                                toDate) %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_CASE_", x)})
 
   ## Join on id_district and summarize confirmed cases
@@ -59,7 +60,8 @@ GetEpidBase <- function(){
     
   ## Get new hospitalizations per district
   new_hospitalizations_district <- GetNewCountsPerDistrict(variable = "admitted_to_health_facility_hospitalization",
-                                                           date_type = "admission_date_hospitalization") %>% 
+                                                           date_type = "admission_date_hospitalization",
+                                                           toDate) %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_HOSP_", x)})
   
   ## Join on id_district
@@ -75,7 +77,8 @@ GetEpidBase <- function(){
     dplyr::rename_with(.cols = !id_district, function(x){paste0("DEATH_", x)})
   ## Get new deaths per district
   new_deaths_district = GetNewCountsPerDistrict(variable = "cause_of_death_person",
-                                                date_type = "death_date_person") %>% 
+                                                date_type = "death_date_person",
+                                                toDate) %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_DEATH_", x)})
   ## Join on id_district
   epid_base_deaths <- total_deaths_district %>% 

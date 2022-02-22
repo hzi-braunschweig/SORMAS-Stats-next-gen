@@ -20,7 +20,9 @@ GetDeathCountsPerAgegroupGender <- function(){
   # get agegroup counts by gender
   # and chaning string in age_group variable to match values in empty_df
   agegroup_gender_counts <- case_data_line_list %>% 
-    dplyr::group_by(sex_person, age_group = cut(death_age, breaks = c(seq(0,80,5),150))) %>% 
+    dplyr::group_by(sex_person, age_group = cut(death_age, breaks = c(seq(0,80,5),Inf),
+                                                include.lowest = TRUE,
+                                                right = FALSE)) %>% 
     dplyr::count(cause_of_death_person) %>% 
     dplyr::filter(cause_of_death_person == "EPIDEMIC_DISEASE") %>%
     dplyr::select(-cause_of_death_person) %>% 
