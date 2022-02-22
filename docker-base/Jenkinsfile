@@ -14,9 +14,11 @@ node {
 	        withCredentials([ usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERUSER', passwordVariable: 'DOCKERPASS' )]) {
 	        	sh """
 	        	cp ../sormas-stats-shinyapp/sormas-stats-app/renv.lock .
-	            sudo buildah bud --pull-always --no-cache -t sormas-stats-base .
-	            sudo buildah login -u '${DOCKERUSER}' -p '${DOCKERPASS}' docker.io
-	            sudo buildah push -f v2s2 sormas-stats-base hzibraunschweig/sormas-stats-base:latest
+	            sudo docker build --pull --no-cache -t sormas-stats-base:${BRANCH} .
+	            sudo docker login -u '${DOCKERUSER}' -p '${DOCKERPASS}' docker.io
+	            sudo docker tag sormas-stats-base:${BRANCH} docker.io/hzibraunschweig/sormas-stats-base:${BRANCH}
+	            sudo docker push docker.io/hzibraunschweig/sormas-stats-base:${BRANCH}
+	            sudo docker logout docker.io
 	            """                                                                                                                 
 	        }
         }
