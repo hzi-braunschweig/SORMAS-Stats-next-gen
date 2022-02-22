@@ -28,7 +28,7 @@ node {
 	    	sh """
 	    	job_result=\$(awx --conf.host 'https://${ANSIBLE_TOWER}' --conf.username ${ANSIBLE_USER} --conf.password ${ANSIBLE_PASS} \
 	           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --limit '${SERVER_LIMIT}' 316)
-	        echo $job_result
+	        echo \$job_result
 	    	"""       
     	}              
     }
