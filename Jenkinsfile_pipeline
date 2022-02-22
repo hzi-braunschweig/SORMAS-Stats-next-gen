@@ -1,0 +1,19 @@
+
+node {
+        
+    stage('checkout') {
+        git branch: '${BRANCH}', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
+    }
+    
+    stage('Build base image') {
+        echo 'Build base image....'
+        
+    	build job: 'Build_SORMAS_Stats_Base', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+
+    }
+    stage('Build stats image') {
+		echo 'Build stats image....'
+		build job: 'Build_SORMAS_Stats', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+    }
+    
+}
