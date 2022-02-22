@@ -29,10 +29,11 @@ dbDisconnect(sormas_db)
 # Preparing data
 
 # Epidemic overview
-epid_base = GetEpidBase()
+epid_base = GetEpidBase(data_line_list = case_data_line_list)
 
 # Death counts per agegroup and gender
-death_counts_agegroup_gender = GetDeathCountsPerAgegroupGender()
+death_counts_agegroup_gender = GetDeathCountsPerAgegroupGender(data_line_list = case_data_line_list,
+                                                               cause_of_death = "EPIDEMIC_DISEASE")
 
 # Timeseries data 
 timeseries_data <- GetTimeseriesData(case_data_line_list, as.Date(fromDate), as.Date(toDate))

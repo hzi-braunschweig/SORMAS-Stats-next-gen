@@ -1,6 +1,10 @@
 #' Get timeseries data 
 #'
 #' @param data_line_list Output of the ExportCaseLineList function. 
+#' 
+#' @param start_date Start of the timeseries.
+#' 
+#' @param end_date End of the timeseries.
 #'
 #' @return Returns a dataframe with time series data for cases by reporting date,
 #'  by symptom onset date and for hospitalizations by hospitalization date.
@@ -61,7 +65,7 @@ GetTimeseriesData <- function(data_line_list, start_date, end_date){
   base_df_hosp <- df_list$df_hospitalizations
   
   # aggregate hospitalizations by admission_date_hospitalization
-  hospitalizations_by_admission_date <- AggregateCountsByDate(data_line_list = case_data_line_list,
+  hospitalizations_by_admission_date <- AggregateCountsByDate(data_line_list = data_line_list,
                                                               count_values = "reason_hospitalization",
                                                               by_date = "admission_date_hospitalization",
                                                               start_date = start_date,

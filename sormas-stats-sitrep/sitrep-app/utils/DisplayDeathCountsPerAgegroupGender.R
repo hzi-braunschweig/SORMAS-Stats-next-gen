@@ -22,5 +22,5 @@ DisplayDeathCountsPerAgegroupGender <- function(agegroup_gender_data = death_cou
   barplot_unknown <- BarplotCountsPerAgegroup(agegroup_gender_data, "UNKNOWN")
   
   # plot all four barplots
-  gridExtra::grid.arrange(barplot_male, barplot_female, barplot_other, barplot_unknown)
+  gridExtra::grid.arrange(barplot_male, barplot_female, barplot_other, barplot_unknown, ncol = 1)
 }

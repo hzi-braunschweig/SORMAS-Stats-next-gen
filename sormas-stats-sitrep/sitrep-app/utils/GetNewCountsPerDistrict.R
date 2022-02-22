@@ -12,7 +12,8 @@
 #' @export
 #'
 #' @examples
-GetNewCountsPerDistrict <- function(variable = "caseclassification_case",
+GetNewCountsPerDistrict <- function(data_line_list,
+                                    variable = "caseclassification_case",
                                     date_type = "report_date_case",
                                     toDate){
   
@@ -20,7 +21,7 @@ GetNewCountsPerDistrict <- function(variable = "caseclassification_case",
   latest_date <- as.character(as.Date(toDate)-1) 
   
   ### First filter data for new counts on date type
-  new_counts_district <- case_data_line_list %>% 
+  new_counts_district <- data_line_list %>% 
     dplyr::filter(.data[[date_type]] %in% latest_date)  %>%
     AggregateCountsByVariable(data_line_list = .,
                               count_values = variable,

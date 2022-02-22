@@ -12,6 +12,9 @@
 #'
 #' @return Empty data frame with all all districts as rows and all 
 #' necessary factor levels as column names.
+#' 
+#' @seealso [GetEpidBase()]
+#' 
 #' @export
 #'
 #' @examples

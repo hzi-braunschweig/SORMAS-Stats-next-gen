@@ -4,9 +4,9 @@
 #' GetDeathCountsPerAgegroupGender.R' function because it provides a plot based on
 #' the agegroup_gender_data output of this function.
 #' 
-#' @agegroup_gender_data Output of the GetDeathCountsPerAgegroupGender.R function.
+#' @param agegroup_gender_data Output of the GetDeathCountsPerAgegroupGender.R function.
 #'
-#' @gender Gender from which counts are. Can be "MALE", "FEMALE", "OTHER" or "UNKNOWN". 
+#' @param gender Gender from which counts are. Can be "MALE", "FEMALE", "OTHER" or "UNKNOWN". 
 #'
 #' @return Bar plot of the counts per agegroup of a certain gender.
 #' 
@@ -15,8 +15,8 @@
 #'
 #' @examples
 BarplotCountsPerAgegroup <- function(agegroup_gender_data, gender){
-  # build 3 bar plots, one for each gender
   
+  # build bar plot for the requested gender
   barplot_data <- agegroup_gender_data %>% 
     dplyr::filter(.data[["gender"]] == {{gender}})
   
