@@ -6,6 +6,9 @@
 #'
 #' @param geoshapes_data Output of the ExportGeoshapes() function.
 #' 
+#' @param join_by Column by which epid_data and geoshapes_data are joined.Must be a column
+#' that is in both data frames.
+#' 
 #' @return A district level map of the counts of one of the epidemic indicators
 #' total cases, new cases, total hospitalizations, new hospitalizations, 
 #' total deaths and new deaths.
@@ -15,10 +18,13 @@
 #' @export
 #'
 #' @examples
-DisplayEpidDistrictMap <-function(epid_data, geoshapes_data, epidemic_indicator){
+DisplayEpidDistrictMap <-function(epid_data,
+                                  geoshapes_data,
+                                  epidemic_indicator,
+                                  join_by = "name_district"){
   # join geo shapes with the epid base data
   geo_epid_data <- geoshapes_data %>% 
-    dplyr::left_join(epid_data, by = "name_district")
+    dplyr::left_join(epid_data, by = join_by)
   
   # build map for chosen epidemic indicator
   ggplot(geo_epid_data) +

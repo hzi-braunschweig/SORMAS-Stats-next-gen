@@ -23,7 +23,7 @@
 #' @seealso [AggregateCountsByVariable()]
 #'
 #' @examples
-GetEpidBase <- function(){
+GetEpidBase <- function(data_line_list){
   
   # TO RENAME ALL COLUMNS EXCEPT ONE  
   # dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_", x)})
@@ -37,11 +37,13 @@ GetEpidBase <- function(){
   # Get dataframe with base indicators for cases
   
   ## Get total cases per district
-  total_cases_district <- GetTotalCountsPerDistrict(variable = "caseclassification_case") %>% 
+  total_cases_district <- GetTotalCountsPerDistrict(data_line_list = data_line_list,
+                                                    variable = "caseclassification_case") %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("CASE_", x)})
   
   ## Get new cases per district based on reporting date
-  new_cases_district <- GetNewCountsPerDistrict(variable = "caseclassification_case",
+  new_cases_district <- GetNewCountsPerDistrict(data_line_list = data_line_list,
+                                                variable = "caseclassification_case",
                                                 date_type = "report_date_case",
                                                 toDate) %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_CASE_", x)})
@@ -55,11 +57,13 @@ GetEpidBase <- function(){
   # Get dataframe with base indicators for hospitalizations
   
   ## Get total hospitalizations per district
-  total_hospitalizations_district <- GetTotalCountsPerDistrict(variable = "admitted_to_health_facility_hospitalization") %>% 
+  total_hospitalizations_district <- GetTotalCountsPerDistrict(data_line_list = data_line_list,
+                                                               variable = "admitted_to_health_facility_hospitalization") %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("HOSP_", x)})
     
   ## Get new hospitalizations per district
-  new_hospitalizations_district <- GetNewCountsPerDistrict(variable = "admitted_to_health_facility_hospitalization",
+  new_hospitalizations_district <- GetNewCountsPerDistrict(data_line_list = data_line_list,
+                                                           variable = "admitted_to_health_facility_hospitalization",
                                                            date_type = "admission_date_hospitalization",
                                                            toDate) %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_HOSP_", x)})
@@ -73,10 +77,12 @@ GetEpidBase <- function(){
   # Get dataframe with base indicators for deaths
 
   ## Get total deaths per district
-  total_deaths_district = GetTotalCountsPerDistrict(variable = "cause_of_death_person") %>% 
+  total_deaths_district = GetTotalCountsPerDistrict(data_line_list = data_line_list,
+                                                    variable = "cause_of_death_person") %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("DEATH_", x)})
   ## Get new deaths per district
-  new_deaths_district = GetNewCountsPerDistrict(variable = "cause_of_death_person",
+  new_deaths_district = GetNewCountsPerDistrict(data_line_list = data_line_list,
+                                                variable = "cause_of_death_person",
                                                 date_type = "death_date_person",
                                                 toDate) %>% 
     dplyr::rename_with(.cols = !id_district, function(x){paste0("NEW_DEATH_", x)})

@@ -9,6 +9,8 @@
 #' as rows, plus an unknown agegroup.
 #' The columns of the data frame are the genders.
 #' 
+#' @seealso [GetDeathCountsPerAgegroupGender()]
+#' 
 #' @export
 #'
 #' @examples

@@ -12,9 +12,10 @@
 #'
 #' @examples
 #' 
-GetTotalCountsPerDistrict <- function(variable = "caseclassification_case"){
+GetTotalCountsPerDistrict <- function(data_line_list,
+                                      variable = "caseclassification_case"){
   
-  total_counts_district <- AggregateCountsByVariable(data_line_list = case_data_line_list,
+  total_counts_district <- AggregateCountsByVariable(data_line_list = data_line_list,
                                                      count_values = variable,
                                                      by_variable = "id_district") %>% 
     dplyr::mutate(across(everything(), ~replace_na(.,0))) # %>% 
