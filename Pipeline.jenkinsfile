@@ -1,0 +1,37 @@
+
+node {
+        
+    stage('checkout') {
+        git branch: '${BRANCH}', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
+    }
+    
+    stage('Build base image') {
+        if (params.BUILD_BASE != null && params.BUILD_BASE) {
+	        echo 'Build base image....'
+	    	build job: 'Build_SORMAS_Stats_Base', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+    	}
+    	else {
+    	    echo 'Skipping base image....'
+    	}
+
+
+    }
+    stage('Build stats image') {
+		echo 'Build stats image....'
+		build job: 'Build_SORMAS_Stats', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+    }
+    
+    def credentials_id = params.CREDENTIALS_ID
+    
+    stage('Deploy to server') {
+        withCredentials([ usernamePassword(credentialsId: credentials_id, usernameVariable: 'ANSIBLE_USER', passwordVariable: 'ANSIBLE_PASS' )]) {
+	    	sh """
+	    	job_result=\$(awx --conf.host 'https://${ANSIBLE_TOWER}' --conf.username ${ANSIBLE_USER} --conf.password ${ANSIBLE_PASS} \
+	           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --limit '${SERVER_LIMIT}' 316)
+	        echo \$job_result
+	    	"""       
+    	}              
+    }
+
+    
+}
