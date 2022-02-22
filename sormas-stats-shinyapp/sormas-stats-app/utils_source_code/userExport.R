@@ -6,7 +6,7 @@ userExport = function(sormas_db){
   # https://doc.libsodium.org/password_hashing/
   
   #loading user table
-  queryUsers <- paste0("SELECT uuid, username, firstname, lastname
+  queryUsers <- paste0("SELECT uuid, username 
                         FROM public.users
                        WHERE active = TRUE")
   users = dbGetQuery(sormas_db,queryUsers)

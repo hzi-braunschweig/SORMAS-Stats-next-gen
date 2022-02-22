@@ -279,7 +279,7 @@ output$transChain <- renderVisNetwork({
   output$totalInfectorInfecteePair <- renderInfoBox({
     req(credentials()$user_auth)
     temp =  elistSel2ResCaseSourseCase() %>%
-      dplyr::filter(resultingcase_id != "NA")
+      dplyr::filter(resultingcase_id != "NA") # deleting records with missing person id for infector
     # no need to count unique pairs of person since elist has unique pairs of nodes when exported from sormas db
     infoBox(
       title = NULL, 
@@ -740,44 +740,46 @@ output$plot <- renderPlot({
 
     
     ## serial interval
-    #selecting siDat baed on disease, time; regiion and district just as in d
-    siD = reactive({
-      req(credentials()$user_auth)
-      if(is.null(input$regionContactUi) )
-      {
-        siDat[((siDat$disease == input$diseaseContactUi) & (siDat$reportdatetime >= (min(input$reportdateContactUi))) & (siDat$reportdatetime <= (max(input$reportdateContactUi)) )), ]
-      } else{
-        siDat[((siDat$region_name %in% input$regionContactUi) & (siDat$disease == input$diseaseContactUi) & (siDat$reportdatetime >= (min(input$reportdateContactUi) )  ) & (siDat$reportdatetime <= (max(input$reportdateContactUi) ))),]
-      }
-    })
+    # deactivation exportion of serial interval data
+    # #selecting siDat baed on disease, time; regiion and district just as in d
+    # siD = reactive({
+    #   req(credentials()$user_auth)
+    #   if(is.null(input$regionContactUi) )
+    #   {
+    #     siDat[((siDat$disease == input$diseaseContactUi) & (siDat$reportdatetime >= (min(input$reportdateContactUi))) & (siDat$reportdatetime <= (max(input$reportdateContactUi)) )), ]
+    #   } else{
+    #     siDat[((siDat$region_name %in% input$regionContactUi) & (siDat$disease == input$diseaseContactUi) & (siDat$reportdatetime >= (min(input$reportdateContactUi) )  ) & (siDat$reportdatetime <= (max(input$reportdateContactUi) ))),]
+    #   }
+    # })
   
     # Begin exportation of  data
-    # cotactRegionDist export
-    conRegionDistExp = reactive({
-      data.frame(contactReportDate =as.character( d()$reportdatetime),  caseID= d()$caze_id, contactID =  d()$id, contactProximity = d()$contactproximity,
-                 contactClassification = d()$contactclassification, caseClassification = d()$caseclassification_case, disease = d()$disease, 
-                 caseOutcome = d()$outcome_case, contactRegion = d()$region_name, contactDistrict = d()$district_name)
-    })
-    # output to download data
-    output$conRegionDistExpCsv <- downloadHandler(
-      filename = function() {
-        paste("sormas_export_", Sys.Date(), ".csv", sep="")
-      },
-      content = function(file) {
-        write.csv(conRegionDistExp(), file)
-      }
-    )
-    output$conRegionDistExpTable <- renderPrint({
-      orig <- options(width = 1000)
-      # print(tail(cv_cases %>% select(c(country, date, cases, new_cases, deaths, new_deaths,
-      #                                  recovered, new_recovered, active_cases,
-      #                                  per100k, newper100k, activeper100k, deathsper100k, newdeathsper100k)), input$maxrows), row.names = FALSE)
-      print(head(conRegionDistExp(), input$maxrowsContactDetailed), row.names = FALSE)
-      options(orig)
-    })
+    # cotactRegionDist export begin -----
+    # Deactivating export of contact for now till further notice
+    # conRegionDistExp = reactive({
+    #   data.frame(contactReportDate =as.character( d()$reportdatetime),  caseID= d()$caze_id, contactID =  d()$id, contactProximity = d()$contactproximity,
+    #              contactClassification = d()$contactclassification, caseClassification = d()$caseclassification_case, disease = d()$disease, 
+    #              caseOutcome = d()$outcome_case, contactRegion = d()$region_name, contactDistrict = d()$district_name)
+    # })
+    # # output to download data
+    # output$conRegionDistExpCsv <- downloadHandler(
+    #   filename = function() {
+    #     paste("sormas_export_", Sys.Date(), ".csv", sep="")
+    #   },
+    #   content = function(file) {
+    #     write.csv(conRegionDistExp(), file)
+    #   }
+    # )
+    # output$conRegionDistExpTable <- renderPrint({
+    #   orig <- options(width = 1000)
+    #   # print(tail(cv_cases %>% select(c(country, date, cases, new_cases, deaths, new_deaths,
+    #   #                                  recovered, new_recovered, active_cases,
+    #   #                                  per100k, newper100k, activeper100k, deathsper100k, newdeathsper100k)), input$maxrows), row.names = FALSE)
+    #   print(head(conRegionDistExp(), input$maxrowsContactDetailed), row.names = FALSE)
+    #   options(orig)
+    # })
+    # # cotactRegionDist export ends
 
-
-    ### Number of contacts per case exprt
+    ### Number of contacts per case export begin -----
     # use p()
     conPerCaseExp = reactive({
       p() %>% dplyr::rename(Case_id = Var1, Nunber_of_contacts = Freq )
@@ -797,28 +799,29 @@ output$plot <- renderPlot({
       options(orig)
     })
 
-    ## Serail interval
+    ## Serial interval export begin ----
     # use siD()
-    siExp = reactive({
-      #p() %>% rename(Case_id = Var1, Nunber_of_contacts = Freq )
-      siD() %>% dplyr::rename(Contact_report_date = reportdatetime, Disease = disease, Contact_region = region_name, Contact_district = district_name, Serial_interval = si)
-    })
+    # siExp = reactive({
+    #   #p() %>% rename(Case_id = Var1, Nunber_of_contacts = Freq )
+    #   siD() %>% dplyr::rename(Contact_report_date = reportdatetime, Disease = disease, Contact_region = region_name, Contact_district = district_name, Serial_interval = si)
+    # })
+    # 
+    # output$siExpCsv <- downloadHandler(
+    #   filename = function() {
+    #     paste("sormas_serialIntervalExp_", Sys.Date(), ".csv", sep="")
+    #   },
+    #   content = function(file) {
+    #     write.csv(siExp(), file)
+    #   }
+    # )
+    # output$siExpTable <- renderPrint({
+    #   orig <- options(width = 1000)
+    #   print(head(siExp(), input$maxrowsContSI), row.names = FALSE)
+    #   options(orig)
+    # })
+    ## Serial interval export end
 
-    output$siExpCsv <- downloadHandler(
-      filename = function() {
-        paste("sormas_serialIntervalExp_", Sys.Date(), ".csv", sep="")
-      },
-      content = function(file) {
-        write.csv(siExp(), file)
-      }
-    )
-    output$siExpTable <- renderPrint({
-      orig <- options(width = 1000)
-      print(head(siExp(), input$maxrowsContSI), row.names = FALSE)
-      options(orig)
-    })
-
-    # use d()
+    # Export of contact per region begin ----
     conPerGerionExp = reactive({
       temp =  data.frame(table(as.factor(d( )$region_name)))
       colnames(temp) = c("Region_name", "Number_of_Contacts")
@@ -1135,24 +1138,26 @@ output$pickerInputdistrictCaseUi <- renderUI({
 
 
     ############### Case tables  ###########
-    # casePersonRegionDist export
-    casebyRegionVar = reactive({
-      casePersonFilter()
-    })
-    # output to download data
-    output$caseRegionVarExpCsv <- downloadHandler(
-      filename = function() {
-        paste("sormas_export_case_region_", Sys.Date(), ".csv", sep="")
-      },
-      content = function(file) {
-        write.csv(casePersonFilter(), file)
-      }
-    )
-    output$casebyRegionVarTable <- renderPrint({
-      orig <- options(width = 1000)
-      print(head(casebyRegionVar(), input$maxrowsCase), row.names = FALSE)
-      options(orig)
-    })
+    # This option to ecport cases line-list is disable for now till further notice
+    # # casePersonRegionDist export begin
+    # casebyRegionVar = reactive({
+    #   casePersonFilter()
+    # })
+    # # output to download data
+    # output$caseRegionVarExpCsv <- downloadHandler(
+    #   filename = function() {
+    #     paste("sormas_export_case_region_", Sys.Date(), ".csv", sep="")
+    #   },
+    #   content = function(file) {
+    #     write.csv(casePersonFilter(), file)
+    #   }
+    # )
+    # output$casebyRegionVarTable <- renderPrint({
+    #   orig <- options(width = 1000)
+    #   print(head(casebyRegionVar(), input$maxrowsCase), row.names = FALSE)
+    #   options(orig)
+    # })
+    # # casePersonRegionDist export end
     
     ## Case sum by region and other variables ######
     # tabulate cases by region jurisdiction
@@ -1617,8 +1622,7 @@ output$SI_estimate_table <- DT::renderDataTable({
 # summary statistics for offsring distribtion
 nodedegree_summaryTab = eventReactive(input$caseDataAnalysisAction, { 
   # compute node degree
-  temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(), niter = input$niter_Rk_UI, 
-                           polyDegree = input$polyDegree_RtK_UI)
+  temp = offspringDistPlot(infectorInfecteePair = infectorInfecteeDataDiseaseRegionDist(), polyDegree = input$polyDegree_RtK_UI)
   # compute summary statistics table
   ret = summary_statistics(x = temp$offspringDegree )
   return(ret)
@@ -1651,7 +1655,7 @@ base::try({
         # add function here whose output should be traced 
         kRet <- eventReactive(input$caseDataAnalysisAction, {
           temp =  infectorInfecteeDataDiseaseRegionDist() # infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
-          kRet = offspringDistPlot(infectorInfecteePair = temp, niter = input$niter_Rk_UI, polyDegree = input$polyDegree_RtK_UI)
+          kRet = offspringDistPlot(infectorInfecteePair = temp, polyDegree = input$polyDegree_RtK_UI)
           return(kRet)
         }, ignoreNULL = FALSE) 
       })

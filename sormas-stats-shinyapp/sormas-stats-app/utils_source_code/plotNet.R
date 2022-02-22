@@ -48,5 +48,5 @@ plotNet = function(nodeLineList, elist, IgraphLayout=TRUE)
       visPhysics(stabilization = F) %>%
       visInteraction(dragNodes = T, dragView = T, zoomView = T, hideEdgesOnDrag = T, hideNodesOnDrag=F, hover = T, navigationButtons=T)
   }
-  print(g)
+  return(g) #print(g)
 }

@@ -157,7 +157,7 @@ shinyUI(bootstrapPage(
                                     p('* High risk => Type of contact is Face_to_face_long, Medical_unsave, Touched_fluid, Touched_cloth, Physical_contact, otherwise, Low risk', style = "font-size: 95%"),
                                     p('* Right click on the network diagram or legend to download or copy.', style = "font-size: 95%"),
                                     p("* The filters on the left panel are based on complete data, thus entities with missing values (NULL or UNKNOWN) for the variable used for filtering are dropped.", style = "font-size: 95%"),
-                                    p('* All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://sormasorg.helmholtz-hzi.de/", 'SORMAS', target = '_blank'), '.', style = "font-size: 95%")
+                                    p('* All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), '.', style = "font-size: 95%")
                                    )
                            )
                          ) # end of main panel
@@ -373,7 +373,6 @@ shinyUI(bootstrapPage(
                                                            )), style="color:#045a8d")
                            ), 
                            conditionalPanel(condition = "input.tabs1==8",
-                                            numericInput("niter_Rk_UI", label = h5("Specify number of bootstrap iteration"), value = 100, min = 50, max=5000),
                                             numericInput("polyDegree_RtK_UI", label = h5("Specify degree of the polynomial curve"),  min = 1, max=9, value = NA),
                                             br(),
                                             span(tags$i(h5("This section estimates the superspreading parameter (k) and effective reproduction number (R). 
@@ -381,7 +380,7 @@ shinyUI(bootstrapPage(
                                             )), style="color:#045a8d"),
                                             span(tags$i(h5("A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). 
                                                            The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the 
-                                                           superspreading parameter (k). The 95% percentile confidence interval is estimated by bootstrap.
+                                                           superspreading parameter (k). The 95% confidence interval is estimated using `confint`   function of the R `stats` package.
                                                            ")), style="color:#045a8d")
                            ),
                            width = 2),
@@ -682,9 +681,8 @@ shinyUI(bootstrapPage(
                                                                      width = 15,
                                                                      #height = 158, # 118, # 142,
                                                                      div( DT::dataTableOutput("k_estimate_table", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
-                                                                     h5(helpText("These estimates were estimated using boostrap based on the specified number of iteration specified in the filter.
-                                                                                   For efficient estimates, set the specified number of iterations to be > 1000. This may takes some time for bootsrap
-                                                                                  to complete."))
+                                                                     h5(helpText("SD: standard deviation, CI: confidence interval, a lower dispersion parameter k indicates  higher transmission heterogeneity
+                                                                                 i.e. more transmissions resulted from a small number of people."))
                                                                      )
                                                                  )
                                                                )
@@ -716,12 +714,12 @@ shinyUI(bootstrapPage(
                                                 )
                                               )
                                               )
-                                     , 
-                                     tabPanel("Basic export",
-                                                       numericInput("maxrowsCase", "Rows to show", 20),
-                                                       verbatimTextOutput("casebyRegionVarTable"),
-                                                       downloadButton("caseRegionVarExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                                       "Each row in this data a case. The data was obtained by merging case, person, region and district tables")
+                                     # , Deactivating basic line-list export of cases
+                                     # tabPanel("Basic export", 
+                                     #                   numericInput("maxrowsCase", "Rows to show", 20),
+                                     #                   verbatimTextOutput("casebyRegionVarTable"),
+                                     #                   downloadButton("caseRegionVarExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                                     #                   "Each row in this data a case. The data was obtained by merging case, person, region and district tables")
                            ),
                            width = 10)                       
                        )
@@ -1022,16 +1020,9 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                      numericInput("maxrows", "Rows to show", 20),
                                      verbatimTextOutput("conPerCaseExpTable"),
                                      downloadButton("conPerCaseExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                     "Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table"),
-                            tabPanel("Contact by region export",
-                                     numericInput("maxrowsContByRegion", "Rows to show", 20),
-                                     verbatimTextOutput("conPerGerionExpTable"),
-                                     downloadButton("conPerGerionExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                     "Each row in this data is a region with corresponding number of contacts.
-                                         The data was obtained by summing the number of contacts in each region.
-                                         The resgion of the source case was used in case the region of the contact was missing."
-                            ),
-                            tabPanel("Serial Interval Export", icon = icon("table"),
+                                     "Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table")
+                            ,
+                            tabPanel("Contact by region export", icon = icon("table"),
                                      width = 10,
                                      mainPanel(width=12,
                                                dashboardPage(
@@ -1044,21 +1035,45 @@ tabPanel("Contact data analysis", icon = icon("handshake"),
                                                  )
                                                  ,
                                                  dashboardBody(
-                                                   numericInput("maxrowsContSI", "Rows to show", 20),
-                                                   verbatimTextOutput("siExpTable"),
-                                                   downloadButton("siExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                                   "Each row in this data is a contact between a case person and a contact person.
-                                         The data was obtained by calculating the number of days between the symptom onset of the source case person and that of the secondary case (contact) person.
-                                         Only contacts that resulted to a case were cosidered."
+                                                   numericInput("maxrowsContByRegion", "Rows to show", 20),
+                                                   verbatimTextOutput("conPerGerionExpTable"),
+                                                   downloadButton("conPerGerionExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                                                   "Each row in this data is a region with corresponding number of contacts.
+                                         The data was obtained by summing the number of contacts in each region.
+                                         The resgion of the source case was used in case the region of the contact was missing."
                                                  )
                                                ))
-                            ),
-                            tabPanel("Detailed contact export",
-                                     numericInput("maxrowsContactDetailed", "Rows to show", 20),
-                                     verbatimTextOutput("conRegionDistExpTable"),
-                                     downloadButton("conRegionDistExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                     "Each row in this data is a contact between a case person and a contact person. The data was obtained by merging contacts and their cases, thus the columns contains variables for contacts and cases.",
-                                     "Contacts wihout source cases or cases without contacts are not included in this section of contact data analysis")
+                            )
+                            # ,  # deactivating exportation of serial interval
+                            # tabPanel("Serial Interval Export", icon = icon("table"),
+                            #          width = 10,
+                            #          mainPanel(width=12,
+                            #                    dashboardPage(
+                            #                      # dashboardHeader(title = "SI"),
+                            #                      dashboardHeader( ),
+                            #                      dashboardSidebar( disable = TRUE,
+                            #                                        pickerInput("conPerson", "Contact entity type", choices = c("Contact", "Contact person"), # option to view contact or contact person
+                            #                                                    selected = c("Contact"),
+                            #                                                    multiple = FALSE)
+                            #                      )
+                            #                      ,
+                            #                      dashboardBody(
+                            #                        numericInput("maxrowsContSI", "Rows to show", 20),
+                            #                        verbatimTextOutput("siExpTable"),
+                            #                        downloadButton("siExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                            #                        "Each row in this data is a contact between a case person and a contact person.
+                            #              The data was obtained by calculating the number of days between the symptom onset of the source case person and that of the secondary case (contact) person.
+                            #              Only contacts that resulted to a case were cosidered."
+                            #                      )
+                            #                    ))
+                            # )
+                            #, # deactivating exportation of contact
+                            # tabPanel("Detailed contact export",
+                            #          numericInput("maxrowsContactDetailed", "Rows to show", 20),
+                            #          verbatimTextOutput("conRegionDistExpTable"),
+                            #          downloadButton("conRegionDistExpCsv", "Download as CSV"),tags$br(),tags$br(),
+                            #          "Each row in this data is a contact between a case person and a contact person. The data was obtained by merging contacts and their cases, thus the columns contains variables for contacts and cases.",
+                            #          "Contacts wihout source cases or cases without contacts are not included in this section of contact data analysis")
                           )
                           , width = 10)
          )
@@ -1108,7 +1123,7 @@ tags$footer(
 hr(style = "border-color: #cbcbcb;"),
 fluidRow(
   column(9,
-         p('All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://sormasorg.helmholtz-hzi.de/", 'SORMAS', target = '_blank'), '.', style = "font-size: 85%"),
+         p('All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), '.', style = "font-size: 85%"),
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),

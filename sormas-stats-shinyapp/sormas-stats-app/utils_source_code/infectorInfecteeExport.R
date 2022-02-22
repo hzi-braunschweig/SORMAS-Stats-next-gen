@@ -12,22 +12,24 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
                           WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ")
   case = dbGetQuery(sormas_db,queryCase)
   
-  #load contacts
-  queryContact <- paste0("SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
+  # load contacts having source case among the selected cases only. Date is not relevant here.
+  queryContact <- sprintf("SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
     person_id AS person_id_contact, reportdatetime AS report_date_contact, creationdate AS creation_date_contact, lastcontactdate AS lastcontact_date_contact,
     contactproximity AS contact_proximity, resultingcase_id, contactstatus, contactclassification
                           FROM public.contact
-                          WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ") 
+                          WHERE deleted = FALSE and caze_id IS NOT NULL and caze_id in (%s)", paste("'", base::unique(c(case$case_id)), "'",collapse=",") )  
   contact = dbGetQuery(sormas_db,queryContact)
   
-  #loading symptom data
-  symptoms = dbGetQuery(
-    sormas_db,
+  #loading symptom data corresponding to selected cases only
+  querySymptom = sprintf(
     "SELECT id AS symptom_id, onsetdate AS onset_date
-                         from public.symptoms"
+     FROM public.symptoms
+     WHERE id in (%s)", paste("'", base::unique(c(case$symptoms_id)), "'",collapse=",") 
   )
+  symptoms =  dbGetQuery(sormas_db,querySymptom)
+  
   ### loading person data  ###
-  # only persons linkded to cases or contacts, events and ep persons are not included in this export
+  # only persons linked to cases or contacts, events and ep persons are not included in this export
   # since the goal is to get pairs on infectors and infectees with corresponding onset dates to be used to estimate serial interval
   queryPerson <- sprintf("SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
                         FROM public.person
@@ -65,12 +67,14 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     dplyr::mutate(onset_date = as.Date(format(onset_date, "%Y-%m-%d")))
   
   # fixing birth date of person. 
-  person = fixBirthDate(person) %>% # This method assign the birhdate of the person as first January of the year of birth. Improvement will follow
-    dplyr::select(person_id, sex, date_of_birth, ) #dropping unused varaibles
+  person = fixBirthDate(person) %>% # This method assign the birthdate of the person as first January of the year of birth. Improvement will follow
+    dplyr::select(person_id, sex, date_of_birth, ) #dropping unused variables
   
   ## Obtaining dataset to the exported
-  # The primary dataset to begin with is the contact since the goel is to export the contact data
-  
+  # The primary dataset to begin with is the contact since the goal is to export the contact data
+  # A contact can be converted to a case having a report date that is not in the date interval
+  # This may result to NA values for case_id_infector or case_id_infectee, thus such error records 
+  # documented can be dropped. There is no validation in sormas to prevent this
   # Merging tables
   ret = contact %>%
     dplyr::filter(resultingcase_id != "NA")  %>%  #dropping contacts that did not resulted to a case
@@ -78,13 +82,14 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     dplyr::mutate(case_uuid_infector = case_uuid, case_id_infector= case_id,  disease_infector = disease,  report_date_infector = report_date_case,
                   creation_date_case_infector = creation_date_case,  person_id_case_infector = person_id_case, region_id_case_infector = region_id_case,
                   district_id_case_infector = district_id_case, case_classification_infector = case_classification, case_origin_infector = case_origin,
-                  symptoms_id_infector = symptoms_id, .keep = "unused" ) %>% # renaming variables ny adding infector to them
+                  symptoms_id_infector = symptoms_id, .keep = "unused" ) %>% # renaming variables by adding infector to them
     dplyr::left_join(., case, by = c( "resultingcase_id" = "case_id") ) %>%  # merging data with case table again by resulting case or infectee id
     dplyr::mutate(case_uuid_infectee = case_uuid,case_id_infectee = resultingcase_id,  disease_infectee = disease,  report_date_infectee = report_date_case,
                   creation_date_case_infectee = creation_date_case,  person_id_case_infectee = person_id_case, region_id_case_infectee = region_id_case,
                   district_id_case_infectee = district_id_case, case_classification_infectee = case_classification, case_origin_infectee = case_origin,
-                  symptoms_id_infectee = symptoms_id, .keep = "unused" ) %>% # renaming variables ny adding infectee to them
-    dplyr::select(., -c(person_id_contact, case_uuid_infector, contact_uuid, case_uuid_infectee, disease_infectee, case_origin_infectee, region_id_case_infectee, district_id_case_infectee)) %>%  # dropping duplicates or unimportant varibles
+                  symptoms_id_infectee = symptoms_id, .keep = "unused" ) %>% # renaming variables by adding infectee to them
+    dplyr::select(., -c(person_id_contact, case_uuid_infector, contact_uuid, case_uuid_infectee, disease_infectee, case_origin_infectee, 
+                        region_id_case_infectee, district_id_case_infectee)) %>%  # dropping duplicates or unimportant varibles
     dplyr::left_join(., person, by = c( "person_id_case_infector" = "person_id") ) %>% # merging with person table to get person details of  infector person
     dplyr::mutate(sex_infector = sex, date_of_birth_infector = date_of_birth, .keep = "unused") %>% # renaming
     dplyr::left_join(., person, by = c( "person_id_case_infectee" = "person_id") )  %>%  # merging with person table to get person details of  infectee person
@@ -96,7 +101,8 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     dplyr::mutate(onset_date_infector = onset_date, .keep = "unused") %>%  #renaming
     dplyr::left_join(., symptoms, by = c("symptoms_id_infectee" = "symptom_id" )) %>%  # merging with symptom table to get symptoms details of  infectee person
     dplyr::mutate(onset_date_infectee = onset_date, .keep = "unused") %>% # renaming
-    
+    dplyr::filter((person_id_case_infectee != "NA") | (person_id_case_infector != "NA") ) %>%  # dropping records with person_id_case_infectee == NA, this can hapen when the report date of resulting case is not in time interval
+    # or if the infectee person was infected by a case that is not among the selected cases, resuling in NA infector person id.
     # computing derived variables 
     dplyr::mutate(age_at_report_infector = floor(as.numeric(report_date_infector - date_of_birth_infector)/365),
                   age_at_report_infectee = floor(as.numeric(report_date_infectee - date_of_birth_infectee)/365),
@@ -109,17 +115,17 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
     
     ## selecting variables to export
     dplyr::select(
-      # contact varibles, rendering by time will be based on report date of contact
+      # contact variables, rendering by time will be based on report date of contact
       contact_id, report_date_contact,  report_week_contact, report_month_contact, report_year_contact, contact_proximity,
-      #infector variables, rendering by disease, region and district will be based on the infrestructure of the infector
+      #infector variables, rendering by disease, region and district will be based on the infrastructure of the infector
       person_id_case_infector, case_id_infector, disease_infector, 
       report_date_infector, region_infector, district_infector, case_classification_infector, case_origin_infector, 
       sex_infector, onset_date_infector, age_at_report_infector,
-      #infectiee variables
+      #infectee variables
       person_id_case_infectee, case_id_infectee, report_date_infectee, case_classification_infectee, sex_infectee,
       onset_date_infectee, age_at_report_infectee,
       #other variables
       serial_interval, incubation_Period
     )
   return(ret)
-}
+} 
