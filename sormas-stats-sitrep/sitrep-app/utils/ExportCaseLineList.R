@@ -2,8 +2,8 @@
 #'
 #' @param sormas_db Connection to SORMAS database
 #' 
-#' @param fromDate Start date of export as character string.
-#' @param toDate End date of export as character string.
+#' @param fromDateSQL Start date of export for SQL export.
+#' @param toDateSQL End date of export for SQL export.
 #'
 #' @return  Returns a table containing a line listing of all cases
 #'  that fulfill one of the following conditions:
@@ -21,12 +21,12 @@
 #'
 #' @examples
 #' 
-ExportCaseLineList <- function(sormas_db, fromDate, toDate){
+ExportCaseLineList <- function(sormas_db, fromDateSQL, toDateSQL){
   
   ## Computing default time based on 365 days in the past if not provided by user
-  if(missing(fromDate) | missing(toDate)){
-    fromDate = as.character(Sys.Date() - delay) 
-    toDate = as.character(Sys.Date()) 
+  if(missing(fromDateSQL) | missing(toDateSQL)){
+    fromDateSQL = as.character(Sys.Date() - delay) 
+    toDateSQL = as.character(Sys.Date()) 
   }
   
   ## Loading tables from SORMAS DB
@@ -36,7 +36,7 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
     deathDate AS death_date_person,
     causeOfDeath AS cause_of_death_person
     FROM public.person
-    WHERE deathDate between '%s' and '%s'", fromDate, toDate)
+    WHERE deathDate between '%s' and '%s'", fromDateSQL, toDateSQL)
   
   persons <- DBI::dbGetQuery(sormas_db,queryPersons)
   
@@ -44,7 +44,7 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
   querySymptoms <- base::sprintf("SELECT DISTINCT id AS id_symptoms,
     onsetDate AS onset_date_symptoms
     FROM public.symptoms 
-    WHERE onsetDate between '%s' and '%s'", fromDate, toDate)
+    WHERE onsetDate between '%s' and '%s'", fromDateSQL, toDateSQL)
   
   symptoms <- DBI::dbGetQuery(sormas_db, querySymptoms)
   
@@ -54,7 +54,7 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
     admissionDate AS admission_date_hospitalization,
     hospitalizationReason AS reason_hospitalization
     FROM public.hospitalization 
-    WHERE admissionDate between '%s' and '%s'", fromDate, toDate)
+    WHERE admissionDate between '%s' and '%s'", fromDateSQL, toDateSQL)
   
   hospitalizations <- DBI::dbGetQuery(sormas_db, queryHospitalizations)
   
@@ -75,7 +75,7 @@ ExportCaseLineList <- function(sormas_db, fromDate, toDate){
          OR person_id IN (%s) 
          OR hospitalization_id IN (%s) 
          OR symptoms_id IN (%s))",
-                              fromDate, toDate,
+                              fromDateSQL, toDateSQL,
                               paste("'", base::unique(c(persons$id_person)), "'",collapse=","),
                               paste("'", base::unique(c(hospitalizations$id_hospitalization)), "'",collapse=","),
                               paste("'", base::unique(c(symptoms$id_symptoms)), "'",collapse=","))
