@@ -2,7 +2,7 @@
 #' 
 #' @description Get the new counts of a variable of the 
 #'  data frame output of the ExportCaseLineList function based on the latest date.
-#'  The latest date is defined as the last 24 hours.
+#'  The latest date is defined as yesterday.
 #'
 #' @param variable Column in the case_data_line_list output of the 
 #'  ExportCaseLineList function.
@@ -12,10 +12,12 @@
 #' @export
 #'
 #' @examples
-GetNewCountsPerDistrict <- function(variable = "caseclassification_case", date_type = "report_date_case"){
+GetNewCountsPerDistrict <- function(variable = "caseclassification_case",
+                                    date_type = "report_date_case",
+                                    toDate){
   
   # Define latest date
-  latest_date <- c(Sys.Date(), Sys.Date()-1) # as.character(as.Date(toDate)-1) #  example 
+  latest_date <- as.character(as.Date(toDate)-1) 
   
   ### First filter data for new counts on date type
   new_counts_district <- case_data_line_list %>% 
