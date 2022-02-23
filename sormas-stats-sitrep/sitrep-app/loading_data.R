@@ -26,10 +26,6 @@ geoshapes_data = ExportGeoshapes(sormas_db = sormas_db)
 # Disconnect from sormas_db ---- 
 dbDisconnect(sormas_db)
 
-# Import text and references
-text_files<- readtext::readtext("data/text/*.docx")
-text <- data.frame(text_files[,-1], row.names=text_files[,1])
-
 # Preparing data
 
 # Epidemic overview
@@ -41,3 +37,15 @@ death_counts_agegroup_gender = GetDeathCountsPerAgegroupGender(data_line_list = 
 
 # Timeseries data 
 timeseries_data <- GetTimeseriesData(case_data_line_list, as.Date(fromDate), as.Date(toDate))
+
+# Overview epid table
+overview_table <- GetOverviewEpidTable(epid_data = epid_base)
+
+# Regional epid table
+region_table <- GetRegionEpidTable(epid_data = epid_base)
+
+# Import text and references
+text_files<- readtext::readtext("data/text/*.docx")
+text <- data.frame(text_files[,-1], row.names=text_files[,1])
+# insert dynamic references to table cells
+text <- GetDynamicText(text = text, overview_table = overview_table, region_table = region_table)

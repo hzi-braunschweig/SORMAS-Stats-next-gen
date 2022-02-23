@@ -47,7 +47,7 @@ set_flextable_defaults(big.mark = " ",
 `r text["OVERVIEW.docx",1]`
 
 ```{r OverviewTable, tab.cap= "Overview Table"}
-DisplayOverviewEpidTable(epid_data = epid_base)
+flextable::flextable(overview_table)
 ```
 
 # Epidemic Dynamic
@@ -75,7 +75,7 @@ DisplayDeathCountsPerAgegroupGender(agegroup_gender_data = death_counts_agegroup
 `r text["STATE_TBL.docx",1]`
 
 ```{r RegionTable, tab.cap= "Region level table"}
-DisplayRegionEpidTable(epid_data = epid_base)
+flextable::flextable(region_table)
 ```
 
 
