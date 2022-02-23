@@ -37,3 +37,7 @@ death_counts_agegroup_gender = GetDeathCountsPerAgegroupGender(data_line_list = 
 
 # Timeseries data 
 timeseries_data <- GetTimeseriesData(case_data_line_list, as.Date(fromDate), as.Date(toDate))
+
+# Import text and references
+text_files<- readtext::readtext("data/text/*.docx")
+text <- data.frame(text_files[,-1], row.names=text_files[,1])
