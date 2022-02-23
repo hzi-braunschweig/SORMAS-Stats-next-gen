@@ -69,5 +69,5 @@ GetTextTableKeys <- function(overview_table, region_table){
   # merge overview_table_keys and region_table_keys into one long vector: text_table_keys
   text_table_keys <- c(overview_table_keys, region_table_keys)
 
-  return(list())
+  return(text_table_keys)
 }
