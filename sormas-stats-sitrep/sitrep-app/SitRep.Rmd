@@ -46,8 +46,8 @@ set_flextable_defaults(big.mark = " ",
 ## Overview
 `r text["OVERVIEW.docx",1]`
 
-```{r}
-DisplayOverviewEpidTable()
+```{r OverviewTable, tab.cap= "Overview Table"}
+DisplayOverviewEpidTable(epid_data = epid_base)
 ```
 
 # Epidemic Dynamic
@@ -56,7 +56,7 @@ DisplayOverviewEpidTable()
 ## Time series data
 `r text["TIME_SER.docx",1]`
 
-```{r}
+```{r TimeseriesGraphs, fig.cap="Time series data"}
 DisplayTimeseriesGraphs(timeseries_data = timeseries_data)
 ```
 
@@ -64,7 +64,7 @@ DisplayTimeseriesGraphs(timeseries_data = timeseries_data)
 ## Death incidences by age groups
 `r text["DEATH_INC.docx",1]`
 
-```{r}
+```{r DeathCountBarplots, fig.height=8, fig.cap="Death counts"}
 DisplayDeathCountsPerAgegroupGender(agegroup_gender_data = death_counts_agegroup_gender)
 ```
 
@@ -74,15 +74,15 @@ DisplayDeathCountsPerAgegroupGender(agegroup_gender_data = death_counts_agegroup
 ## Region level table
 `r text["STATE_TBL.docx",1]`
 
-```{r}
-DisplayRegionEpidTable()
+```{r RegionTable, tab.cap= "Region level table"}
+DisplayRegionEpidTable(epid_data = epid_base)
 ```
 
 
 ## District level map
 `r text["COUNTY_MAP.docx",1]`
 
-```{r}
+```{r DistrictMap, fig.cap= "District level map"}
 DisplayEpidDistrictMap(epid_data = epid_base, geoshapes_data = geoshapes_data, epidemic_indicator = "TOTAL_CONFIRMED_CASES")
 ```
 
