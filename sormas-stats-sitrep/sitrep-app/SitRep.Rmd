@@ -1,7 +1,7 @@
 ---
 title: "Situation Report"
 author: "HZI Analysis, Output and Research"
-date: "Placeholder for reportDate"
+date: "`r reportDate`"
 output: 
   bookdown::word_document2:
     reference_docx: data/text/template.docx
@@ -18,11 +18,6 @@ link-citations: yes
 # setting knitr chunk options
 knitr::opts_chunk$set(echo = FALSE, tab.cap.style = "Table Caption")
 ```
-
-```{r sitrep_data_setup, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
-base::source(file.path(".", "global.R"))
-```
-
 
 ```{r flextable settings, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
 # In this SitRep the package 'flextable' is used to display tables in word.
