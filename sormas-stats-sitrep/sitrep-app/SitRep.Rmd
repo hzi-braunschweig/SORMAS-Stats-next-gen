@@ -59,7 +59,7 @@ DisplayTimeseriesGraphs(timeseries_data = timeseries_data)
 ## Death incidences by age groups
 `r text["DEATH_INC.docx",1]`
 
-```{r DeathCountBarplots, fig.height=8, fig.cap="Death counts"}
+```{r DeathCountBarplots, fig.height=8, fig.cap="Death counts by age group"}
 DisplayDeathCountsPerAgegroupGender(agegroup_gender_data = death_counts_agegroup_gender)
 ```
 
