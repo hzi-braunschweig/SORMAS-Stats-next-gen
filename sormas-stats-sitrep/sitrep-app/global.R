@@ -26,6 +26,3 @@ base::source(file.path(".", "loading_functions.R"))
 ## loading data ----
 ## loading_data connects to sormas db, pull all the non sensitive data needed by sormas-stats and disconnect when done
 base::source(file.path(".", "loading_data.R"))
-
-## knit Situation Report Rmd file
-rmarkdown::render(file.path(".", "SitRep.Rmd"))
