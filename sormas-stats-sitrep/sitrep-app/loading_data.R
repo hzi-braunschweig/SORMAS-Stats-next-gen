@@ -48,4 +48,7 @@ overview_table <- GetOverviewEpidTable(epid_data = epid_base)
 region_table <- GetRegionEpidTable(epid_data = epid_base)
 
 # insert dynamic references to table cells
-text <- GetDynamicText(text = text, overview_table = overview_table, region_table = region_table)
+text <- GetDynamicText(text = text,
+                       overview_table = overview_table,
+                       region_table = region_table, 
+                       geographic_units = geographic_units)

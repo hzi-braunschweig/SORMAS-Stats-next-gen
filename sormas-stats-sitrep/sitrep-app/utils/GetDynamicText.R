@@ -9,11 +9,12 @@
 #' @export
 #'
 #' @examples
-GetDynamicText <- function(text, overview_table, region_table){
+GetDynamicText <- function(text, overview_table, region_table, geographic_units){
   
   # get text table keys for overview table and region table
   text_table_keys <- GetTextTableKeys(overview_table = overview_table, 
-                                      region_table = region_table)
+                                      region_table = region_table,
+                                      geographic_units = geographic_units)
   
   # get replacements, by which the text keys will be replaced in the text
   text_replacements <- GetTextReplacements(overview_table = overview_table, 

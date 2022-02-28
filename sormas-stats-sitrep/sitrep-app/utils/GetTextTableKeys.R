@@ -1,67 +1,59 @@
 #' Get text keys for table
 #'
-#' @param overview_table Output of the GetOverviewEpidTable().
-#' @param region_table Output of the GetRegionEpidTable().
+#' @param overview_table Output of the GetOverviewEpidTable() function.
+#' @param region_table Output of the GetRegionEpidTable() function.
+#' @param geographic_units "geographic_unit" dataframe in the output list
+#'  of the ExportPopulation() function. 
 #'
 #' @return Returns a vector with the table text keys for the overview and 
 #' region tables.
 #' @export
 #'
 #' @examples
-GetTextTableKeys <- function(overview_table, region_table){
+GetTextTableKeys <- function(overview_table, region_table, geographic_units){
   
   ########### OVERVIEW TEXT TABLE KEYS ###########################
   
   
   # column keys for overview table
-  column_keys_overview <-c("#Overview_TC",
-                           "#Overview_NC",
-                           "#Overview_TH",
-                           "#Overview_NH",
-                           "#Overview_TD",
-                           "#Overview_ND") 
+  column_keys_overview <-c("#OverviewTable_TotalCases",
+                           "#OverviewTable_NewCases",
+                           "#OverviewTable_TotalHospitalizations",
+                           "#OverviewTable_NewHospitalizations",
+                           "#OverviewTable_TotalDeaths",
+                           "#OverviewTable_NewDeaths") 
   
   # overview table keys
   list_overview_table_keys <- rep(list(column_keys_overview), times = nrow(overview_table))
-  
-  # get row counts to complete overview table keys
-  for (i in 1:length(list_overview_table_keys)){
-    vector_row <- list_overview_table_keys[[i]]
-    # add number indicating table row
-    vector_row <- paste0(vector_row,"_", i)
-    # reassign vector to list
-    list_overview_table_keys[[i]] <- vector_row
-  }
-  
+
   # merge list of region table keys into one vector
   overview_table_keys <- Reduce(c, list_overview_table_keys)
  
   
   ######### REGION TEXT TABLE KEYS ####################################
-  
+  region_names <- sort(unique(geographic_units$name_region))
    
   # column keys for region table
-  column_keys_region <-c("#Region_TC",
-                           "#Region_NC",
-                           "#Region_TH",
-                           "#Region_NH",
-                           "#Region_TD",
-                           "#Region_ND")
+  column_keys_region <-c("#RegionTable_TotalCases",
+                           "#RegionTable_NewCases",
+                           "#RegionTable_TotalHospitalizations",
+                           "#RegionTable_NewHospitalizations",
+                           "#RegionTable_TotalDeaths",
+                           "#RegionTable_NewDeaths")
   
   # region table keys
   list_region_table_keys <- rep(list(column_keys_region), times = nrow(region_table))
   
-  # get row counts to complete overview table keys
+  # add string for corresponding region at the end of each table key
   for (i in 1:length(list_region_table_keys)){
-    vector_row <- list_region_table_keys[[i]]
-    # add number indicating table row
-    vector_row <- paste0(vector_row,"_", i)
-    # reassign vector to list
-    list_region_table_keys[[i]] <- vector_row
+    list_region_table_keys[[i]] <- paste0(list_region_table_keys[[i]],"_", region_names[[i]])
   }
   
   # merge list of region table keys into one vector
   region_table_keys <- Reduce(c, list_region_table_keys)
+  
+  # replace spaces and "-" in the region names
+  region_table_keys <- gsub("-", "", (gsub(" ", "", region_table_keys)))
   
   
   #################### MERGING #########################################
