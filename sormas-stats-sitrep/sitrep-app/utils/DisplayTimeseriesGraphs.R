@@ -29,19 +29,22 @@ DisplayTimeseriesGraphs <- function(timeseries_data,
   cases_by_report_date_graph <- TimeseriesGraph(timeseries_data = timeseries_data,
                                           variable = "REPORT_TOTAL_CONFIRMED",
                                           date_column = "date",
-                                          line_color = colors[1])
+                                          line_color = colors[1])+
+    labs(x="", y="", subtitle = "Cases by reporting date")
   
   # get timeseries graph for confirmed cases by onset date
   cases_by_onset_date_graph <- TimeseriesGraph(timeseries_data = timeseries_data,
                                                 variable = "ONSET_TOTAL_CONFIRMED",
                                                 date_column = "date",
-                                               line_color = colors[2])
+                                               line_color = colors[2])+
+    labs(x="", y="", subtitle = "Cases by symptom onset date")
   
   # get timeseries graph for hospitalizations by admission date
   hospitalizations_by_admission_date_graph <- TimeseriesGraph(timeseries_data = timeseries_data,
                                                 variable = "ADMISSION_REPORTED_DISEASE",
                                                 date_column = "date",
-                                                line_color = colors[3])
+                                                line_color = colors[3])+
+    labs(x="", y="", subtitle = "Hospitalizations by admission date")
   
   # display all three graphs
   gridExtra::grid.arrange(cases_by_report_date_graph, cases_by_onset_date_graph, hospitalizations_by_admission_date_graph)
