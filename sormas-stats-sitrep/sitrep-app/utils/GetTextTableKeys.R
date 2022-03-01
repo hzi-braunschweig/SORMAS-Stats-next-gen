@@ -16,12 +16,12 @@ GetTextTableKeys <- function(overview_table, region_table, geographic_units){
   
   
   # column keys for overview table
-  column_keys_overview <-c("#OverviewTable_TotalCases",
-                           "#OverviewTable_NewCases",
-                           "#OverviewTable_TotalHospitalizations",
-                           "#OverviewTable_NewHospitalizations",
-                           "#OverviewTable_TotalDeaths",
-                           "#OverviewTable_NewDeaths") 
+  column_keys_overview <-c("#Country_TotalCases",
+                           "#Country_NewCases",
+                           "#Country_TotalHospitalizations",
+                           "#Country_NewHospitalizations",
+                           "#Country_TotalDeaths",
+                           "#Country_NewDeaths") 
   
   # overview table keys
   list_overview_table_keys <- rep(list(column_keys_overview), times = nrow(overview_table))
@@ -34,12 +34,12 @@ GetTextTableKeys <- function(overview_table, region_table, geographic_units){
   region_names <- sort(unique(geographic_units$name_region))
    
   # column keys for region table
-  column_keys_region <-c("#RegionTable_TotalCases",
-                           "#RegionTable_NewCases",
-                           "#RegionTable_TotalHospitalizations",
-                           "#RegionTable_NewHospitalizations",
-                           "#RegionTable_TotalDeaths",
-                           "#RegionTable_NewDeaths")
+  column_keys_region <-c("#Region_TotalCases",
+                           "#Region_NewCases",
+                           "#Region_TotalHospitalizations",
+                           "#Region_NewHospitalizations",
+                            "#Region_TotalDeaths",
+                           "#Region_NewDeaths")
   
   # region table keys
   list_region_table_keys <- rep(list(column_keys_region), times = nrow(region_table))
