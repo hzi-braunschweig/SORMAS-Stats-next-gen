@@ -10,9 +10,18 @@ server <- function(input, output) {
   
   output$download = downloadHandler(filename = "Situation Report.docx",
   content = function(file){
-    base::source("global.R")
-    rmarkdown::render("SitRep.Rmd",
+    # progress bar
+    shiny::withProgress(message = "Downloading..", value = 0,{
+      
+      shiny::incProgress(1/10)
+      # computing output data used in sitrep
+      base::source("global.R")
+      
+      shiny::incProgress(5/10)
+      # rendering report
+      rmarkdown::render("SitRep.Rmd",
                       output_file = file)
+    })
   })
 }
 # app
