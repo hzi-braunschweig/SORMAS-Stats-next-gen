@@ -43,7 +43,8 @@ RUN install2.r --error \
 RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
 
 ## renv.lock file
-COPY renv.lock ./renv.lock 
+#COPY renv.lock ./renv.lock 
+COPY sormas-stats-shinyapp/sormas-stats-app/renv.lock ./renv.lock
 
 # install renv & restore packages
 RUN Rscript -e 'install.packages("renv")' 
