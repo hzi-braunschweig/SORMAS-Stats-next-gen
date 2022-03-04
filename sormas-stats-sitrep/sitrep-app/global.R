@@ -1,9 +1,12 @@
+# CONFIGURATION FOR PULLING DATA AT THE TIME OF GENERATING REPORT
 
-# Defining parameters to be used to sample data from external database (sormas database)
-delay = 365 # number of days to count backward from today for entities without specific delay parameters,  default = 90 days in the past
-fromDate = as.character(Sys.Date() - delay - 1) #  you can directly define fromDate as: fromDate = as.character("yyyy-mm-dd")
-toDate = as.character(Sys.Date() + 1) # or toDate = as.character("yyyy-mm-dd"), +1 is added because between sql commant does not consider end of intervals
+reportDate = Sys.Date() # date which appears on the report
+toDate = reportDate -1 # latest date of the data being queried
+toDateSQL = toDate +1 # +1 is added because between sql command does not consider end of interval
 
+duration = 365 # number of consecutive dates used for the report
+fromDate = toDate - duration + 1 # earliest date of the data being queried 
+fromDateSQL = fromDate - 1 # -1 is added because between sql command does not consider beginning of interval
 
 # Defining connection to db
 DB_USER = "sormas_user"
@@ -11,7 +14,7 @@ DB_PASS = "password"
 DB_HOST = "127.0.0.1"
 DB_PORT = "5432"
 DB_NAME = "sormas"
-## end of configuratiion
+## end of configuration
 
 # Loading packages -----
 base::source(file.path(".", "loading_packages.R"))

@@ -1,0 +1,120 @@
+---
+title: "Situation Report"
+author: "HZI Analysis, Output and Research"
+date: "`r reportDate`"
+output: 
+  bookdown::word_document2:
+    reference_docx: data/text/template.docx
+    number_sections: true
+    fig_width: 7
+    fig_height: 6
+    fig_caption: yes
+bibliography: data/text/references.bib
+link-citations: yes
+---
+
+```{r setup, include = FALSE}
+# "`r format(Sys.time(), '%d %B, %Y')`" 
+# setting knitr chunk options
+knitr::opts_chunk$set(echo = FALSE, tab.cap.style = "Table Caption")
+```
+
+```{r flextable settings, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
+# In this SitRep the package 'flextable' is used to display tables in word.
+# Here we set the default options for the flextable package.
+# The flextable package automatically splits long tables over different pages 
+# and repeats the headings.
+
+set_flextable_defaults(big.mark = " ",
+  font.size = 9, theme_fun = theme_vanilla,
+  padding.bottom = 6,
+  padding.top = 6,
+  padding.left = 5,
+  padding.right = 5,
+  background.color = "#EFEFEF")
+
+```
+
+# Introduction
+`r text["INTRO.docx",1]` 
+
+## Overview
+`r text["OVERVIEW.docx",1]`
+
+```{r OverviewTable, tab.cap= "Overview Table"}
+flextable::flextable(overview_table)
+```
+
+# Epidemic Dynamic
+`r text["EPID_DYN.docx",1]` 
+
+## Time series data
+`r text["TIME_SER.docx",1]`
+
+```{r TimeseriesGraphs, fig.cap="Time series data"}
+DisplayTimeseriesGraphs(timeseries_data = timeseries_data)
+```
+
+
+## Death incidences by age groups
+`r text["DEATH_INC.docx",1]`
+
+```{r DeathCountBarplots, fig.height=8, fig.cap="Death counts by age group"}
+DisplayDeathCountsPerAgegroupGender(agegroup_gender_data = death_counts_agegroup_gender)
+```
+
+# Regional Situation
+`r text["REG_SIT.docx",1]`
+
+## Region level table
+`r text["STATE_TBL.docx",1]`
+
+```{r RegionTable, tab.cap= "Region level table"}
+flextable::flextable(region_table)
+```
+
+
+## District level map
+`r text["COUNTY_MAP.docx",1]`
+
+```{r DistrictMap, fig.cap= "District level map"}
+DisplayEpidDistrictMap(epid_data = epid_base, geoshapes_data = geoshapes_data, epidemic_indicator = "TOTAL_CONFIRMED_CASES")
+```
+
+
+# Remarks 
+`r text["REMARKS.docx",1]`
+
+# References
+```{r references, echo = FALSE, warning=FALSE, message=FALSE}
+# References to papers can be included via the references.bib and the .docx
+# files in the /text folder.
+# First, the user needs to copy the BibTex reference of the paper he or she 
+# wants to cite in the references.bib file. 
+# Then, to define the place of the refence within the text, the user simply 
+# needs to put '[@refname]' in the text of the .docx file where the citation
+# should be. 
+# To cite multiple references at once: '[@refname1;@refname2]'.
+# refname is the BibTex reference name of the paper to be cited.
+
+# For crossreferences to section headings the user needs to type 
+# 'Section \@ref(label)' in the text witin the .docx file in the /text
+# folder.
+# 'label' is the Section ID of the section to be cited, which is defined by
+# through Pandoc as e.g. 'heading-one' for a Section named '# Heading one'.
+# The user can define section IDs by adding '{#userdefinedID}' behind a
+# heading, e.g. '# Heading {#userdefinedID}'.
+
+# For crossreferences to figures the user needs to type 
+# 'Figure \@ref(fig:FigName)' in the text witin the .docx file in the /text
+# folder.
+# FigName is the name of the figure to be cited, which is defined in the chunk
+# options of this Situation-Report.Rmd file.
+
+# For crossreferences to tables the user needs to type 
+# 'Table \@ref(tab:TabName)' in the text witin the .docx file in the /text
+# folder.
+# TabName is the name of the table to be cited, which is defined in the chunk
+# options of this Situation-Report.Rmd file.
+
+```
