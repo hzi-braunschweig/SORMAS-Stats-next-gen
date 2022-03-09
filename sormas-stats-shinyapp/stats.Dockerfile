@@ -62,4 +62,4 @@ COPY run_app.sh /usr/sbin/run_app.sh
 RUN chmod 700 /usr/sbin/run_app.sh
 
 # run app on container start
-CMD ["R", "-e", "shiny::runApp('/app', host = '0.0.0.0', port = 3839)"]
+CMD ["/usr/sbin/run_app.sh"]
