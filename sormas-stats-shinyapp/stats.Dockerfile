@@ -1,13 +1,12 @@
-# check available R versions here: <https://hub.docker.com/r/rocker/shiny/tags>
-#FROM rocker/shiny:3.6.3
+# Base image https://hub.docker.com/u/rocker/
+# FROM rocker/shiny:latest 
 FROM rocker/shiny:4.1.2
-# ---------------------------------------------
-LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 
-ENV RENV_PATHS_ROOT=/opt/local/renv
-ENV RENV_PATHS_CACHE=/opt/local/renv/cache
-
-FROM rocker/shiny:4.1.2
+ENV DB_USER="sormas_user"
+ENV DB_PASS="password"
+ENV DB_HOST="127.0.0.1"
+ENV DB_PORT="5432"
+ENV DB_NAME="sormas"
 
 # system libraries of general use
 ## install debian packages
@@ -41,18 +40,26 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*		
 
-RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
+# copy necessary files
+## renv.lock file
+COPY /sormas-stats-app/renv.lock ./renv.lock 
+## app folder
+COPY /sormas-stats-app ./app
 
 RUN mkdir -p /var/log/shiny-server \
   && chown -R shiny.shiny /var/log/shiny-server \
   && chmod 664 /var/log/shiny-server
-
-## renv.lock file
-COPY renv.lock ./renv.lock 
-#COPY sormas-stats-shinyapp/sormas-stats-app/renv.lock ./renv.lock
 
 # install renv & restore packages
 RUN Rscript -e 'install.packages("renv")' 
 RUN Rscript -e 'renv::consent(provided = TRUE)'
 RUN Rscript -e 'renv::restore()'
 
+# expose port
+EXPOSE 3838
+
+COPY run_app.sh /usr/sbin/run_app.sh
+RUN chmod 700 /usr/sbin/run_app.sh
+
+# run app on container start
+CMD ["R", "-e", "shiny::runApp('/app', host = '0.0.0.0', port = 3839)"]

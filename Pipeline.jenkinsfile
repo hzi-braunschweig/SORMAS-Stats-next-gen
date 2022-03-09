@@ -17,8 +17,23 @@ node {
 
     }
     stage('Build stats image') {
-		echo 'Build stats image....'
-		build job: 'Build_SORMAS_Stats', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+    	if (params.BUILD_SINGLE != null && params.BUILD_SINGLE) {
+    		dir('sormas-stats-shinyapp') {
+    		    echo 'Build stats single image....'
+	    		sh """
+	            sudo docker build -f stats.Dockerfile --pull --no-cache --build-arg BRANCH=${BRANCH} -t sormas-stats:${BRANCH} .
+	            sudo docker login -u '${DOCKERUSER}' -p '${DOCKERPASS}' docker.io
+	            sudo docker tag sormas-stats:${BRANCH} docker.io/hzibraunschweig/sormas-stats:${TAG}
+	            sudo docker push docker.io/hzibraunschweig/sormas-stats:${TAG}
+	            sudo docker logout docker.io
+	            echo 'Finished'
+	            """          
+    		}
+    	}
+    	else {
+    	    echo 'Build stats image....'
+			build job: 'Build_SORMAS_Stats', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+    	}
     }
     
     def credentials_id = params.CREDENTIALS_ID
@@ -32,6 +47,8 @@ node {
 	    	"""       
     	}              
     }
+    
+
 
     
 }
