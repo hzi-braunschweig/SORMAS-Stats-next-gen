@@ -43,7 +43,7 @@ sormas-stats-sitrep generates and downloads an automated situation report of the
 
 # **Installation of necessary software**
 
-Make sure [R and RStudio](https://www.rstudio.com/products/rstudio/download/#download) as well as [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) software are installed on your device.
+Make sure [R and RStudio](https://www.rstudio.com/products/rstudio/download/#download) software is installed on your device.
 
 To use the sitrep app you then need to:
 
@@ -93,24 +93,38 @@ In case of requesting and receiving a database backup file you need to following
 
 # Downloading the Repository
 
-Open RStudio, set the working directory to the place you want to download the repository to. 
-
-Open the terminal and enter the following code to download this repository:
-
-```
-git clone https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git
-```
+Download this repository into a directory of your choosing. 
 
 
 
 # Running sitrep-app
 
-To run the sitrep-app go to SORMAS-Stats-next-gen\sormas-stats-sitrep\sitrep-app directory in the cloned repository on your machine and open the sitrep-app.Rproj.
+**When running a SORMAS instance:**
+
+To run the sitrep-app go to SORMAS-Stats-next-gen\sormas-stats-sitrep\sitrep-app directory in the repository on your machine and open the sitrep-app.Rproj.
+
+Set the configuration to connect to the SORMAS instance in the `global.R` file:
+
+- `DB_USER = "sormas_user"`
+- `DB_PASS = "password"`
+- `DB_HOST = "127.0.0.1"`
+- `DB_PORT = "5432"`
+- `DB_NAME = "sormas"`
+
+Open the file `launch_app.R` and run it. 
+
+
+
+**When using a SORMAS backup database file:**
+
+To run the sitrep-app go to SORMAS-Stats-next-gen\sormas-stats-sitrep\sitrep-app directory in the repository on your machine and open the sitrep-app.Rproj.
 
 Set the configuration for the postgres user account in the `global.R` file:
 
 - `DB_USER = "postgres"` 
 - `DB_PASS = "your_password"`
+- `DB_HOST = "127.0.0.1"`
+- `DB_PORT = "5432"`
 - `DB_NAME = "your_database_name"`
 
 Open the file `launch_app.R` and run it. 
