@@ -1,7 +1,9 @@
 
 # connect to sormas_db
-sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
-
+sormas_db = attempt::attempt(expr = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, 
+                                              password = DB_PASS, host=DB_HOST, port=DB_PORT), 
+                             msg = "Could not connect to external database")
+ 
 # Extracting user data, Hashing Passwords with sodium
 users = userExport(sormas_db=sormas_db, authenticat_user= authenticat_user_global)
 
@@ -17,7 +19,8 @@ infectorInfecteeData = infectorInfecteeExport(sormas_db, fromDate = fromDate, to
 
 ## Extracting contact data ---- 
 # mergingDataFromDB extracts network data, default contact data and serial interval data
-importDataFrontEndOutput = mergingDataFromDB(sormas_db = sormas_db, fromDate = fromDate, toDate = toDate , uniquePersonPersonContact = TRUE)
+importDataFrontEndOutput = mergingDataFromDB(sormas_db = sormas_db, fromDate = fromDate, 
+                                             toDate = toDate , uniquePersonPersonContact = TRUE)
 
 contRegionDist = importDataFrontEndOutput$contRegionDist
 nodeLineList = importDataFrontEndOutput$nodeLineList  # id here is person id
