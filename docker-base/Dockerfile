@@ -41,6 +41,7 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*		
 
+RUN echo ${RENV_PATHS_CACHE} 
 RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
 
 RUN mkdir -p /var/log/shiny-server \
