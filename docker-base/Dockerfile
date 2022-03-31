@@ -4,50 +4,33 @@ FROM rocker/shiny:4.1.2
 # ---------------------------------------------
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 
-# system libraries of general use
-## install debian packages
-RUN apt-get update -qq && apt-get -y --no-install-recommends install \
+ENV RENV_PATHS_ROOT=/opt/local/renv
+ENV RENV_PATHS_CACHE=/opt/local/renv/cache
+
+#code with default packahes from https://hub.docker.com/r/rocker/shiny-verse/dockerfile
+RUN apt-get update -qq && apt-get upgrade -y \
+  && apt-get -y --no-install-recommends install \
     libxml2-dev \
     libpq-dev \
     libssl-dev \
-    && install2.r --error \
+    libudunits2-dev \
+    libgdal-dev \
+    libsodium-dev \
+  && apt-get -y autoremove \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*		
+
+  
+RUN install2.r --error \
     --deps TRUE \
-    # tidyverse \
-    # dplyr \
-    # devtools \
     formatR \
-    # remotes \
-    # selectr \
     caTools \
-  && rm -rf /tmp/downloaded_packages
-
-## update system libraries
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get clean
-	
-# Install missing debian/ubuntu packages
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-       libudunits2-dev \
-       libgdal-dev \
-       libsodium-dev \
- && apt-get -y autoremove \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*		
-
-RUN mkdir -p /var/log/shiny-server \
-  && chown -R shiny.shiny /var/log/shiny-server \
-  && chmod 664 /var/log/shiny-server
-
-ENV RENV_PATHS_ROOT=/opt/local/renv
-ENV RENV_PATHS_CACHE=/opt/local/renv/cache
+  && rm -rf /tmp/downloaded_packages 
 
 RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
 
 ## renv.lock file
 COPY renv.lock ./renv.lock 
-#COPY sormas-stats-shinyapp/sormas-stats-app/renv.lock ./renv.lock
 
 # install renv & restore packages
 RUN Rscript -e 'install.packages("renv")' 
