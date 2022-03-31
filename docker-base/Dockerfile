@@ -7,7 +7,8 @@ LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 ENV RENV_PATHS_ROOT=/opt/local/renv
 ENV RENV_PATHS_CACHE=/opt/local/renv/cache
 
-FROM rocker/shiny:4.1.2
+RUN echo ${RENV_PATHS_CACHE} 
+RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
 
 # system libraries of general use
 ## install debian packages
@@ -41,8 +42,7 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*		
 
-RUN echo ${RENV_PATHS_CACHE} 
-RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
+
 
 RUN mkdir -p /var/log/shiny-server \
   && chown -R shiny.shiny /var/log/shiny-server \
