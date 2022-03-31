@@ -4,12 +4,6 @@ FROM rocker/shiny:4.1.2
 # ---------------------------------------------
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 
-ENV RENV_PATHS_ROOT=/opt/local/renv
-ENV RENV_PATHS_CACHE=/opt/local/renv/cache
-
-RUN echo ${RENV_PATHS_CACHE} 
-RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
-
 # system libraries of general use
 ## install debian packages
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
@@ -42,11 +36,14 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*		
 
-
-
 RUN mkdir -p /var/log/shiny-server \
   && chown -R shiny.shiny /var/log/shiny-server \
   && chmod 664 /var/log/shiny-server
+
+ENV RENV_PATHS_ROOT=/opt/local/renv
+ENV RENV_PATHS_CACHE=/opt/local/renv/cache
+
+RUN mkdir -p ${RENV_PATHS_CACHE} && chmod a+rx ${RENV_PATHS_CACHE} 
 
 ## renv.lock file
 COPY renv.lock ./renv.lock 
