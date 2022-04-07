@@ -3,7 +3,6 @@
 #####  server function #######
 shinyServer(
   function(input, output,session) { 
-
     #################################################
     # Call login module and supplying it with the user dataframe, 
     # username and password calls and reactive trigger

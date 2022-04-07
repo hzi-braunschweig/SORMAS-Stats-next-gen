@@ -30,7 +30,7 @@ DB_NAME= "sormas"
 
 # Loading packages -----
 source(file.path(".", "loading_packages.R"))
-  
+
 # load binary files for functions -----
 # source(file.path(".", "loading_functions.R")) # Use this version of sourcing the binary version of functions
 source(file.path(".", "loading_functions_source.R"))

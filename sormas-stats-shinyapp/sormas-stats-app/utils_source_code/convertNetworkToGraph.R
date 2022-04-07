@@ -12,7 +12,8 @@ convertNetworkToGraph = convertNetworkToGraph = function(elist, nodeLineList){
   nodeLineListSelResCase = nodeLineList %>%
     dplyr::mutate(id = label, group = group, label=label, .keep = "none") %>%
     dplyr::filter(id %in% node_uuid) %>%
-    dplyr::distinct_at(., vars(id), .keep_all = TRUE)
+    dplyr::distinct_at(., vars(id), .keep_all = TRUE) %>% 
+    dplyr::select(id, everything()) # the id need to ne on the first colun
   
   # dropping all nodes in elist that are not in nodeList
   # this is not needed in case the filter at front end generated a data with such a situation
