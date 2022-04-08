@@ -3,6 +3,132 @@
 #####  server function #######
 shinyServer(
   function(input, output,session) { 
+    msg <- try({
+      # connect to sormas_db
+      sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
+      
+      # Extracting user data, Hashing Passwords with sodium
+      users = userExport(sormas_db=sormas_db, authenticat_user= authenticat_user_global)
+      
+      ## Extracting eventData -----
+      eventData = eventExport(sormas_db,fromDate = event_fromDate, toDate = event_toDate)
+      
+      # compute location_category varaible for events
+      eventData = compute_eventlocation_category(eventData = eventData)
+      
+      ## Extracting infectorInfecteeData -----
+      infectorInfecteeData = infectorInfecteeExport(sormas_db, fromDate = fromDate, toDate = toDate)
+      
+      
+      ## Extracting contact data ---- 
+      # mergingDataFromDB extracts network data, default contact data and serial interval data
+      importDataFrontEndOutput = mergingDataFromDB(sormas_db = sormas_db, fromDate = fromDate, 
+                                                   toDate = toDate , uniquePersonPersonContact = TRUE)
+      
+      contRegionDist = importDataFrontEndOutput$contRegionDist
+      nodeLineList = importDataFrontEndOutput$nodeLineList  # id here is person id
+      elist = importDataFrontEndOutput$elist  # id here is contact id
+      #siDat = importDataFrontEndOutput$siDat 
+      
+      ## The code below would need to be transformed in to independent functions later
+      #### loading case -----
+      ## reading raw data from db based on time (fromDate, toDate) specified
+      dataCombined = ImportingUnformatedDataFromDB(sormas_db, fromDate, toDate)
+      
+      # Assigning DOB to person with only year of birth using January 1. This is an estimates birth date
+      person = dataCombined$person
+      perTemp = person[is.na(person$birthdate_yyyy) == F, ]
+      perTemp2 = person[is.na(person$birthdate_yyyy) == T, ]
+      
+      dm = rep(1,nrow(perTemp))
+      perTemp$birthDate = as.Date(with(perTemp, paste(birthdate_yyyy, dm, dm, sep = "-")))
+      perTemp2$birthDate = rep(NA,nrow(perTemp2)) 
+      person = rbind(perTemp, perTemp2)
+      
+      personVar=c( "person_id", "sex","occupationtype","presentcondition", "birthDate")  
+      person = person[, colnames(person) %in% personVar]
+      
+      ## mergig case and person table
+      casePerson = base::merge(dataCombined$case , person, by=  "person_id",  all.x = T, all.y = F ) # to ge the casevaraibles of contacts. Contacts that
+      # calculating age at point that the person was a case
+      casePerson$age = as.numeric(round((casePerson$reportdate - casePerson$birthDate)/365))
+      
+      # merging casePerson with region
+      casePersonRegion = base::merge(casePerson, dataCombined$region, by = "region_id", all.x = T, all.y = F)
+      
+      ## Adding week, month and year  as individual colums using date of report
+      #casePersonRegion = casePersonRegion[casePersonRegion$reportdate > as.Date("2017-05-01"),] # deleting cases with date errors 
+      
+      casePersonRegion$total = rep(1, nrow(casePersonRegion))
+      casePersonRegion$reportweek = week(casePersonRegion$reportdate)
+      casePersonRegion$reportmonth = month(casePersonRegion$reportdate)
+      casePersonRegion$reportyear = year(casePersonRegion$reportdate)
+      casePersonRegion$total = rep(1, nrow(casePersonRegion))
+      
+      ### merging casePersonRegion with district  ##
+      casePersonRegionDist = base::merge(casePersonRegion, dataCombined$district, by = "district_id", all.x = T, all.y = F)
+      
+      #### event and event participant data merging -----
+      ## source data is event table and we mergr in this order: event*location*region*district*evetnPartucipant*Person
+      eventLoc = base::merge(dataCombined$event, dataCombined$location, by.x =  "eventlocation_id", by.y = "location_id", all.x = T, all.y = F)
+      eventLocReg = base::merge(eventLoc, dataCombined$region, by.x =  "region_id", by.y = "region_id", all.x = T, all.y = F)
+      eventLocRegDist = base::merge(eventLocReg, dataCombined$district, by.x =  "district_id", by.y = "district_id", all.x = T, all.y = F)
+      eventLocRegDistParticipant = base::merge(eventLocRegDist, dataCombined$eventParticipant, by.x =  "event_id", by.y = "event_id", all.x = T, all.y = F)
+      
+      # adding random lat, lng, and ep to event to event data
+      #  to be added to event data export later
+      eventData = eventData %>%
+        dplyr::mutate(n_ep = rep(5,nrow(eventData)), lat = 10.53128 + rnorm(nrow(eventData)), long = 52.21099 + nrow(eventData) ) %>%
+        dplyr::select(-c(latitude, longitude ))
+      
+      eventData = as.data.frame(eventData)
+      
+      ## creating event_variable_data dateset that maps event variables to their categories. This mapping would be used for selecting columns on event table by jurisdiction
+      event_variable_data = event_variable_category_maper(cuntbyRegionTableEvent = cuntbyRegionDistrictEvent(data = eventData , byRegion = TRUE ))
+      
+      
+      #disconnect from db ---- 
+      dbDisconnect(sormas_db)
+      
+      ##
+      ## Update UI
+      ##
+      # elist
+      updatePickerInput(session = session, inputId = "regionNetworkUi", choices = sort(levels(as.factor(elist$region_name))))
+      updatePickerInput(session = session, inputId = "contactEntitiyTypeUi", choices = sort(unique(elist$entityType)))
+      updatePickerInput(session = session, inputId = "relationCaseUi", choices = sort(levels(as.factor(elist$relationtocase))))
+      updatePickerInput(session = session, inputId = "eventstatusUI", choices = sort(levels(as.factor(elist$eventstatus))))
+      updatePickerInput(session = session, inputId = "risklevelUI", choices = sort(levels(as.factor(elist$risklevelEvent))))
+      # casePersonRegionDist
+      updatePickerInput(session = session, inputId = "regionCaseMapUi", choices = sort(levels(as.factor(casePersonRegionDist$region_name))))
+      updatePickerInput(session = session, inputId = "regionCaseUi", choices = sort(levels(as.factor(casePersonRegionDist$region_name))))
+      updatePickerInput(session = session, inputId = "classificationCaseUi", choices = sort(levels(as.factor(casePersonRegionDist$caseclassification))))
+      updatePickerInput(session = session, inputId = "facilityCaseUi", choices = sort(levels(as.factor(casePersonRegionDist$healthfacility_id))))
+      # casePerson
+      updatePickerInput(session = session, inputId = "diseaseCaseUi", choices = sort(levels(as.factor(casePerson$disease))), selected = c("CORONAVIRUS"))
+      updatePickerInput(session = session, inputId = "diseaseEventUi", choices = sort(levels(as.factor(casePerson$disease))), selected = c("CORONAVIRUS"))
+      # event_variable_data
+      updatePickerInput(session = session, inputId = "eventTableColumnVaribleUi", choices = c(levels(as.factor(event_variable_data$event_variable))), selected = c("Name", "Total", "Event status"))
+      # eventData
+      updatePickerInput(session = session, inputId = "twoByTwotableEventVariblesUi", choices = c(levels(as.factor(colnames(eventData)))))
+      updatePickerInput(session = session, inputId = "piechartEventVaribleUi", choices = c("Event Status",levels(as.factor(colnames(eventData)))), selected = "Event Status")
+      updatePickerInput(session = session, inputId = "barplotEventVaribleUi", choices = c("Location category",levels(as.factor(colnames(eventData)))), selected = "Location category")
+      updatePickerInput(session = session, inputId = "regionEventUi", choices = sort(levels(as.factor(eventData$region_name))))
+      updatePickerInput(session = session, inputId = "eventIdentificationSourceUi", choices = sort(levels(as.factor(eventData$event_identification_source))))  
+      updateSliderInput(session = session, inputId = "range", min =  min(eventData$n_ep), max = max(eventData$n_ep), value = range(eventData$n_ep))
+      # contRegionDist
+      updatePickerInput(session = session, inputId = "regionContactUi", choices = sort(levels(as.factor(contRegionDist$region_name))))       
+    })
+    if(inherits(msg, "try-error")){
+      showModal(modalDialog(title = "Startup error", as.character(msg), easyClose = TRUE))
+    }else{
+      ## Failed, use empty users dataset
+      users <- data.frame(username = character(), password = character(), stringsAsFactors = FALSE)
+    }
+    
+    
+    
+    
     #################################################
     # Call login module and supplying it with the user dataframe, 
     # username and password calls and reactive trigger
