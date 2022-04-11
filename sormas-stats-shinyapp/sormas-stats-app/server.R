@@ -4,6 +4,7 @@
 shinyServer(
   function(input, output,session) { 
     msg <- try({
+      showModal(modalDialog(title = NULL, "Loading data from the database.", "Just a minute.", tags$br(), "This message will close automatically when this has finished.", easyClose = TRUE, footer = NULL))
       # connect to sormas_db
       sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
       
@@ -89,6 +90,7 @@ shinyServer(
       
       #disconnect from db ---- 
       dbDisconnect(sormas_db)
+      removeModal()
       
       ##
       ## Update UI
@@ -121,9 +123,6 @@ shinyServer(
     })
     if(inherits(msg, "try-error")){
       showModal(modalDialog(title = "Startup error", as.character(msg), easyClose = TRUE))
-    }else{
-      ## Failed, use empty users dataset
-      users <- data.frame(username = character(), password = character(), stringsAsFactors = FALSE)
     }
     
     
