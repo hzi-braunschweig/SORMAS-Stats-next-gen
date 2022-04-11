@@ -147,23 +147,12 @@ shinyServer(
       id = "logout",
       active = reactive(credentials()$user_auth)
     )
-    ########################################"
-   
-    ### toggling sidebar panel
-    # Can be activated by uncommenting this code ans also in ui file
-    # observeEvent(input$toggleSidebar, {
-    #   shinyjs::toggle(id = "Sidebar")
-    # })
+    ########################################
     
-    # ui element to filter trensmisson chenin by district based of users delected region 
+    # ui element to filter transmission chain by district based of users selected region 
     output$pickerInputDistrict2 <- renderUI({
-      # choicesRegionUI = sort(unique(contRegionDist$district_name[contRegionDist$region_name %in% input$regionUi]  ))
       if(!is.null(input$regionNetworkUi))
       {
-        # choicesRegionNetworkUI = contRegionDist %>%
-        #   dplyr::filter(region_name %in% input$regionNetworkUi)  %>%
-        #   mutate(district_name )
-        
         choicesRegionNetworkUI = elist %>%
           dplyr::filter(region_name %in% input$regionNetworkUi)  %>%
           distinct(district_name) %>%
@@ -348,7 +337,7 @@ elistSel2ResCaseSourseCase = eventReactive(input$transChainAction, {
 
 # Ordering column of elist to be plotted, this is needed to be in this specific order
 elistToPlot = reactive({
-  #remaming node id with node uuid
+  #renaming node id with node uuid
   ret = elistSel2ResCaseSourseCase() %>%  #        
     dplyr::select(-from, -to)  %>% 
     dplyr::mutate(from = from_uuid_person, to = to_uuid_person, .keep = "all") %>%
@@ -970,7 +959,7 @@ output$plot <- renderPlot({
   ## end exportation of data
        
 #### CASE DATA ANALYSIS  #################
-# ui element to filter casePersonRegionDist by disdrict based of users selected region 
+# ui element to filter casePersonRegionDist by district based on user selected region 
 output$pickerInputdistrictCaseUi <- renderUI({
   if(!is.null(input$regionCaseUi))
   {
