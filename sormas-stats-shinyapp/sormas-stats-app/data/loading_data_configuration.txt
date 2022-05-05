@@ -1,0 +1,9 @@
+# This is an internal table to map each featuere name to its corresponding data to be loading from sormas db
+# do not include space after a comma, ie ",f" not ",  f"
+# the feature name on third column should be the same as on fature_configuration.txt file
+analysis_type,feature_name,required_data_name
+contact_data_analysis, contact_per_case_export, contRegionDist
+contact_data_analysis, contact_per_case_plot, contRegionDist
+contact_data_analysis, contact_dashboard, contRegionDist
+contact_data_analysis, contact_per_region_export, contRegionDist
+sample_data_analysis, sample_custom_indicators, sample_table

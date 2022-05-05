@@ -21,6 +21,7 @@ base::source(file.path("./utils_source_code","factorLevelCount.R"))
 base::source(file.path("./utils_source_code","cuntbyRegionDistrictCase.R"))
 base::source(file.path("./utils_source_code","proportionByregion.R"))
 base::source(file.path("./utils_source_code","eventExport.R"))
+base::source(file.path("./utils_source_code","sample_export.R"))
 base::source(file.path("./utils_source_code","twoByTwoTablefunction.R"))
 base::source(file.path("./utils_source_code","pieChartPlot.R"))
 base::source(file.path("./utils_source_code","factorLevelCountEvent.R"))
@@ -44,8 +45,9 @@ base::source(file.path("./utils_source_code","univariate_barplot.R"))
 base::source(file.path("./utils_source_code","convertNetworkToGraph.R"))
 base::source(file.path("./utils_source_code","sourceNodeDegreeCounter.R"))
 
-
-
+# General utils functions
+base::source(file.path("./utils_source_code","vector_is_empty.R"))
+base::source(file.path("./utils_source_code","dataframe_is_empty.R"))
 
 
 

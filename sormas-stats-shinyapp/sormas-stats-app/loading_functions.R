@@ -22,6 +22,7 @@ base::load(file.path("./utils","factorLevelCount.R"))
 base::load(file.path("./utils","cuntbyRegionDistrictCase.R"))
 base::load(file.path("./utils","proportionByregion.R"))
 base::load(file.path("./utils","eventExport.R"))
+base::load(file.path("./utils","sampleExport.R"))
 base::load(file.path("./utils","twoByTwoTablefunction.R"))
 base::load(file.path("./utils","pieChartPlot.R"))
 base::load(file.path("./utils","factorLevelCountEvent.R"))
@@ -34,6 +35,8 @@ base::load(file.path("./utils","infectorInfecteeExport.R"))
 base::load(file.path("./utils","serialIntervalPlot.R"))
 base::load(file.path("./utils","offspringDistPlot.R"))
 base::load(file.path("./utils","fixBirthDate.R"))
+base::load(file.path("./utils","vector_is_empty.R"))
+base::load(file.path("./utils","dataframe_is_empty.R"))
 base::load(file.path("./utils","event_variable_category_maper.R"))
 base::load(file.path("./utils","fit_distribution.R"))
 base::load(file.path("./utils","fitdist_plot.R"))
@@ -44,6 +47,11 @@ base::load(file.path("./utils","compute_eventlocation_category.R"))
 base::load(file.path("./utils","univariate_barplot.R"))
 base::load(file.path("./utils","convertNetworkToGraph.R"))
 base::load(file.path("./utils","sourceNodeDegreeCounter.R"))
+
+
+
+
+
 
 
 
