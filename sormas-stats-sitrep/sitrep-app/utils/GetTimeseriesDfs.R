@@ -40,7 +40,8 @@ GetTimeseriesDfs <- function(start_date, end_date){
                      "REPORTED_DISEASE",
                      "OTHER",
                      "UNKNOWN",
-                     "NA")
+                     "NA",
+                     "ISOLATION")
   
   # Initialize data frame
   df0_hospitalization <- data.frame(matrix(0, ncol = length(columns_hospitalization), nrow = (as.integer(end_date-start_date) +1))) # +1 added because otherwise start date is not included 

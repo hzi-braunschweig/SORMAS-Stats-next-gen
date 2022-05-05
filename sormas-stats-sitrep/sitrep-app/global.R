@@ -4,7 +4,7 @@ reportDate = Sys.Date() # date which appears on the report
 toDate = reportDate -1 # latest date of the data being queried
 toDateSQL = toDate +1 # +1 is added because between sql command does not consider end of interval
 
-duration = 365 # number of consecutive dates used for the report
+duration = 1000 # number of consecutive dates used for the report
 fromDate = toDate - duration + 1 # earliest date of the data being queried 
 fromDateSQL = fromDate - 1 # -1 is added because between sql command does not consider beginning of interval
 

@@ -26,6 +26,7 @@ geoshapes_data = ExportGeoshapes(sormas_db = sormas_db)
 # Disconnect from sormas_db ---- 
 dbDisconnect(sormas_db)
 
+
 # Import text and references
 text_files<- readtext::readtext("data/text/*.docx")
 text <- data.frame(text_files[,-1], row.names=text_files[,1])
@@ -50,5 +51,5 @@ region_table <- GetRegionEpidTable(epid_data = epid_base)
 # insert dynamic references to table cells
 text <- GetDynamicText(text = text,
                        overview_table = overview_table,
-                       region_table = region_table, 
+                       region_table = region_table,
                        geographic_units = geographic_units)

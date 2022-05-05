@@ -22,11 +22,11 @@ shinyServer(
       
       
       ## Extracting contact data ---- 
+      # only data frames that matched the configuration in loading_data_config_vector are exported
       # mergingDataFromDB extracts network data, default contact data and serial interval data
       importDataFrontEndOutput = mergingDataFromDB(sormas_db = sormas_db, fromDate = fromDate, 
                                                    toDate = toDate , uniquePersonPersonContact = TRUE)
-      
-      contRegionDist = importDataFrontEndOutput$contRegionDist
+      if("contRegionDist" %in% loading_data_config_vector){contRegionDist = importDataFrontEndOutput$contRegionDist}
       nodeLineList = importDataFrontEndOutput$nodeLineList  # id here is person id
       elist = importDataFrontEndOutput$elist  # id here is contact id
       #siDat = importDataFrontEndOutput$siDat 
@@ -86,7 +86,8 @@ shinyServer(
       
       ## creating event_variable_data dateset that maps event variables to their categories. This mapping would be used for selecting columns on event table by jurisdiction
       event_variable_data = event_variable_category_maper(cuntbyRegionTableEvent = cuntbyRegionDistrictEvent(data = eventData , byRegion = TRUE ))
-      
+      ## Loading sample data if the module is activated
+      if("sample_table" %in% loading_data_config_vector){sample_table = sample_export(sormas_db, fromDate, toDate)}
       
       #disconnect from db ---- 
       dbDisconnect(sormas_db)
@@ -119,19 +120,18 @@ shinyServer(
       updatePickerInput(session = session, inputId = "eventIdentificationSourceUi", choices = sort(levels(as.factor(eventData$event_identification_source))))  
       updateSliderInput(session = session, inputId = "range", min =  min(eventData$n_ep), max = max(eventData$n_ep), value = range(eventData$n_ep))
       # contRegionDist
-      updatePickerInput(session = session, inputId = "regionContactUi", choices = sort(levels(as.factor(contRegionDist$region_name))))       
-    })
+      updatePickerInput(session = session, inputId = "regionContactUi", choices = sort(levels(as.factor(contRegionDist$region_name))))
+      # sample_table
+      updatePickerInput(session = session, inputId = "diseaseSampleUi", choices = sort(levels(as.factor(sample_table$disease))))
+      updatePickerInput(session = session, inputId = "bargraphSampleVariableUi", choices = c("sample_meterial", sort(levels(as.factor(colnames(sample_table))))))
+      updatePickerInput(session = session, inputId = "samplepurposeUi", choices = sort(levels(as.factor(sample_table$samplepurpose))))
+      })
     if(inherits(msg, "try-error")){
       showModal(modalDialog(title = "Startup error", as.character(msg), easyClose = TRUE))
     }
-    
-    
-    
-    
     #################################################
     # Call login module and supplying it with the user dataframe, 
     # username and password calls and reactive trigger
-
     credentials <- shinyauthr::loginServer(
       id = "login",
       data = users,
@@ -668,6 +668,7 @@ output$transChain <- renderVisNetwork({
 ## end of transmission network analysis
 
 ## CONTACT DATA ANALYSIS-----
+  
 # begin of contact filter
 # Filter contact data  based on region district time and disease
 contRegionDistDiseaseDate = reactive({
@@ -783,8 +784,6 @@ output$plot <- renderPlot({
       )
     })
 
-    
-
     ### Row 4, summary of number of contacts per case
     p = reactive({
       data.frame(as.table(summary(as.factor(d()$caze_id), maxsum = 5000000)))
@@ -815,25 +814,23 @@ output$plot <- renderPlot({
 
 ##########  end of KPI #################""
   
-      ### Contacts per case ####
+#Contacts per case analysis begin----
+if(contact_per_case_plot=="t"){
     minLim = reactive({
       c( min(p()$Freq), max(p()$Freq)+20)
     })
-
     output$plotContPerCase <- renderPlot({
       if(nrow(d( ) ) == 0)
       {
         plot(NULL, xlim=c(0,1), ylim=c(0,1), ylab="Number of contacts", xlab=" ",
              main = "No data exist based on your selection, please choose another selection for which data exist")
       }else{
-        #summary(p$Freq)
         par(mar=c(5,4,4,1), mfrow = c(1,2))
         hist(p()$Freq, breaks = 50,  xlim = minLim(), col = "grey", main = "Histogram of number of contacts per case", xlab = "Number of contacts per case")
         plot(sort(p()$Freq), col="black", cex=1, pch=16, xlab = "Case index", ylab = "Number of contacts",
              main = "Number of contacts per case")
       }
     }, height=700)
-
     ## exporting contact per case plot
     output$downloadContPerCasePlot = downloadHandler(
       filename = function(){
@@ -848,100 +845,32 @@ output$plot <- renderPlot({
              main = "Number of contacts per case")
         ##
         dev.off()
-      }
-    )
-
-    
-    ## serial interval
-    # deactivation exportion of serial interval data
-    # #selecting siDat baed on disease, time; regiion and district just as in d
-    # siD = reactive({
-    #   req(credentials()$user_auth)
-    #   if(is.null(input$regionContactUi) )
-    #   {
-    #     siDat[((siDat$disease == input$diseaseContactUi) & (siDat$reportdatetime >= (min(input$reportdateContactUi))) & (siDat$reportdatetime <= (max(input$reportdateContactUi)) )), ]
-    #   } else{
-    #     siDat[((siDat$region_name %in% input$regionContactUi) & (siDat$disease == input$diseaseContactUi) & (siDat$reportdatetime >= (min(input$reportdateContactUi) )  ) & (siDat$reportdatetime <= (max(input$reportdateContactUi) ))),]
-    #   }
-    # })
-  
-    # Begin exportation of  data
-    # cotactRegionDist export begin -----
-    # Deactivating export of contact for now till further notice
-    # conRegionDistExp = reactive({
-    #   data.frame(contactReportDate =as.character( d()$reportdatetime),  caseID= d()$caze_id, contactID =  d()$id, contactProximity = d()$contactproximity,
-    #              contactClassification = d()$contactclassification, caseClassification = d()$caseclassification_case, disease = d()$disease, 
-    #              caseOutcome = d()$outcome_case, contactRegion = d()$region_name, contactDistrict = d()$district_name)
-    # })
-    # # output to download data
-    # output$conRegionDistExpCsv <- downloadHandler(
-    #   filename = function() {
-    #     paste("sormas_export_", Sys.Date(), ".csv", sep="")
-    #   },
-    #   content = function(file) {
-    #     write.csv(conRegionDistExp(), file)
-    #   }
-    # )
-    # output$conRegionDistExpTable <- renderPrint({
-    #   orig <- options(width = 1000)
-    #   # print(tail(cv_cases %>% select(c(country, date, cases, new_cases, deaths, new_deaths,
-    #   #                                  recovered, new_recovered, active_cases,
-    #   #                                  per100k, newper100k, activeper100k, deathsper100k, newdeathsper100k)), input$maxrows), row.names = FALSE)
-    #   print(head(conRegionDistExp(), input$maxrowsContactDetailed), row.names = FALSE)
-    #   options(orig)
-    # })
-    # # cotactRegionDist export ends
-
-    ### Number of contacts per case export begin -----
-    # use p()
-    conPerCaseExp = reactive({
+      })}
+#Contacts per case analysis ends----
+#Contacts per case export begin -----
+if(contact_per_case_export == "t"){
+conPerCaseExp = reactive({
       p() %>% dplyr::rename(Case_id = Var1, Nunber_of_contacts = Freq )
     })
-
-    output$conPerCaseExpCsv <- downloadHandler(
+output$conPerCaseExpCsv <- downloadHandler(
       filename = function() {
         paste("sormas_contactPerCaseExp_", Sys.Date(), ".csv", sep="")
       },
       content = function(file) {
-        write.csv(conPerCaseExp(), file)
-      }
-    )
-    output$conPerCaseExpTable <- renderPrint({
+        write.csv(conPerCaseExp(), file)})
+output$conPerCaseExpTable <- renderPrint({
       orig <- options(width = 1000)
       print(head(conPerCaseExp(), input$maxrows), row.names = FALSE)
       options(orig)
-    })
-
-    ## Serial interval export begin ----
-    # use siD()
-    # siExp = reactive({
-    #   #p() %>% rename(Case_id = Var1, Nunber_of_contacts = Freq )
-    #   siD() %>% dplyr::rename(Contact_report_date = reportdatetime, Disease = disease, Contact_region = region_name, Contact_district = district_name, Serial_interval = si)
-    # })
-    # 
-    # output$siExpCsv <- downloadHandler(
-    #   filename = function() {
-    #     paste("sormas_serialIntervalExp_", Sys.Date(), ".csv", sep="")
-    #   },
-    #   content = function(file) {
-    #     write.csv(siExp(), file)
-    #   }
-    # )
-    # output$siExpTable <- renderPrint({
-    #   orig <- options(width = 1000)
-    #   print(head(siExp(), input$maxrowsContSI), row.names = FALSE)
-    #   options(orig)
-    # })
-    ## Serial interval export end
-
-    # Export of contact per region begin ----
+    })}
+#Contacts per case export ends -----
+#Contact per region export begin ----
     conPerGerionExp = reactive({
       temp =  data.frame(table(as.factor(d( )$region_name)))
       colnames(temp) = c("Region_name", "Number_of_Contacts")
       temp = temp[order(temp$Number_of_Contacts, decreasing = T), ]
       return(temp)
     })
-
     output$conPerGerionExpCsv <- downloadHandler(
       filename = function() {
         paste("sormas_conPerGerionExp_", Sys.Date(), ".csv", sep="")
@@ -955,10 +884,65 @@ output$plot <- renderPlot({
       print(head(conPerGerionExp(), input$maxrowsContByRegion), row.names = FALSE)
       options(orig)
     })
-
-  ## end exportation of data
-       
-#### CASE DATA ANALYSIS  #################
+#Contact per region export ends----
+# UI output for "contact data analysis" tab ----
+# This output object "contact_analysis_output" should be placed below the computation of elements needed in it
+output$contact_analysis_output <- renderUI({
+panels <- list(
+tabPanel("Contact dashboard",
+wellPanel(style = "background: white", 
+ fluidRow(width = 12,
+   column(2, infoBoxOutput("allCont", width = 12)),
+   column(2, infoBoxOutput("contConfirmed", width = 12)),
+   column(2, infoBoxOutput("contUnconfirmed", width = 12)),
+   column(2, infoBoxOutput("contNot", width = 12)),
+   column(2,infoBoxOutput("activeCont", width = 12)),
+   column(2,infoBoxOutput("convertedToCase", width = 12))
+ ),
+ fluidRow(width=12,
+  column(2,infoBoxOutput("dropped", width = 12)),
+  column(2,infoBoxOutput("inactiveCont", width = 12)),
+  column(2, infoBoxOutput("minConPerCase", width = 12)),
+  column(2,infoBoxOutput("medianConPerCase", width = 12)),
+  column(2, infoBoxOutput("meanConPerCase", width = 12)),
+  column(2,infoBoxOutput("maxConPerCase", width = 12)) )
+),
+plotOutput("plot", width = "100%", height = "90vh"),downloadButton("downloadBarplot", "Download this plot")
+, tags$br(),tags$br(),
+" Each bar in this plot represents a region or district and the height of the bar corresponds to the number of contacts 
+                 in the region or district."
+),
+tabPanel("Contact per region export", icon = icon("table"),
+ width = 10,
+ dashboardPage( # the use of shiny dashboard is to make sure that all icons are fine, do not remove or deactivate this tab.
+   dashboardHeader( ),
+   dashboardSidebar( disable = TRUE,
+                     pickerInput("conPerson", "Contact entity type", choices = c("Contact", "Contact person"), # option to view contact or contact person
+                                 selected = c("Contact"),
+                                 multiple = FALSE)
+   ),
+   dashboardBody(
+     numericInput("maxrowsContByRegion", "Rows to show", 20),
+     verbatimTextOutput("conPerGerionExpTable"),
+     downloadButton("conPerGerionExpCsv", "Download as CSV"),tags$br(),tags$br(),
+     "Each row in this data is a region with corresponding number of contacts.
+                     The data was obtained by summing the number of contacts in each region.
+                     The resgion of the source case was used in case the region of the contact was missing." )
+ ))   )
+  if(contact_per_case_plot=="t"){
+    panels[[3]]  = tabPanel("Contact per case plot", plotOutput("plotContPerCase", width = "100%", height = "90vh"),  downloadButton("downloadContPerCasePlot", "Download this plot"), tags$br(),tags$br(),
+                                     " Contact per case.")}
+  if(contact_per_case_export == "t"){
+    panels[[4]] <-tabPanel("Contacts per case export",
+      numericInput("maxrows", "Rows to show", 20),
+      verbatimTextOutput("conPerCaseExpTable"),
+      downloadButton("conPerCaseExpCsv", "Download as CSV"),tags$br(),tags$br(),
+      "Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table")
+  }
+  base::do.call(tabsetPanel, panels)
+})     
+         
+#### CASE DATA ANALYSIS  #################----
 # ui element to filter casePersonRegionDist by district based on user selected region 
 output$pickerInputdistrictCaseUi <- renderUI({
   if(!is.null(input$regionCaseUi))
@@ -2430,11 +2414,9 @@ eventDataDiseaseRegionTimeFilter = eventReactive(input$eventDataAnalysisAction, 
                    fillColor = ~pal(n_ep), fillOpacity = 0.7, popup = ~paste(n_ep)
         )
     })
-
     # Use a separate observer to recreate the legend as needed.
     observe({
       proxy <- leafletProxy("map", data = eventData)
-
       # Remove any existing legend, and only if the legend is
       # enabled, create a new one.
       proxy %>% clearControls()
@@ -2447,12 +2429,106 @@ eventDataDiseaseRegionTimeFilter = eventReactive(input$eventDataAnalysisAction, 
     })
     
 # End of event analysis 
-   
-# Model specifocation----
+    
+## SAMPLE DATA ANALYSIS -----
+# Start of sample filter-----
+    
+# End of sample filter -----
+
+# Start of sample analysis -----
+# Bar plot  
+sample_table_filtered = reactive({
+  req(credentials()$user_auth)
+  # add all filters here, one reactive function per filter condition
+  sample_table
+}) 
+# Adding control based on apply changes icon on front ui
+# Any output or computation that depend on sample_table_selected would run only when input$sampleDataAnalysisAction is clicked
+sample_table_selected = eventReactive(input$sampleDataAnalysisAction,{ 
+  sample_table_filtered()
+}, ignoreNULL = FALSE)    
+#extracting user selected variable to plot bar plot
+sample_barVar = eventReactive(input$sampleDataAnalysisAction,{
+  temp_data = sample_table_selected()
+  if(input$bargraphSampleVariableUi != "sample_meterial"){
+  ret = as.character(temp_data[, colnames(temp_data) == input$bargraphSampleVariableUi])
+  }else{
+  ret=temp_data$samplematerial
+  }
+  },ignoreNULL = FALSE)
+# plotiing barchart
+output$barChartSampleUi <- renderPlotly({
+  if(input$sampleIndicatorTypeUi == "Count"){ 
+  fg = univariate_barplot(var = sample_barVar(), count=TRUE, x_verticalLayout = TRUE )
+  }
+  if(input$sampleIndicatorTypeUi == "Proportion"){ 
+  fg = univariate_barplot(var = sample_barVar(), count=FALSE, x_verticalLayout = TRUE)
+  }
+  return(fg)
+})
+# plotting pie chart
+output$pieCdhartSampleUi <- renderPlotly({
+fg = pieChartPlot(variable = sample_barVar())
+})
+# End of sample analysis -----
+# UI output for "sample data analysis" tab ----
+# The output object "sample_analysis_output" should be placed below the computation of elements needed in it
+output$sample_analysis_output <- renderUI({
+panels <- list(
+tabPanel("Sample dashboard",
+fluidRow(width=10,                                                         
+ column(6,                                                                
+ wellPanel(
+   h4(helpText("This page is deactivated on your server. Activate this feature to visulise the data.")) 
+   #,
+   #div(plotlyOutput("pieCdhartSampleUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
+ )
+ ),
+ column(6,                    
+ wellPanel(
+   h4(helpText("add some output here")) 
+   #,
+   #div(plotlyOutput("pieCdhartSampleUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
+ ) )
+ ) ## end of fluid row
+)
+)
+# check for configuration and add more panels 
+if(sample_custom_indicators=="t"){
+panels[[2]]=tabPanel("Custom indicators",
+fluidRow(width=10,                                                         
+column(6,                                                                
+ wellPanel(
+   h4(helpText("Dynamic pie chart")) ,
+   div(plotlyOutput("pieCdhartSampleUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
+ ) ),
+column(6,                    
+ wellPanel(
+   h4(helpText("Dynamic bar graph")) ,
+   div(plotlyOutput("barChartSampleUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
+ )  )
+) ## end of fluid row
+)  }
+base::do.call(tabsetPanel, panels) 
+})     
+
+# Sample custom indicator tab filter
+# This filter would show on ui only if custom indicator tab is activated
+output$sample_cuctom_indicator_filter = renderUI({
+if(sample_custom_indicators=="t"){
+  pickerInput(
+    inputId = "bargraphSampleVariableUi",
+    label = 'Choose custom indicator variable',
+    # sample material is used as default variable to plot bar plot else use variable selected by user
+    choices = c("sample_meterial", sort(levels(as.factor(colnames(sample_table))))),
+    options = list(`actions-box` = TRUE, size = 12),
+    selected = NULL,  multiple = FALSE)
+} })
+      
+# Model specification----
     output$model_specificationUI <- renderUI(
       includeMarkdown(paste0("Documentation/model_specification_", input$language,".md"))
     )
-
 } 
 )
 

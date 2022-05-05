@@ -8,7 +8,7 @@ shinyUI(bootstrapPage(
              # theme = shinytheme("darkly"),
              collapsible = TRUE,
              inverse = FALSE,
-             "SORMAS Stats", 
+             title = "SORMAS Stats", 
              id="nav",
              tabPanel( "Transmission Network", 
                        icon = icon("project-diagram"), # icon("filter"),
@@ -948,137 +948,75 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
 
 ##### contat data analysis -----
 tabPanel("Contact data analysis", icon = icon("handshake"),
-         sidebarLayout( position = "left",
-                        sidebarPanel( width = 2,
-                          span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
-                          
-                          actionButton(inputId = "contactDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
-                                       class = "btn-primary", width = '55%'),
-                          hr(),
-                          
-                          pickerInput("diseaseContactUi", "Disease", 
-                                      choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
-                                                  "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
-                                      selected = c("CORONAVIRUS"),
-                                      multiple = FALSE),
-                          #br(),
-                          dateRangeInput("reportdateContactUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
-                                         max = NULL, format = "dd-mm-yyyy", startview = "month",
-                                         weekstart = 0, language = "en", separator = " to ", width = NULL,
-                                         autoclose = TRUE),
-                          
-                          # Filter specific event region and district
-                          pickerInput(
-                            inputId = "regionContactUi",
-                            label = 'Region of contact',
-                            choices = sort(levels(as.factor(contRegionDist$region_name))),
-                            options = list(
-                              `actions-box` = TRUE,
-                              size = 12
-                            ),
-                            selected = NULL,
-                            multiple = TRUE
-                          )
-                        ),
-                        
-                        mainPanel(
-                          tabsetPanel(
-                            tabPanel("Contact dashboard",
-                                     wellPanel(style = "background: white", 
-                                               #h4('Contact classification'),
-                                               fluidRow(width = 12,
-                                                        column(2, infoBoxOutput("allCont", width = 12)),
-                                                        column(2, infoBoxOutput("contConfirmed", width = 12)),
-                                                        column(2, infoBoxOutput("contUnconfirmed", width = 12)),
-                                                        column(2, infoBoxOutput("contNot", width = 12)),
-                                                        column(2,infoBoxOutput("activeCont", width = 12)),
-                                                        column(2,infoBoxOutput("convertedToCase", width = 12))
-                                               )
-                                               ,
-                                               # h4('Contact status'),
-                                               fluidRow(width=12,
-                                                        # column(2,infoBoxOutput("activeCont", width = 12)),
-                                                        # column(2,infoBoxOutput("convertedToCase", width = 12)),
-                                                        column(2,infoBoxOutput("dropped", width = 12)),
-                                                        column(2,infoBoxOutput("inactiveCont", width = 12)),
-                                                        column(2, infoBoxOutput("minConPerCase", width = 12)),
-                                                        column(2,infoBoxOutput("medianConPerCase", width = 12)),
-                                                        column(2, infoBoxOutput("meanConPerCase", width = 12)),
-                                                        column(2,infoBoxOutput("maxConPerCase", width = 12))
-                                               )
-                                               
-                                     ),
-                                     
-                                     plotOutput("plot", width = "100%", height = "90vh"),downloadButton("downloadBarplot", "Download this plot")
-                                     , tags$br(),tags$br(),
-                                     " Each bar in this plot represents a region or district and the height of the bar corresponds to the number of contacts 
-                                      in the region or district.")
-                            ,
-                            tabPanel("Contacts per case", plotOutput("plotContPerCase", width = "100%", height = "90vh"),  downloadButton("downloadContPerCasePlot", "Download this plot"), tags$br(),tags$br(),
-                                     " Contact per case."),
-                            tabPanel("Contacts per case export",
-                                     numericInput("maxrows", "Rows to show", 20),
-                                     verbatimTextOutput("conPerCaseExpTable"),
-                                     downloadButton("conPerCaseExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                     "Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table")
-                            ,
-                            tabPanel("Contact by region export", icon = icon("table"),
-                                     width = 10,
-                                     mainPanel(width=12,
-                                               dashboardPage(
-                                                 # dashboardHeader(title = "SI"),
-                                                 dashboardHeader( ),
-                                                 dashboardSidebar( disable = TRUE,
-                                                                   pickerInput("conPerson", "Contact entity type", choices = c("Contact", "Contact person"), # option to view contact or contact person
-                                                                               selected = c("Contact"),
-                                                                               multiple = FALSE)
-                                                 )
-                                                 ,
-                                                 dashboardBody(
-                                                   numericInput("maxrowsContByRegion", "Rows to show", 20),
-                                                   verbatimTextOutput("conPerGerionExpTable"),
-                                                   downloadButton("conPerGerionExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                                                   "Each row in this data is a region with corresponding number of contacts.
-                                         The data was obtained by summing the number of contacts in each region.
-                                         The resgion of the source case was used in case the region of the contact was missing."
-                                                 )
-                                               ))
-                            )
-                            # ,  # deactivating exportation of serial interval
-                            # tabPanel("Serial Interval Export", icon = icon("table"),
-                            #          width = 10,
-                            #          mainPanel(width=12,
-                            #                    dashboardPage(
-                            #                      # dashboardHeader(title = "SI"),
-                            #                      dashboardHeader( ),
-                            #                      dashboardSidebar( disable = TRUE,
-                            #                                        pickerInput("conPerson", "Contact entity type", choices = c("Contact", "Contact person"), # option to view contact or contact person
-                            #                                                    selected = c("Contact"),
-                            #                                                    multiple = FALSE)
-                            #                      )
-                            #                      ,
-                            #                      dashboardBody(
-                            #                        numericInput("maxrowsContSI", "Rows to show", 20),
-                            #                        verbatimTextOutput("siExpTable"),
-                            #                        downloadButton("siExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                            #                        "Each row in this data is a contact between a case person and a contact person.
-                            #              The data was obtained by calculating the number of days between the symptom onset of the source case person and that of the secondary case (contact) person.
-                            #              Only contacts that resulted to a case were cosidered."
-                            #                      )
-                            #                    ))
-                            # )
-                            #, # deactivating exportation of contact
-                            # tabPanel("Detailed contact export",
-                            #          numericInput("maxrowsContactDetailed", "Rows to show", 20),
-                            #          verbatimTextOutput("conRegionDistExpTable"),
-                            #          downloadButton("conRegionDistExpCsv", "Download as CSV"),tags$br(),tags$br(),
-                            #          "Each row in this data is a contact between a case person and a contact person. The data was obtained by merging contacts and their cases, thus the columns contains variables for contacts and cases.",
-                            #          "Contacts wihout source cases or cases without contacts are not included in this section of contact data analysis")
-                          )
-                          , width = 10)
-         )
+sidebarLayout( position = "left",
+ sidebarPanel( width = 2,
+   span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
+   
+   actionButton(inputId = "contactDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+                class = "btn-primary", width = '55%'),
+   hr(),
+   pickerInput("diseaseContactUi", "Disease", 
+               choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
+                           "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
+               selected = c("CORONAVIRUS"),
+               multiple = FALSE),
+   dateRangeInput("reportdateContactUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
+                  max = NULL, format = "dd-mm-yyyy", startview = "month",
+                  weekstart = 0, language = "en", separator = " to ", width = NULL,
+                  autoclose = TRUE),
+   
+   # Filter specific event region and district
+   pickerInput(
+     inputId = "regionContactUi",
+     label = 'Region of contact',
+     choices = sort(levels(as.factor(contRegionDist$region_name))),
+     options = list(
+       `actions-box` = TRUE,
+       size = 12
+     ),
+     selected = NULL,
+     multiple = TRUE
+   )
+ ),
+ mainPanel(width = 10,
+   uiOutput("contact_analysis_output")
+  )
+)
 ),
-
+# Sample data analysis ----
+tabPanel("Sample data analysis",
+icon = icon("vial"),
+sidebarLayout(position = "left",
+sidebarPanel(width = 2,
+    span(tags$i(h5("Please select filter options and click on `Apply changes` to run analysis.")), style="color:#045a8d"),
+    span(tags$i(h5("The date filter uses  the date of sample collection, not the report date of the essociated entity (case, contact, event participant, ...)")), style="color:#045a8d"),
+    actionButton(inputId = "sampleDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+                 class = "btn-primary", width = '55%'),
+    hr(),
+pickerInput(
+  inputId = "samplepurposeUi",
+  label = 'Choose sample pursope',
+  choices = sort(levels(as.factor(sample_table$samplepurpose))),
+  options = list(`actions-box` = TRUE, size = 12),
+  selected = NULL,multiple = TRUE),
+uiOutput("sample_cuctom_indicator_filter")
+    ), 
+mainPanel(width = 10,
+# top filter that appears ontop of all tabs
+fluidRow(
+  column(2,
+         pickerInput("diseaseSampleUi", "Disease", choices = sort(levels(as.factor(sample_table$disease))),
+                     selected = c("CORONAVIRUS"),multiple = FALSE)
+         ),
+  column(2,
+         radioButtons("sampleIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion"),selected = c("Count"), inline = TRUE)
+  )
+),
+uiOutput("sample_analysis_output")
+) # clossing main panel                       
+)  # clossing sidbarlayout 
+),
+  
 # Model specification ----
 tabPanel("Model specification",
          icon = icon("book"),
@@ -1089,8 +1027,7 @@ tabPanel("Model specification",
                       choiceNames = c("English", "Français"),
                       selected = "en",
                       inline = TRUE),
-         
-         uiOutput("model_specificationUI")
+uiOutput("model_specificationUI")
 ),
 
 # About ------
@@ -1114,8 +1051,15 @@ h5("SORMAS-Stats contain functions to analyze and visualize surveillance data co
 h4(strong("SORMAS User and some of the diseases with modules for control measures")),
 
 img(src = "process-flow-sormas.png", width = "800", height = "900"),  img(src = "sormas_diseases.png", width = "800", height = "900"),
-
-h5(" Mote txt to add ...")
+fluidRow( 
+dashboardPage( # the use of shiny dashboard is to make sure that all icons are fine, do not remove or deactivate this tab.
+  dashboardHeader( ),
+  dashboardSidebar(disable = TRUE),
+  dashboardBody(
+  h5(" Add more txt  and gifures here...")
+)
+)
+)
 ),
 
 # Footer ------
