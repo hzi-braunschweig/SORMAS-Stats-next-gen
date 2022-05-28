@@ -7,3 +7,4 @@ contact_data_analysis, contact_per_case_plot, contRegionDist
 contact_data_analysis, contact_dashboard, contRegionDist
 contact_data_analysis, contact_per_region_export, contRegionDist
 sample_data_analysis, sample_custom_indicators, sample_table
+sample_data_analysis, sample_dashboard, sample_table

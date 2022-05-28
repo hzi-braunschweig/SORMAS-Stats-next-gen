@@ -7,7 +7,7 @@ base::load(file.path("./utils","contIdsForSingleChain.R"))
 base::load(file.path("./utils","contIdsForMultipleChains.R"))
 
 ## Functions for case data analysis ---- 
-base::load(file.path("./utils","ImportingUnformatedDataFromDB.R"))
+base::load(file.path("./utils","case_export.R"))
 base::load(file.path("./utils","pyramidPlotFunction.R"))
 base::load(file.path("./utils","timeSeriesPlotDay.R"))
 base::load(file.path("./utils","timeSeriesPlotWeek.R"))

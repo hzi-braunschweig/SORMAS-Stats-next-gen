@@ -21,6 +21,7 @@ colPerson = "black"   # contact person or event participant person colour
 colEdge = "black"
  
 # Defining connection to db
+#credentials for local instance
 DB_USER = "sormas_user"
 DB_PASS = "password"
 DB_HOST = "127.0.0.1"
@@ -34,7 +35,7 @@ source(file.path(".", "loading_packages.R"))
 # load functions from source files -----
 source(file.path(".", "loading_functions_source.R"))
 
-# loading configuration file to determine the kind of data  extraction, wrangling 
+# loading configuration file to determine the kind of data extraction, data wrangling 
 # and the tabs to activate on the ui
 source(file.path(".", "feature_config.R"))
 

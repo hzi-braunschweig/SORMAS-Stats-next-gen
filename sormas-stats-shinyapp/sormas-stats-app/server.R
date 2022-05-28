@@ -13,13 +13,21 @@ shinyServer(
       
       ## Extracting eventData -----
       eventData = eventExport(sormas_db,fromDate = event_fromDate, toDate = event_toDate)
+      # adding random lat, lng, and ep to event to event data
+      #  to be added to event data export later
+      eventData = eventData %>%
+        dplyr::mutate(n_ep = rep(5,nrow(eventData)), lat = 10.53128 + rnorm(nrow(eventData)), long = 52.21099 + nrow(eventData) ) %>%
+        dplyr::select(-c(latitude, longitude ))
+      eventData = as.data.frame(eventData)
+      
+      ## creating event_variable_data dateset that maps event variables to their categories. This mapping would be used for selecting columns on event table by jurisdiction
+      event_variable_data = event_variable_category_maper(cuntbyRegionTableEvent = cuntbyRegionDistrictEvent(data = eventData , byRegion = TRUE ))
       
       # compute location_category varaible for events
       eventData = compute_eventlocation_category(eventData = eventData)
       
       ## Extracting infectorInfecteeData -----
       infectorInfecteeData = infectorInfecteeExport(sormas_db, fromDate = fromDate, toDate = toDate)
-      
       
       ## Extracting contact data ---- 
       # only data frames that matched the configuration in loading_data_config_vector are exported
@@ -32,69 +40,17 @@ shinyServer(
       #siDat = importDataFrontEndOutput$siDat 
       
       ## The code below would need to be transformed in to independent functions later
-      #### loading case -----
-      ## reading raw data from db based on time (fromDate, toDate) specified
-      dataCombined = ImportingUnformatedDataFromDB(sormas_db, fromDate, toDate)
+      #### loading case data-----
+      casePersonRegionDist = case_export(sormas_db, fromDate, toDate)
       
-      # Assigning DOB to person with only year of birth using January 1. This is an estimates birth date
-      person = dataCombined$person
-      perTemp = person[is.na(person$birthdate_yyyy) == F, ]
-      perTemp2 = person[is.na(person$birthdate_yyyy) == T, ]
-      
-      dm = rep(1,nrow(perTemp))
-      perTemp$birthDate = as.Date(with(perTemp, paste(birthdate_yyyy, dm, dm, sep = "-")))
-      perTemp2$birthDate = rep(NA,nrow(perTemp2)) 
-      person = rbind(perTemp, perTemp2)
-      
-      personVar=c( "person_id", "sex","occupationtype","presentcondition", "birthDate")  
-      person = person[, colnames(person) %in% personVar]
-      
-      ## mergig case and person table
-      casePerson = base::merge(dataCombined$case , person, by=  "person_id",  all.x = T, all.y = F ) # to ge the casevaraibles of contacts. Contacts that
-      # calculating age at point that the person was a case
-      casePerson$age = as.numeric(round((casePerson$reportdate - casePerson$birthDate)/365))
-      
-      # merging casePerson with region
-      casePersonRegion = base::merge(casePerson, dataCombined$region, by = "region_id", all.x = T, all.y = F)
-      
-      ## Adding week, month and year  as individual colums using date of report
-      #casePersonRegion = casePersonRegion[casePersonRegion$reportdate > as.Date("2017-05-01"),] # deleting cases with date errors 
-      
-      casePersonRegion$total = rep(1, nrow(casePersonRegion))
-      casePersonRegion$reportweek = week(casePersonRegion$reportdate)
-      casePersonRegion$reportmonth = month(casePersonRegion$reportdate)
-      casePersonRegion$reportyear = year(casePersonRegion$reportdate)
-      casePersonRegion$total = rep(1, nrow(casePersonRegion))
-      
-      ### merging casePersonRegion with district  ##
-      casePersonRegionDist = base::merge(casePersonRegion, dataCombined$district, by = "district_id", all.x = T, all.y = F)
-      
-      #### event and event participant data merging -----
-      ## source data is event table and we mergr in this order: event*location*region*district*evetnPartucipant*Person
-      eventLoc = base::merge(dataCombined$event, dataCombined$location, by.x =  "eventlocation_id", by.y = "location_id", all.x = T, all.y = F)
-      eventLocReg = base::merge(eventLoc, dataCombined$region, by.x =  "region_id", by.y = "region_id", all.x = T, all.y = F)
-      eventLocRegDist = base::merge(eventLocReg, dataCombined$district, by.x =  "district_id", by.y = "district_id", all.x = T, all.y = F)
-      eventLocRegDistParticipant = base::merge(eventLocRegDist, dataCombined$eventParticipant, by.x =  "event_id", by.y = "event_id", all.x = T, all.y = F)
-      
-      # adding random lat, lng, and ep to event to event data
-      #  to be added to event data export later
-      eventData = eventData %>%
-        dplyr::mutate(n_ep = rep(5,nrow(eventData)), lat = 10.53128 + rnorm(nrow(eventData)), long = 52.21099 + nrow(eventData) ) %>%
-        dplyr::select(-c(latitude, longitude ))
-      
-      eventData = as.data.frame(eventData)
-      
-      ## creating event_variable_data dateset that maps event variables to their categories. This mapping would be used for selecting columns on event table by jurisdiction
-      event_variable_data = event_variable_category_maper(cuntbyRegionTableEvent = cuntbyRegionDistrictEvent(data = eventData , byRegion = TRUE ))
-      ## Loading sample data if the module is activated
+      ## Loading sample data if the feature is activated
       if("sample_table" %in% loading_data_config_vector){sample_table = sample_export(sormas_db, fromDate, toDate)}
       
       #disconnect from db ---- 
       dbDisconnect(sormas_db)
       removeModal()
       
-      ##
-      ## Update UI
+      ## Update UI filters
       ##
       # elist
       updatePickerInput(session = session, inputId = "regionNetworkUi", choices = sort(levels(as.factor(elist$region_name))))
@@ -107,9 +63,7 @@ shinyServer(
       updatePickerInput(session = session, inputId = "regionCaseUi", choices = sort(levels(as.factor(casePersonRegionDist$region_name))))
       updatePickerInput(session = session, inputId = "classificationCaseUi", choices = sort(levels(as.factor(casePersonRegionDist$caseclassification))))
       updatePickerInput(session = session, inputId = "facilityCaseUi", choices = sort(levels(as.factor(casePersonRegionDist$healthfacility_id))))
-      # casePerson
-      updatePickerInput(session = session, inputId = "diseaseCaseUi", choices = sort(levels(as.factor(casePerson$disease))), selected = c("CORONAVIRUS"))
-      updatePickerInput(session = session, inputId = "diseaseEventUi", choices = sort(levels(as.factor(casePerson$disease))), selected = c("CORONAVIRUS"))
+      updatePickerInput(session = session, inputId = "diseaseCaseUi", choices = sort(levels(as.factor(casePersonRegionDist$disease))), selected = c("CORONAVIRUS"))
       # event_variable_data
       updatePickerInput(session = session, inputId = "eventTableColumnVaribleUi", choices = c(levels(as.factor(event_variable_data$event_variable))), selected = c("Name", "Total", "Event status"))
       # eventData
@@ -119,11 +73,15 @@ shinyServer(
       updatePickerInput(session = session, inputId = "regionEventUi", choices = sort(levels(as.factor(eventData$region_name))))
       updatePickerInput(session = session, inputId = "eventIdentificationSourceUi", choices = sort(levels(as.factor(eventData$event_identification_source))))  
       updateSliderInput(session = session, inputId = "range", min =  min(eventData$n_ep), max = max(eventData$n_ep), value = range(eventData$n_ep))
+      updatePickerInput(session = session, inputId = "diseaseEventUi", choices = sort(levels(as.factor(eventData$disease_event))), selected = c("CORONAVIRUS"))
       # contRegionDist
       updatePickerInput(session = session, inputId = "regionContactUi", choices = sort(levels(as.factor(contRegionDist$region_name))))
       # sample_table
-      updatePickerInput(session = session, inputId = "diseaseSampleUi", choices = sort(levels(as.factor(sample_table$disease))))
-      updatePickerInput(session = session, inputId = "bargraphSampleVariableUi", choices = c("sample_meterial", sort(levels(as.factor(colnames(sample_table))))))
+      updatePickerInput(session = session, inputId = "diseaseSampleUi", choices = sort(levels(as.factor(sample_table$disease_sample))), selected = c("CORONAVIRUS"))
+      updatePickerInput(session = session, inputId = "reportdateSampleUi", choices = sort(levels(as.factor(sample_table$date_of_report))))
+      updatePickerInput(session = session, inputId = "regionSampleUi", choices = sort(levels(as.factor(sample_table$region_name))))
+      updatePickerInput(session = session, inputId = "bargraphSampleVariableUi", choices = sort(c("pathogentestresult","samplingreason","samplepurpose","shipped","received",
+                                                                                                  "specimencondition","samplesource","samplematerial"))  )
       updatePickerInput(session = session, inputId = "samplepurposeUi", choices = sort(levels(as.factor(sample_table$samplepurpose))))
       })
     if(inherits(msg, "try-error")){
@@ -1378,11 +1336,11 @@ output$pickerInputdistrictCaseUi <- renderUI({
       {
         if(input$byRegiontimeUnitUi == F)
         {
-          dateSumCase = aggregate(total ~ reportdate, data = temp, sum, na.rm = F)
+          dateSumCase = stats::aggregate(total ~ reportdate, data = temp, sum, na.rm = F)
           fg=  timeSeriesPlotDay(data = dateSumCase, cum = input$cumUi )
 
         } else{
-          dateSumCaseRegion = aggregate(total ~ reportdate + region_name, data = temp, sum, na.rm = F)
+          dateSumCaseRegion = stats::aggregate(total ~ reportdate + region_name, data = temp, sum, na.rm = F)
           #fg = timeSeriesPlotDayRegion(data = dateSumCaseRegion)
           fg = timeSeriesPlotDayRegion(data = dateSumCaseRegion, cum = input$cumRegionUi)
 
@@ -1391,12 +1349,12 @@ output$pickerInputdistrictCaseUi <- renderUI({
       }
       if (input$timeUnitUi == "Epi-week")
       {
-        weekSumCase = aggregate(total ~ reportweek+ reportyear, data = temp, sum, na.rm = F)
+        weekSumCase = stats::aggregate(total ~ reportweek+ reportyear, data = temp, sum, na.rm = F)
         fg=   timeSeriesPlotWeek(data = weekSumCase )
       }
       if (input$timeUnitUi == "Month")
       {
-        monthSumCase = aggregate(total ~ reportmonth+ reportyear, data = temp, sum, na.rm = F)
+        monthSumCase = stats::aggregate(total ~ reportmonth+ reportyear, data = temp, sum, na.rm = F)
         fg=  timeSeriesPlotMonth(data = monthSumCase )
       }
       return(fg)
@@ -1409,12 +1367,12 @@ output$pickerInputdistrictCaseUi <- renderUI({
       temp = casePersonFilter()
       if (input$timeUnitEpicurveUi == "Day")
       {
-        dateSumCaseClass = aggregate(total ~ reportdate + caseclassification, data = temp, sum, na.rm = F)
+        dateSumCaseClass = stats::aggregate(total ~ reportdate + caseclassification, data = temp, sum, na.rm = F)
         fg=  epicurveDate(data = dateSumCaseClass)
       }
       if (input$timeUnitEpicurveUi == "Epi-week")
       {
-        dateSumCaseClass = aggregate(total ~ reportdate + caseclassification, data = temp, sum, na.rm = F)
+        dateSumCaseClass = stats::aggregate(total ~ reportdate + caseclassification, data = temp, sum, na.rm = F)
         fg=  epicurveDate(data = dateSumCaseClass)
       }
       if (input$timeUnitEpicurveUi == "Month")
@@ -1516,7 +1474,7 @@ output$pickerInputdistrictCaseUi <- renderUI({
       # preparing si_data data
       rt_analysis_data = casePersonFilter()  
       rt_analysis_data$total = 1
-      dateSumCase = stats::aggregate(formula = total ~ reportdate, data = rt_analysis_data, FUN = sum, na.rm = T)  
+      dateSumCase = stats::aggregate(total ~ reportdate, data = rt_analysis_data, FUN = sum, na.rm = T)  
       # completting missing dates
       dateSumCase =  dateSumCase %>%
         dplyr::mutate(Date = as.Date(reportdate)) %>%
@@ -2432,31 +2390,70 @@ eventDataDiseaseRegionTimeFilter = eventReactive(input$eventDataAnalysisAction, 
     
 ## SAMPLE DATA ANALYSIS -----
 # Start of sample filter-----
+# filtering district name from sample_table based of users selected region and parse it back to the frontend ----
+output$pickerInputdistrictSampleUi <- renderUI({
+  if(!is.null(input$regionSampleUi))
+  {
+    temp = sample_table %>%
+      dplyr::filter(region_name %in% input$regionSampleUi)  %>%
+      distinct(district_name) %>%
+      .$district_name
+  }else{
+    temp = NULL
+  }
+  pickerInput(inputId = 'districtSampleUi', label = 'District of sample',
+              choices = temp, 
+              options = list(`actions-box` = TRUE, size = 12),
+              selected = NULL,
+              multiple = TRUE
+  )
+})
     
-# End of sample filter -----
+# filter sample_table by disease, region, and report date
+selSampleRegionDiseaseTime = reactive({
+  if(!is.null(input$regionSampleUi)){
+    sample_table[((sample_table$region_name  %in% input$regionSampleUi) & (sample_table$disease_sample == input$diseaseSampleUi) & (sample_table$date_of_report >= (min(input$reportdateSampleUi) )  ) & (sample_table$date_of_report <= (max(input$reportdateSampleUi) ))),]
+  } else{
+    sample_table[((sample_table$disease_sample == input$diseaseSampleUi) & (sample_table$date_of_report >= (min(input$reportdateSampleUi))) & (sample_table$date_of_report <= (max(input$reportdateSampleUi)) )), ]
+  }
+})    
+# add more filters here, one reactive function per filter condition
+# fitter by district of sample
+selSampleRegionDiseaseTimeDist = reactive({
+  if(is.null(input$districtSampleUi))
+  {temp = selSampleRegionDiseaseTime() } else{
+    temp = selSampleRegionDiseaseTime() %>%
+      dplyr::filter(district_name %in% input$districtSampleUi)
+  }
+  return(temp)
+})
 
-# Start of sample analysis -----
-# Bar plot  
+## add more filters here if needed, use one varible per filter
+# filter 1
+# filter 2, etc
+# checking is user is authenticated before creating ui elements
 sample_table_filtered = reactive({
   req(credentials()$user_auth)
-  # add all filters here, one reactive function per filter condition
-  sample_table
+  selSampleRegionDiseaseTimeDist()
 }) 
-# Adding control based on apply changes icon on front ui
-# Any output or computation that depend on sample_table_selected would run only when input$sampleDataAnalysisAction is clicked
+# Adding control based on "apply changes" icon  ---
+# Any output or computation that depends on sample_table_selected would run only when input$sampleDataAnalysisAction is clicked
 sample_table_selected = eventReactive(input$sampleDataAnalysisAction,{ 
   sample_table_filtered()
-}, ignoreNULL = FALSE)    
-#extracting user selected variable to plot bar plot
+}, ignoreNULL = FALSE) 
+
+# End of sample filter 
+# Start of sample analysis -----
+#extracting user selected variable to plot bar chart 
 sample_barVar = eventReactive(input$sampleDataAnalysisAction,{
   temp_data = sample_table_selected()
-  if(input$bargraphSampleVariableUi != "sample_meterial"){
+  if(input$bargraphSampleVariableUi != "samplematerial"){
   ret = as.character(temp_data[, colnames(temp_data) == input$bargraphSampleVariableUi])
   }else{
   ret=temp_data$samplematerial
   }
   },ignoreNULL = FALSE)
-# plotiing barchart
+# plotting bar chart
 output$barChartSampleUi <- renderPlotly({
   if(input$sampleIndicatorTypeUi == "Count"){ 
   fg = univariate_barplot(var = sample_barVar(), count=TRUE, x_verticalLayout = TRUE )
@@ -2479,16 +2476,12 @@ tabPanel("Sample dashboard",
 fluidRow(width=10,                                                         
  column(6,                                                                
  wellPanel(
-   h4(helpText("This page is deactivated on your server. Activate this feature to visulise the data.")) 
-   #,
-   #div(plotlyOutput("pieCdhartSampleUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
+   h4(helpText("To add some figures or info boxes here.")) 
  )
  ),
  column(6,                    
  wellPanel(
-   h4(helpText("add some output here")) 
-   #,
-   #div(plotlyOutput("pieCdhartSampleUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
+   h4(helpText("To add some info boxes here")) 
  ) )
  ) ## end of fluid row
 )
@@ -2512,26 +2505,26 @@ column(6,
 base::do.call(tabsetPanel, panels) 
 })     
 
-# Sample custom indicator tab filter
-# This filter would show on ui only if custom indicator tab is activated
+# Sample custom indicator tab filters should be added here -----
+# This filters would show on ui only if "custom indicator tab" is activated
 output$sample_cuctom_indicator_filter = renderUI({
 if(sample_custom_indicators=="t"){
   pickerInput(
     inputId = "bargraphSampleVariableUi",
     label = 'Choose custom indicator variable',
-    # sample material is used as default variable to plot bar plot else use variable selected by user
-    choices = c("sample_meterial", sort(levels(as.factor(colnames(sample_table))))),
+    choices=sort(c("pathogentestresult","samplingreason","samplepurpose","shipped","received",
+                               "specimencondition","samplesource","samplematerial")), 
     options = list(`actions-box` = TRUE, size = 12),
     selected = NULL,  multiple = FALSE)
 } })
-      
+################## end of sample data analysis ###########################      
 # Model specification----
     output$model_specificationUI <- renderUI(
       includeMarkdown(paste0("Documentation/model_specification_", input$language,".md"))
     )
 } 
 )
-
+ 
 
 
 

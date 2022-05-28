@@ -29,11 +29,10 @@ departementShapesFrance@data = read.csv2( file = file.path("./data/shapefiles_fr
 CommuneFrance@data = read.csv2( file = file.path("./data/shapefiles_france/CommuneFrance.csv"), sep = "," )
 
 ## FIXES IN ORDER TO HAVE THE UI PART STILL WORK INSTEAD OF REFACTORING TO NULL
-elist <- list()
-casePersonRegionDist <- list()
-casePerson <- list()
-event_variable_data <- list()
+elist <- data.frame()
+casePersonRegionDist <-data.frame() 
+event_variable_data <-data.frame()
 eventData <- data.frame()
-contRegionDist <- list()
+contRegionDist <-data.frame()
 users <- data.frame(username = character(), password = character(), stringsAsFactors = FALSE)
 sample_table <- data.frame()

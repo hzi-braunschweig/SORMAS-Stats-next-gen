@@ -6,7 +6,7 @@ base::source(file.path("./utils_source_code", "contIdsForSingleChain.R"))
 base::source(file.path("./utils_source_code", "contIdsForMultipleChains.R"))
 
 ## Functions for case data analysis ----
-base::source(file.path("./utils_source_code", "ImportingUnformatedDataFromDB.R"))
+base::source(file.path("./utils_source_code", "case_export.R"))
 base::source(file.path("./utils_source_code", "pyramidPlotFunction.R"))
 base::source(file.path("./utils_source_code", "timeSeriesPlotDay.R"))
 base::source(file.path("./utils_source_code", "timeSeriesPlotWeek.R"))
