@@ -1,7 +1,8 @@
 # please add t or f for each feature you wish ot include in your analysis
 # use "," as delimiter
 analysis_type, feature_name, enabled
-contact_data_analysis, contact_per_case_export, t 
+contact_data_analysis, contact_per_case_export, f 
 contact_data_analysis, contact_per_case_plot, t
-sample_data_analysis, sample_custom_indicators, t  
+sample_data_analysis, sample_custom_indicators, t
+sample_data_analysis, sample_dashboard, t
 

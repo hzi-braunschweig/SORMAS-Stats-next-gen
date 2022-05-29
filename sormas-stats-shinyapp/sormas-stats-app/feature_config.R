@@ -13,5 +13,5 @@ nonactive_features_vector = feature_config_table %>% dplyr::filter(enabled =="f"
 loading_data_config_table = utils::read.table(file.path("./data", "loading_data_configuration.txt"),header=TRUE,sep=",",comment.char="#",strip.white = TRUE)
 # keeping only rows in loading_data_config_table that are not in non-active_features_vector
 loading_data_config_vector = base::unique(loading_data_config_table[!(loading_data_config_table$feature_name %in% nonactive_features_vector),]$required_data_name)
-# loading_data_config_vector contains the name of all dataframe mapping to onifgurable reatures.
-# Only features whose associated dataframe name exist in loading_data_config_vector would be exprted from sormas.
+# loading_data_config_vector contains the name of all dataframe mapping to configurable features.
+# Only features whose associated dataframe name exist in loading_data_config_vector would be exported from sormas.

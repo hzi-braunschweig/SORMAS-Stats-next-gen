@@ -389,7 +389,7 @@ shinyUI(bootstrapPage(
                            fluidRow(
                              column(2, 
                                    pickerInput("diseaseCaseUi", "Disease",
-                                               choices = sort(levels(as.factor(casePerson$disease))),
+                                               choices = sort(levels(as.factor(casePersonRegionDist$disease))),
                                                 selected = c("CORONAVIRUS"),
                                                 multiple = FALSE)
                                     ),
@@ -522,7 +522,7 @@ shinyUI(bootstrapPage(
                                                 wellPanel(
                                                   h4(helpText("Case pyramid by Sex and Age")) , 
                                                   #plotOutput("casePyramidPlot", width = "100%", height = "auto")
-                                                  plotlyOutput("casePyramidPlot", width = "90%", height = "85vh"),
+                                                  plotlyOutput("casePyramidPlot", width = "80%", height = "75vh"),
                                                   style = "background: white"
                                                 ) 
                                                 )
@@ -786,7 +786,7 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                       fluidRow(
                         # filter by disease of event 
                         column(2, 
-                               pickerInput("diseaseEventUi", "Disease", choices = sort(levels(as.factor(casePerson$disease))), 
+                               pickerInput("diseaseEventUi", "Disease", choices = sort(levels(as.factor(eventData$disease_event))), 
                                            selected = c("CORONAVIRUS"),multiple = FALSE)
                         ),
                         # filter by date of event 
@@ -989,7 +989,7 @@ icon = icon("vial"),
 sidebarLayout(position = "left",
 sidebarPanel(width = 2,
     span(tags$i(h5("Please select filter options and click on `Apply changes` to run analysis.")), style="color:#045a8d"),
-    span(tags$i(h5("The date filter uses  the date of sample collection, not the report date of the essociated entity (case, contact, event participant, ...)")), style="color:#045a8d"),
+    span(tags$i(h5("The date filter uses the report date of sample, not the report date of the essociated entity (case, contact, event participant, ...)")), style="color:#045a8d"),
     actionButton(inputId = "sampleDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
                  class = "btn-primary", width = '55%'),
     hr(),
@@ -1002,16 +1002,44 @@ pickerInput(
 uiOutput("sample_cuctom_indicator_filter")
     ), 
 mainPanel(width = 10,
-# top filter that appears ontop of all tabs
+# top filter that appears on the top of all tabs
 fluidRow(
+  # filter by disease ----
   column(2,
-         pickerInput("diseaseSampleUi", "Disease", choices = sort(levels(as.factor(sample_table$disease))),
-                     selected = c("CORONAVIRUS"),multiple = FALSE)
+         pickerInput("diseaseSampleUi", "Disease", choices = sort(levels(as.factor(sample_table$disease_sample))),
+                     selected = c("CORONAVIRUS"), multiple = FALSE)
          ),
+  # filter by date of sample report ----
+  column(2, 
+         dateRangeInput("reportdateSampleUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
+                        max = NULL, format = "dd-mm-yyyy", startview = "month",
+                        weekstart = 0, language = "en", separator = " to ", width = NULL,
+                        autoclose = TRUE)
+  ),
+  # filter by region of sample ----
+  column(2,
+         pickerInput(
+           inputId = "regionSampleUi",
+           label = 'Region of sample',
+           choices = sort(levels(as.factor(sample_table$region_name))),
+           options = list(
+             `actions-box` = TRUE, 
+             size = 12
+           ),
+           selected = NULL,
+           multiple = TRUE
+         )
+  ),
+  # filter by district of sample ----
+  column(2, 
+         uiOutput('pickerInputdistrictSampleUi')
+  ),
+  # filter by indicator type of sample ----
   column(2,
          radioButtons("sampleIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion"),selected = c("Count"), inline = TRUE)
   )
 ),
+# outputting the whole sample ui element built from the server side ------
 uiOutput("sample_analysis_output")
 ) # clossing main panel                       
 )  # clossing sidbarlayout 
@@ -1071,7 +1099,7 @@ fluidRow(
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen", 'SORMAS-Stats Team', target = '_blank'), HTML("&bull;"), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
-         p(tags$em("Last updated: November 15, 2021"), style = 'font-size:75%'))
+         p(tags$em("Last updated: May 28, 2022"), style = 'font-size:75%'))
   ,
   column(3, align = "right",
          p('Powered by:', tags$a(href = " ", target = '_blank'), '', style = "font-size: 85%"),
