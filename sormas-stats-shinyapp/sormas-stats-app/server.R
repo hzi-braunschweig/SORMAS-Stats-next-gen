@@ -57,7 +57,7 @@ shinyServer(
       updatePickerInput(session = session, inputId = "contactEntitiyTypeUi", choices = sort(unique(elist$entityType)))
       updatePickerInput(session = session, inputId = "relationCaseUi", choices = sort(levels(as.factor(elist$relationtocase))))
       updatePickerInput(session = session, inputId = "eventstatusUI", choices = sort(levels(as.factor(elist$eventstatus))))
-      updatePickerInput(session = session, inputId = "risklevelUI", choices = sort(levels(as.factor(elist$risklevelEvent))))
+      updatePickerInput(session = session, inputId = "risklevelUI", choices = sort(levels(as.factor(elist$risklevel_event))))
       # casePersonRegionDist
       updatePickerInput(session = session, inputId = "regionCaseMapUi", choices = sort(levels(as.factor(casePersonRegionDist$region_name))))
       updatePickerInput(session = session, inputId = "regionCaseUi", choices = sort(levels(as.factor(casePersonRegionDist$region_name))))
@@ -195,7 +195,7 @@ selElistRegionEntityTypeSettingEventstatusRisklevelUI = reactive({
   if(!is.null(input$risklevelUI))
   {
     temp = selElistRegionEntityTypeSettingEventstatusUI() %>%
-      dplyr::filter(risklevelEvent %in% input$risklevelUI)
+      dplyr::filter(risklevel_event %in% input$risklevelUI)
   } else{
     temp = selElistRegionEntityTypeSettingEventstatusUI()
   }

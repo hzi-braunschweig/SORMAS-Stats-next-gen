@@ -85,7 +85,7 @@ shinyUI(bootstrapPage(
                           pickerInput(
                             inputId = "risklevelUI", 
                             label = 'Event risk level',
-                            choices = sort(levels(as.factor(elist$risklevelEvent))), 
+                            choices = sort(levels(as.factor(elist$risklevel_event))), 
                             options = list(
                               `actions-box` = TRUE, 
                               size = 12
