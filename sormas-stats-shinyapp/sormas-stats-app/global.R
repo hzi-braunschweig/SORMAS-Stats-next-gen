@@ -26,7 +26,7 @@ DB_USER = "sormas_user"
 DB_PASS = "password"
 DB_HOST = "127.0.0.1"
 DB_PORT = "5432"
-DB_NAME= "sormas"
+DB_NAME = "sormas"
 ## end of connection
 
 # Loading packages -----
