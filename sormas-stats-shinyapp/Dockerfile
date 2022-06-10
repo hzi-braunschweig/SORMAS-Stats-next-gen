@@ -2,6 +2,13 @@
 # FROM rocker/shiny:latest 
 FROM rocker/shiny:4.2.0
 
+#env variables
+ENV DB_USER="sormas_user"
+ENV DB_PASS="password"
+ENV DB_HOST="127.0.0.1"
+ENV DB_PORT="5432"
+ENV DB_NAME="sormas"
+
 # system libraries of general use
 ## install debian packages
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
