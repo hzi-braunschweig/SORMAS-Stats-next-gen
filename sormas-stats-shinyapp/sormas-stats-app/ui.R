@@ -442,61 +442,9 @@ shinyUI(bootstrapPage(
                            #  br(),
                            tabsetPanel( id="tabs1",
                                        tabPanel("Case dashboard", value = 0,
-                                                wellPanel(style = "background: white",
-                                                          h4('Case classification'),
-                                                          fluidRow(width = 12,
-                                                                   infoBoxOutput("allCase", width = 2),
-                                                                   infoBoxOutput("UnclassifiedCases",width = 2),
-                                                                   infoBoxOutput("suspectedCases", width = 2),
-                                                                   infoBoxOutput("probableCases",width = 2),
-                                                                   infoBoxOutput("confirmedCases", width = 2)
-                                                          ),
-                                                          h4('Case quarantine'),
-                                                          fluidRow(width=12,
-                                                                   infoBoxOutput("institutionalQCases",width = 2),
-                                                                   infoBoxOutput("homeQCases", width = 2),
-                                                                   infoBoxOutput("otherQCases", width = 2),
-                                                                   infoBoxOutput("noneQCases", width = 2),
-                                                                   infoBoxOutput("unknownQCases", width = 2),
-                                                                   infoBoxOutput("MissingQCases", width = 2)
-                                                          ),
-                                                          h4('Case gender'),
-                                                          fluidRow(width=12,
-                                                                   infoBoxOutput("maleSexCases",width = 2),
-                                                                   infoBoxOutput("femaleSexCases", width = 2),
-                                                                   infoBoxOutput("otherSexCases", width = 2),
-                                                                   infoBoxOutput("unknownSexCases", width = 2),
-                                                                   infoBoxOutput("MissingSexCases", width = 2)
-                                                          ),
-                                                          h4('Case age'),
-                                                          fluidRow(width=12,
-                                                                   infoBoxOutput("minAgeCases",width = 2),
-                                                                   infoBoxOutput("medianAgeCases", width = 2),
-                                                                   infoBoxOutput("meanAgeCases", width = 2),
-                                                                   infoBoxOutput("maxAgeCases", width = 2),
-                                                                   infoBoxOutput("missingAgeCases", width = 2)
-                                                          ),
-                                                          h4('Case outcome'),
-                                                          fluidRow(width=12,
-                                                                   infoBoxOutput("diseasedCases",width = 2),
-                                                                   infoBoxOutput("recoveredCases", width = 2),
-                                                                   infoBoxOutput("unknownOutcomeCases", width = 2),
-                                                                   infoBoxOutput("noOutcomeCases",width = 2)
-                                                          ),
-                                                          h4('Case occupation'),
-                                                          fluidRow(width=12,
-                                                                   infoBoxOutput("healthWorkerOcupCases",width = 2),
-                                                                   infoBoxOutput("otherOcupCases", width = 2),
-                                                                   infoBoxOutput("MissingOcupCases", width = 2)
-                                                          ),
-                                                          h4('Case Origin'),
-                                                          fluidRow(width=12,
-                                                                   infoBoxOutput("incountryCases",width = 2),
-                                                                   infoBoxOutput("importedCases", width = 2)
-                                                          )
-                                                ),
-                                              tags$br(),tags$br(),
-                                                " Add some description text here")
+                                                
+                                                          KPIValueBox_UI("case")
+                                             )
                                        ,
                                        tabPanel("Cases by region", value = 6,
                                                 fluidRow(
@@ -727,7 +675,7 @@ shinyUI(bootstrapPage(
 
 
 #### Event data analysis ----
-tabPanel( "Event data analysis", icon = icon("procedures"),
+tabPanel( "Event data analysis", icon = icon("cogs"),
           sidebarLayout(position = "left",
             sidebarPanel(width = 2,
               span(tags$i(h5("Please select filter options and click on `Apply changes` to run analysis.")), style="color:#045a8d"),
@@ -837,26 +785,11 @@ tabPanel( "Event data analysis", icon = icon("procedures"),
                       
               tabsetPanel( id= "tabEvent",
                 tabPanel("Event dashboard", value = 0,
-                                   wellPanel(style = "background: white", 
-                                             fluidRow(
-                                               column(2, infoBoxOutput("totalEvent", width = 12)),
-                                               column(2, infoBoxOutput("totalEventManagementPending", width = 12)),
-                                               column(2, infoBoxOutput("totalEventManagementOngoing", width = 12)),
-                                               column(2, infoBoxOutput("totalEventManagementDone", width = 12)),
-                                               column(2, infoBoxOutput("totalEventManagementClosed", width = 12)),
-                                               column(2, infoBoxOutput("totalEventManagementMissing", width = 12))
-                                             )
-                                             ,
-                                             fluidRow(
-                                               column(2, infoBoxOutput("totalEventParticipants", width = 12)),
-                                               column(2, infoBoxOutput("totalEventResultingCases", width = 12)),
-                                               column(2, infoBoxOutput("totalEventstatusSignal", width = 12)),
-                                               column(2, infoBoxOutput("totalEventstatusEvent" , width = 12)),
-                                               column(2, infoBoxOutput("totalEventstatusCluster" , width = 12)),
-                                               column(2, infoBoxOutput("totalEventstatusScreening" , width = 12))
-                                             )
-                                             
-                                   ),
+                        # wellPanel(style = "background: white", 
+                        #           fluidRow(width = 12,  
+                                KPIValueBox_UI("event"),
+                         #          )
+                           #     ),
                                    wellPanel(
                                      h4(helpText("Barplot for events by region/district grouped by event status")) , 
                                      #plotOutput("eventBarplotUi", width = "100%", height = "auto")

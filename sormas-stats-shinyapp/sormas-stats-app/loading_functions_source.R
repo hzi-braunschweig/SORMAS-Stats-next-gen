@@ -50,6 +50,9 @@ base::source(file.path("./utils_source_code","vector_is_empty.R"))
 base::source(file.path("./utils_source_code","dataframe_is_empty.R"))
 
 
+#Module
+base::source(file.path("./utils_source_code","KPIValueBox_mod.R"))
+base::source(file.path("./utils_source_code","rendervalueBoxfromList.R"))
 
 
 
