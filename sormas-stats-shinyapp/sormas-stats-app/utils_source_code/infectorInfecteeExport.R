@@ -9,60 +9,71 @@ infectorInfecteeExport = function(sormas_db, fromDate, toDate){
   queryCase <- paste0("SELECT  DISTINCT uuid AS case_uuid, id AS case_id, disease, reportdate AS report_date_case, creationdate AS creation_date_case, person_id AS person_id_case,
     responsibleregion_id AS region_id_case, responsibledistrict_id AS district_id_case, caseclassification AS case_classification, caseorigin AS case_origin, symptoms_id
                           FROM public.cases 
-                          WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ")
+                          WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ") # this WHERE clause should be matched with sub queries below
   case = dbGetQuery(sormas_db,queryCase)
   
-  # load contacts having source case among the selected cases only. Date is not relevant here.
-  queryContact <- sprintf("SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
+  # load contacts having source case among the selected cases only.
+  contact = dbGetQuery(sormas_db,
+    base::paste0("SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
     person_id AS person_id_contact, reportdatetime AS report_date_contact, creationdate AS creation_date_contact, lastcontactdate AS lastcontact_date_contact,
     contactproximity AS contact_proximity, resultingcase_id, contactstatus, contactclassification
-                          FROM public.contact
-                          WHERE deleted = FALSE and caze_id IS NOT NULL and caze_id in (%s)", paste("'", base::unique(c(case$case_id)), "'",collapse=",") )  
-  contact = dbGetQuery(sormas_db,queryContact)
+    FROM public.contact
+     WHERE deleted = FALSE and caze_id IS NOT NULL and caze_id IN
+     (SELECT id AS caze_id
+     FROM public.cases
+     WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "')"))
   
   #loading symptom data corresponding to selected cases only
-  querySymptom = sprintf(
-    "SELECT id AS symptom_id, onsetdate AS onset_date
-     FROM public.symptoms
-     WHERE id in (%s)", paste("'", base::unique(c(case$symptoms_id)), "'",collapse=",") 
-  )
-  symptoms =  dbGetQuery(sormas_db,querySymptom)
-  
-  ### loading person data  ###
-  # only persons linked to cases or contacts, events and ep persons are not included in this export
-  # since the goal is to get pairs on infectors and infectees with corresponding onset dates to be used to estimate serial interval
-  queryPerson <- sprintf("SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
-                        FROM public.person
-                        WHERE id  in (%s)", paste("'", base::unique(c(case$person_id_case, contact$person_id_contact )), "'",collapse=",") ) 
-  person = dbGetQuery(sormas_db, queryPerson)
+  symptoms = dbGetQuery(sormas_db,
+             base::paste0("SELECT id AS symptom_id, onsetdate AS onset_date
+                           FROM public.symptoms
+                           WHERE id IN
+                           (SELECT symptoms_id AS id
+                           FROM public.cases
+                           WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "')"))
+ ### loading person data
+  ## only persons linked to cases or contacts, events and ep persons are not included in this export
+  ## since the goal is to get pairs on infectors and infectees with corresponding onset dates to be used to estimate serial interval
+  person_case = dbGetQuery(sormas_db,
+                           paste0("SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
+                           FROM public.person
+                           WHERE id IN (SELECT person_id AS id
+                           FROM public.cases
+                           WHERE deleted = FALSE AND caseclassification != 'NO_CASE' AND reportdate between '", fromDate, "' and '", toDate, "')"))
+  person_contact = dbGetQuery(sormas_db,
+                              paste0("SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
+                              FROM public.person 
+                              WHERE id IN (SELECT person_id AS id
+                              FROM public.contact
+                              WHERE deleted = FALSE and caze_id IS NOT NULL and caze_id IN (SELECT id AS caze_id 
+                              FROM public.cases
+                              WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ))"))
+  # row bind and keep distinct person id
+  person = dplyr::bind_rows(person_case, person_contact) %>%
+    dplyr::distinct(person_id, .keep_all = TRUE)                    
   
   # load region
   region = dbGetQuery(
     sormas_db,
     "SELECT id AS region_id, name AS region_name
-    FROM public.region
-    WHERE archived = FALSE"
+    FROM public.region"
   ) 
   
   # load district
   district = dbGetQuery(
     sormas_db,
     "SELECT id AS district_id, name AS district_name
-    FROM district
-    WHERE archived = FALSE"
+    FROM district"
   )
-  
   ## clean-up tables 
   ## fixing date formats for case,  contacts, symptoms
   case = case %>%
     dplyr::mutate(report_date_case = as.Date(format(report_date_case, "%Y-%m-%d")),
                   creation_date_case = as.Date(format(creation_date_case, "%Y-%m-%d")))
-  
   contact  = contact %>%
     dplyr::mutate(report_date_contact = as.Date(format(report_date_contact, "%Y-%m-%d")) ,
                   creation_date_contact = as.Date(format(creation_date_contact, "%Y-%m-%d")),
                   lastcontact_date_contact = as.Date(format(lastcontact_date_contact, "%Y-%m-%d")))
-  
   symptoms = symptoms %>%
     dplyr::mutate(onset_date = as.Date(format(onset_date, "%Y-%m-%d")))
   
