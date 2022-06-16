@@ -685,95 +685,17 @@ output$plot <- renderPlot({
       }
     )
 
-
-    ### Begining of  contact KPI ###########
-    #Row 1,  All contacts, used d
-    output$allCont <- renderInfoBox({
-      infoBox(
-        "", nrow(d( )), icon = icon("handshake"),
-        color = colCont, fill = FALSE , subtitle = "All contacts"   )
-    })
-
-    # confrimed contacts
-    output$contConfirmed = renderInfoBox({
-      temp = d()
-      temp = temp[temp$contactclassification == "CONFIRMED" ,]
-      infoBox("", nrow(temp), icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Confirmed"
-      )
-    })
-    # Uncofirmed contacts
-    output$contUnconfirmed = renderInfoBox({
-      temp = d()[d()$contactclassification == "UNCONFIRMED" ,]
-      infoBox("", nrow(temp), icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Unconfirmed"
-      )
-    })
-    # Not a contact contacts
-    output$contNot = renderInfoBox({
-      temp =  d()[d()$contactclassification == "NO_CONTACT" ,]
-      infoBox("", nrow(temp), icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Discarded"
-      )
-    })
-
-    #### Row 2  contact status ####
-    ## Active contacts
-    output$activeCont = renderInfoBox({
-      temp = d()[d()$contactstatus == "ACTIVE" ,]
-      infoBox("", nrow(temp), icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Active"
-      )
-      })
-    ## converted to case
-    output$convertedToCase = renderInfoBox({
-      temp =  d()[d()$contactstatus == "CONVERTED" ,]
-      infoBox( "",nrow(temp), icon = icon("handshake"), color = colCont,
-              fill = FALSE,  subtitle = "Converted to case"
-      )
-
-    })
-    ## dropped contacts
-    output$dropped = renderInfoBox({
-     temp =   d()[d()$contactstatus == "DROPPED" ,]
-     infoBox("", nrow(temp), icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Dropped"
-     )
-    })
-    ## inactive
-    output$inactiveCont = renderInfoBox({
-      temp =  d()[d()$contactstatus == "INACTIVE",]
-      infoBox("", nrow(temp), icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Inactive"
-      )
-    })
-
-    ### Row 4, summary of number of contacts per case
-    p = reactive({
-      data.frame(as.table(summary(as.factor(d()$caze_id), maxsum = 5000000)))
-    })
-    # Use p()$Freq
-    ## min contact per case
-    output$minConPerCase = renderInfoBox({
-      infoBox("",   min(p()$Freq) , icon = icon("handshake"), color = colCont,
-              fill = FALSE, subtitle = "Min cont-per-case"
-      )
-    })
-
-    ## median contacte per case
-    output$medianConPerCase = renderInfoBox({
-      infoBox("", median(p()$Freq) , icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Med cont-per-case"
-      )
-    })
-   ## mean contact per case
-    output$meanConPerCase = renderInfoBox({
-      infoBox("",  round(mean(p()$Freq), digits = 2 ) , icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Mean cont-per-case"
-      )
-    })
-    ## max contacte per case
-    output$maxConPerCase = renderInfoBox({
-      infoBox("",  max(p()$Freq)   , icon = icon("handshake"), color = colCont, fill = FALSE, subtitle = "Max cont-per-case"
-      )
-    })
+### Begining of  contact KPI ###########
+    KPIValueBox_Server("contact", data= d,panel="contact",boxfun=box)
 
 ##########  end of KPI #################""
   
 #Contacts per case analysis begin----
 if(contact_per_case_plot=="t"){
+  
+  p = reactive({
+    data.frame(as.table(summary(as.factor(d()$caze_id), maxsum = 5000000)))
+  })
     minLim = reactive({
       c( min(p()$Freq), max(p()$Freq)+20)
     })
@@ -848,22 +770,10 @@ output$conPerCaseExpTable <- renderPrint({
 output$contact_analysis_output <- renderUI({
 panels <- list(
 tabPanel("Contact dashboard",
-wellPanel(style = "background: white", 
+#wellPanel(style = "background: white", 
  fluidRow(width = 12,
-   column(2, infoBoxOutput("allCont", width = 12)),
-   column(2, infoBoxOutput("contConfirmed", width = 12)),
-   column(2, infoBoxOutput("contUnconfirmed", width = 12)),
-   column(2, infoBoxOutput("contNot", width = 12)),
-   column(2,infoBoxOutput("activeCont", width = 12)),
-   column(2,infoBoxOutput("convertedToCase", width = 12))
- ),
- fluidRow(width=12,
-  column(2,infoBoxOutput("dropped", width = 12)),
-  column(2,infoBoxOutput("inactiveCont", width = 12)),
-  column(2, infoBoxOutput("minConPerCase", width = 12)),
-  column(2,infoBoxOutput("medianConPerCase", width = 12)),
-  column(2, infoBoxOutput("meanConPerCase", width = 12)),
-  column(2,infoBoxOutput("maxConPerCase", width = 12)) )
+          KPIValueBox_UI("contact")
+#)
 ),
 plotOutput("plot", width = "100%", height = "90vh"),downloadButton("downloadBarplot", "Download this plot")
 , tags$br(),tags$br(),
@@ -955,242 +865,7 @@ output$pickerInputdistrictCaseUi <- renderUI({
     }, ignoreNULL = FALSE)
     
     #### case KPI ################
-    # case classification
-    ## all cases
-    output$allCase <- renderInfoBox({
-      infoBox(
-        "All cases", nrow(casePersonFilter() ), icon = icon("procedures"),  color = colCase, fill = FALSE    )
-    })
-    # unclassified cases
-    output$UnclassifiedCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$caseclassification == "NOT_CLASSIFIED" ,]
-      infoBox(
-        "Unclassified", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # suspected cases
-    output$suspectedCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$caseclassification == "SUSPECT",]
-      infoBox(
-        "Suspect", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # Probable cases
-    output$probableCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$caseclassification == "PROBABLE",]
-      infoBox(
-        "Probable", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # Confirmed cases
-    output$confirmedCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$caseclassification %in% c("CONFIRMED", "CONFIRMED_NO_SYMPTOMS", "CONFIRMED_UNKNOWN_SYMPTOMS"),] # combination of all confirmed cases
-      infoBox(
-        "Confirmed", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-
-    # case outcome
-    # diseases cases
-    output$diseasedCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$outcome == "DECEASED",]
-      infoBox(
-        "Diseased", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # recovered cases
-    output$recoveredCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$outcome == "RECOVERED",]
-      infoBox(
-        "Recovered", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # unknownoutcome cases
-    output$unknownOutcomeCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$outcome == "UNKNOWN",]
-      infoBox(
-        "Unknown", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # unknownoutcome cases
-    output$noOutcomeCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$outcome == "NO_OUTCOME",]
-      infoBox(
-        "No Outcome", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-
-    ## case origin
-    # incountry cases
-    output$incountryCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$caseorigin == "IN_COUNTRY",]
-      infoBox(
-        "In-country", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # POE/ imported cases
-    output$importedCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[temp$caseorigin == "POINT_OF_ENTRY",]
-      infoBox(
-        "Imported", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-
-    ## case quarantine #####
-    # institutional
-    output$institutionalQCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$quarantine) != T,]  # deletig NA before filtering
-      temp = temp[temp$quarantine == "INSTITUTIONELL",]
-      infoBox(
-        "Institutional", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # home
-    output$homeQCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$quarantine) != T,]  # deletig NA before filtering
-      temp = temp[temp$quarantine == "HOME",]
-      infoBox(
-        "Home", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # other
-    output$otherQCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$quarantine) != T,]  # deletig NA before filtering
-      temp = temp[temp$quarantine == "OTHER",]
-      infoBox(
-        "Other", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # None
-    output$noneQCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$quarantine) != T,]  # deletig NA before filtering
-      temp = temp[temp$quarantine == "NONE",]
-      infoBox(
-        "None", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # unknown
-    output$unknownQCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$quarantine) != T,]  # deletig NA before filtering
-      temp = temp[temp$quarantine == "UNKNOWN",]
-      infoBox(
-        "Unknown", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # Missing
-    output$MissingQCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$quarantine) == T,]
-      infoBox(
-        "Missing", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-
-
-    ## case sex ####
-    # male
-    output$maleSexCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$sex) != T,]  # deletig NA before filtering
-      temp = temp[temp$sex == "MALE",]
-      infoBox(
-        "Male", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    #female
-    output$femaleSexCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$sex) != T,]  # deletig NA before filtering
-      temp = temp[temp$sex == "FEMALE",]
-      infoBox(
-        "Female", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    #other
-    output$otherSexCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$sex) != T,]  # deletig NA before filtering
-      temp = temp[temp$sex == "OTHER",]
-      infoBox(
-        "Other", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    #unknown
-    output$unknownSexCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$sex) != T,]  # deletig NA before filtering
-      temp = temp[temp$sex == "UNKNOWN",]
-      infoBox(
-        "Unknown", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    #missing
-    output$MissingSexCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$sex) == T,]
-      infoBox(
-        "Missing", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-
-
-    ## case occupation ####
-    # health care worker
-    output$healthWorkerOcupCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$occupationtype) != T,]  # deletig NA before filtering
-      temp = temp[temp$occupationtype == "HEALTHCARE_WORKER",]
-      infoBox(
-        "Health worker", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # other occupations
-    output$otherOcupCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$occupationtype) != T,]  # deletig NA before filtering
-      temp = temp[temp$occupationtype != "HEALTHCARE_WORKER",] #counting all occupations except health workers
-      infoBox(
-        "Other", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # missing occupations
-    output$MissingOcupCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$occupationtype) == T,]
-      infoBox(
-        "Missing", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-
-
-     ## case age ####
-    # min age
-    output$minAgeCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$age) != T,]  # deletig NA before filtering
-      infoBox(
-        "Minimum", min(temp$age), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # median age
-    output$medianAgeCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$age) != T,]  # deletig NA before filtering
-      infoBox(
-        "Median", median(temp$age), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # mean age
-    output$meanAgeCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$age) != T,]  # deletig NA before filtering
-      infoBox(
-        "Mean", round(mean(temp$age), digits = 2), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # max age
-    output$maxAgeCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$age) != T,]  # deletig NA before filtering
-      infoBox(
-        "Maximum", max(temp$age), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-    # missing age
-    output$missingAgeCases <- renderInfoBox({
-      temp = casePersonFilter()
-      temp = temp[is.na(temp$age) == T,]
-      infoBox(
-        "Missing", nrow(temp), icon = icon("procedures"),  color = colCase, fill = FALSE )
-    })
-
+    KPIValueBox_Server("case",data=casePersonFilter, panel="case",boxfun=tabBox)
 
     ############### Case tables  ###########
     # This option to ecport cases line-list is disable for now till further notice
@@ -1740,7 +1415,7 @@ output$k_estimate_table <- DT::renderDataTable({
 })
 ## end of case data analysis ##
     
-##### EVETN DATA ANALYSIS  ##################
+##### EVENT DATA ANALYSIS  ##################
 
 ## EVENT dashboard and tables ----
 # Begin of event filter
@@ -1856,97 +1531,7 @@ eventDataDiseaseRegionTimeFilter = eventReactive(input$eventDataAnalysisAction, 
     })
     
     # Event dashboard indicators 
-    ## Total events
-    output$totalEvent <- renderInfoBox({
-      infoBox(
-        "", nrow(eventDataDiseaseRegionTimeFilter() ), icon = icon("cog"),  color = colEvent,
-        fill = FALSE, subtitle =  "Total Events")
-    })  
-    # totol event particopant
-    output$totalEventParticipants <- renderInfoBox({
-      infoBox(
-        "", sum(eventDataDiseaseRegionTimeFilter()$eventPart_sum ), icon = icon("users"),
-        color = colEvent, fill = FALSE, subtitle = "Event Participants")
-    })
-    # total resulting cases from events
-    output$totalEventResultingCases <- renderInfoBox({
-      infoBox(
-        "", sum(eventDataDiseaseRegionTimeFilter()$resulting_case_sum ), icon = icon("procedures"),
-        color = colCase, fill = FALSE, subtitle = "Resulting Cases")
-    })
-    
-    # total events by management status
-    output$totalEventManagementPending <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(eventmanagementstatus == "PENDING") 
-      infoBox(
-        "", nrow(temp),
-        icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Pending" ) 
-    })
-    # 
-    output$totalEventManagementOngoing <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(eventmanagementstatus == "ONGOING")
-      infoBox(
-        "", nrow(temp), icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Ongoing")
-    })
-    #
-    output$totalEventManagementDone <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(eventmanagementstatus == "DONE")
-      infoBox(
-        "", nrow(temp), icon = icon("cog"), color = colEvent, fill = FALSE, subtitle = "Management: Done" )
-    })
-    # 
-    output$totalEventManagementClosed <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(eventmanagementstatus == "CLOSED")
-      infoBox(
-        "", nrow(temp), icon = icon("cog"),  
-        color = colEvent, fill = FALSE, subtitle = "Management: Closed" )
-    })
-    #
-    output$totalEventManagementMissing <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(is.na(eventmanagementstatus))
-      infoBox(
-        "", nrow(temp), icon = icon("cog"),  
-        color = colEvent, fill = FALSE, subtitle = "Management: Missing " )
-    })
-    
-    ### total events by event status
-    output$totalEventstatusSignal <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(eventstatus == "SIGNAL" )
-      infoBox(
-        "", nrow(temp), icon = icon("cog"),  
-        color = colEvent, fill = FALSE, subtitle = "Signal" ) 
-    })
-    # 
-    output$totalEventstatusEvent <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(eventstatus == "EVENT" )
-      infoBox(
-        "", nrow(temp), icon = icon("cog"),  
-        color = colEvent, fill = FALSE, subtitle = "Event")
-    })
-    # 
-    output$totalEventstatusCluster <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(eventstatus == "CLUSTER" )
-      infoBox(
-        "", nrow(temp), icon = icon("cog"),  
-        color = colEvent, fill = FALSE, subtitle = "Cluster" ) 
-    })
-    # 
-    output$totalEventstatusScreening <- renderInfoBox({
-      temp = eventDataDiseaseRegionTimeFilter() %>%
-        dplyr::filter(eventstatus == "SCREENING" )
-      infoBox(
-        "", nrow(temp), icon = icon("cog"),  
-        color = colEvent, fill = FALSE, subtitle = "Screening" )
-    })
-    
+    KPIValueBox_Server("event",data=eventDataDiseaseRegionTimeFilter, panel="event",boxfun=box)
     
     ## evnet status by type of place
     output$eventCuntbytyplaceTable <- DT::renderDataTable({
@@ -2463,6 +2048,11 @@ output$barChartSampleUi <- renderPlotly({
   }
   return(fg)
 })
+
+output$samples_table<-renderDT({
+  sample_table_selected()
+})
+KPIValueBox_Server("samples",data = sample_table_selected,panel="samples")
 # plotting pie chart
 output$pieCdhartSampleUi <- renderPlotly({
 fg = pieChartPlot(variable = sample_barVar())
@@ -2473,18 +2063,10 @@ fg = pieChartPlot(variable = sample_barVar())
 output$sample_analysis_output <- renderUI({
 panels <- list(
 tabPanel("Sample dashboard",
-fluidRow(width=10,                                                         
- column(6,                                                                
- wellPanel(
-   h4(helpText("To add some figures or info boxes here.")) 
+  tagList(                                                  
+   KPIValueBox_UI("samples")
+  )
  )
- ),
- column(6,                    
- wellPanel(
-   h4(helpText("To add some info boxes here")) 
- ) )
- ) ## end of fluid row
-)
 )
 # check for configuration and add more panels 
 if(sample_custom_indicators=="t"){
@@ -2502,6 +2084,13 @@ column(6,
  )  )
 ) ## end of fluid row
 )  }
+if(sample_custom_indicators=="t"){ #change here to  sample customregion table
+  panels[[3]]=tabPanel("Samples by region", value = 6,
+         fluidRow(
+           column(12, DT::dataTableOutput("samples_table"))    
+         )
+)
+}
 base::do.call(tabsetPanel, panels) 
 })     
 
