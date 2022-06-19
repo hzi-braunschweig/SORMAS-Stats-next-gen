@@ -6,7 +6,7 @@ shinyServer(
     msg <- try({
       showModal(modalDialog(title = NULL, "Loading data from the database.", "Just a minute.", tags$br(), "This message will close automatically when this has finished.", easyClose = TRUE, footer = NULL))
       # connect to sormas_db
-      sormas_db = dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
+      sormas_db = DBI::dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
       
       # Extracting user data, Hashing Passwords with sodium
       users = userExport(sormas_db=sormas_db, authenticat_user= authenticat_user_global)

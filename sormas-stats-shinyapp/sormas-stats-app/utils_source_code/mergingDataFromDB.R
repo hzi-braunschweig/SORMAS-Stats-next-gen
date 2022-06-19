@@ -8,64 +8,86 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   }
   # connecting to sormas db and reading data needed by sormas-stats
   ## reading contact data ###
-  queryContact <- paste0("SELECT id, uuid, caze_id, district_id, region_id, person_id,reportdatetime, lastcontactdate, disease,
-                    contactclassification,contactproximity,resultingcase_id, followupstatus, followupuntil, contactstatus,
-                    contactcategory, relationtocase
-                          FROM public.contact
-                          WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+  queryContact <- base::paste0("SELECT id, uuid, caze_id, district_id, region_id, person_id,reportdatetime, lastcontactdate, disease,
+  contactclassification,contactproximity,resultingcase_id, followupstatus, followupuntil, contactstatus, contactcategory, relationtocase
+  FROM public.contact
+  WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   contact = dbGetQuery(sormas_db,queryContact)
   
   # reading cases
-  queryCase <- paste0("SELECT  id AS caze_id, uuid AS uuid_case, disease AS disease_case, reportdate AS reportdate_case, person_id AS person_idcase,
+  queryCase <- base::paste0("SELECT  id AS caze_id, uuid AS uuid_case, disease AS disease_case, reportdate AS reportdate_case, person_id AS person_idcase,
   responsibleregion_id AS region_idcase, responsibledistrict_id AS district_idcase, caseclassification AS caseclassification_case, outcome AS outcome_case, epidnumber,
   symptoms_id AS symptoms_idcase
-                          FROM public.cases
-                          WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "' ")
+  FROM public.cases
+  WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "' ")
   case = dbGetQuery(sormas_db,queryCase)
   
   # reading region
-  region = dbGetQuery(sormas_db,"SELECT  id AS region_id, name AS region_name
-                               from public.region
-                               where archived = FALSE
-                               ") 
+  region = dbGetQuery(sormas_db,"SELECT  id AS region_id, name AS region_name FROM public.region") 
   #loading district
-  district = dbGetQuery(sormas_db,"SELECT id AS district_id, name AS district_name
-                               from public.district
-                               where archived = FALSE
-                               ")
-  #loading symptom data
-  querySymptom <- sprintf("SELECT id, onsetdate
-                        FROM public.symptoms
-                        WHERE id  in (%s)", paste("'", case$symptoms_idcase, "'",collapse=",") ) # only symtoms linkded to selected cases
-  symptoms = dbGetQuery(sormas_db, querySymptom)
+  district = dbGetQuery(sormas_db,"SELECT id AS district_id, name AS district_name  FROM public.district")
+  
+  #loading symptom data, only symptoms linked to selected cases are loaded
+  symptoms = dbGetQuery(sormas_db,
+  base::paste0("SELECT id, onsetdate
+  FROM public.symptoms
+  WHERE id IN
+  (SELECT symptoms_id AS id
+  FROM public.cases
+  WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "')"))
   
   # reading event
-  queryEvent <- paste0("SELECT id AS event_id, uuid AS uuevent_id, reportdatetime AS reportdatetime_event, eventstatus, disease AS disease_events,
+  queryEvent <- base::paste0("SELECT id AS event_id, uuid AS uuevent_id, reportdatetime AS reportdatetime_event, eventstatus, disease AS disease_events,
   typeofplace, eventlocation_id, archived, risklevel AS risklevel_event
-                          FROM public.events
-                          WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+  FROM public.events
+  WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
   events = dbGetQuery(sormas_db,queryEvent)
   
-  ## reading event participants
-  queryEventPart <- sprintf("SELECT id AS id_eventparticipant, uuid AS uuid_eventparticipant, event_id, person_id AS person_id_eventparticipant,
+  ## reading event participants linked to selected events
+  eventsParticipant = dbGetQuery(sormas_db,
+  base::paste0("SELECT id AS id_eventparticipant, uuid AS uuid_eventparticipant, event_id, person_id AS person_id_eventparticipant,
   resultingcase_id AS resultingcase_id_eventparticipant
-                        FROM public.eventParticipant
-                        WHERE deleted = FALSE and event_id  in (%s)", paste("'", events$event_id, "'",collapse=",") ) # only ep linkded to selected events
-  eventsParticipant = dbGetQuery(sormas_db, queryEventPart)
+  FROM public.eventParticipant
+  WHERE deleted = FALSE and event_id  IN (
+  SELECT id AS event_id
+  FROM public.events
+  WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "')"))
   
   ## reading location
-  queryLocation <- sprintf("SELECT id, district_id, region_id
-                        FROM public.location
-                        WHERE id  in (%s)", paste("'", na.omit(events$eventlocation_id), "'",collapse=",") ) # only locations linked to events
-  location = dbGetQuery(sormas_db,queryLocation)
+  location = dbGetQuery(sormas_db,
+  base::paste0("SELECT id, district_id, region_id
+  FROM public.location
+  WHERE id IN ( SELECT eventlocation_id  FROM public.events WHERE  deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ) "))
   
-  ### reading person data  ###
-  # only persons linkded to cases, contacts or eps
-  queryPerson <- sprintf("SELECT id AS id_person, uuid AS uuid_person, sex 
-                        FROM public.person
-                        WHERE id  in (%s)", paste("'", base::unique(c(case$person_idcase, contact$person_id, eventsParticipant$person_id_eventparticipant )), "'",collapse=",") ) 
-  person = dbGetQuery(sormas_db, queryPerson)
   
+  ## reading person data  ###
+  ## only persons linked to cases, contacts or eps
+person_case = dbGetQuery(sormas_db,
+base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
+ FROM public.person
+ WHERE id IN (SELECT person_id AS id
+ FROM public.cases
+ WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "')"))
+
+person_contact = dbGetQuery(sormas_db,
+base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
+ FROM public.person 
+ WHERE id IN (SELECT person_id AS id
+ FROM public.contact
+ WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "')")) 
+
+person_event_part = dbGetQuery(sormas_db,
+ base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
+ FROM public.person
+ WHERE id IN ( SELECT person_id AS id
+ FROM public.eventParticipant
+ WHERE deleted = FALSE and event_id  IN (
+ SELECT id AS event_id
+ FROM public.events
+ WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "'))" )) 
+# row bind and keep distinct person id
+person = dplyr::bind_rows(person_case, person_contact, person_event_part) %>%
+    dplyr::distinct(id_person, .keep_all = TRUE)
   
   # merging cases with CONFIRMED_UNKNOWN_SYMPTOMS and  CONFIRMED_NO_SYMPTOMS as confirmed 
   case$caseclassification_case[case$caseclassification_case == "CONFIRMED_NO_SYMPTOMS" ] = "CONFIRMED"
@@ -231,26 +253,5 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
     # adding an elist id by combinig the uuid of the two nodes involved in the contact
     # This is needed because the id for contacts and event partcipant may be the same since we stacked both tables above
     dplyr::mutate(id_elist = paste(from_uuid_person, to_uuid_person, sep = "-"), .keep = "all")
-  
-  ############### determining serial interval  ###########
-  # This section is commented since siDat export is deactivated in app
-  # This section can be deleted later
-  # selecting unique case id from contats table
-  # temp = contRegionDist[,colnames(contRegionDist) %in% c("resultingcase_id", "caze_id", "disease", "region_name", "district_name","reportdatetime" )] # these varibales are used to filter commands from ui latter
-  # selCases = temp[is.na(temp$resultingcase_id) == F,] # edge table with casee id for source cases and resulting cases. We only use data for cases whose contacts became cases
-  # uniqCaseId = base::unique(c(selCases$caze_id, selCases$resultingcase_id))
-  # 
-  # #merging uniqCaseId with case table to know the syptom of the cases 
-  # temp = case[case$caze_id %in% uniqCaseId, c("caze_id", "symptoms_idcase") ]  # cases in involved in contact network
-  # #merging with syptoms
-  # caseSymp = base::merge(temp,symptoms, by.x = "symptoms_idcase", by.y = "id", all.x = T, all.y = F)
-  # caseSymp = caseSymp[, colnames(caseSymp) != "symptoms_idcase"]
-  # #merging caseSymp with selCases
-  # selCasesSympCase  = base::merge(selCases, caseSymp, by = "caze_id", all.x = T, all.y = F)
-  # selCasesSympResultCase = base::merge(selCasesSympCase, caseSymp, by.x = "resultingcase_id", by.y = "caze_id", all.x = T, all.y = F)
-  # selCasesSympResultCase$si = as.numeric(c(selCasesSympResultCase$onsetdate.y - selCasesSympResultCase$onsetdate.x))
-  # siDat = selCasesSympResultCase[, colnames(selCasesSympResultCase) %in% c("si","reportdatetime", "disease", "region_name","district_name" )]
-  # siDat = siDat[is.na(siDat$si) == F,]  # dropping missing values
-  
   return(list(contRegionDist = contRegionDist, nodeLineList = nodeListCaseEvent, elist = elistCaseEvent))
 }
