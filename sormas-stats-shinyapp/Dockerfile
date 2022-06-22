@@ -8,6 +8,9 @@ ENV DB_PASS="password"
 ENV DB_HOST="127.0.0.1"
 ENV DB_PORT="5432"
 ENV DB_NAME="sormas"
+ENV EVENT_DELAY="1000"
+ENV DELAY="1000"
+ENV DELAY_DEFAULT_UI="1000"
 
 # system libraries of general use
 ## install debian packages
