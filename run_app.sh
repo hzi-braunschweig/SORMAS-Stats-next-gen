@@ -1,4 +1,13 @@
 #!/bin/bash
+# Remove any leading or trailing quotes
+EVENT_DELAY=${EVENT_DELAY#"\""}
+EVENT_DELAY=${EVENT_DELAY%"\""}
+DELAY=${DELAY#"\""}
+DELAY=${DELAY%"\""}
+DELAY_DEFAULT_UI=${DELAY_DEFAULT_UI#"\""}
+DELAY_DEFAULT_UI=${DELAY_DEFAULT_UI%"\""}
+
+
 
 sed -i "s/DB_USER =.*/DB_USER = ${DB_USER}/" /srv/shiny-server/sormas-stats-shinyapp/global.R
 sed -i "s/DB_PASS =.*/DB_PASS = ${DB_PASS}/" /srv/shiny-server/sormas-stats-shinyapp/global.R
