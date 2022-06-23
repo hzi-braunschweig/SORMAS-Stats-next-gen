@@ -1,4 +1,5 @@
 # check available R versions here: <https://hub.docker.com/r/rocker/shiny/tags>
+#FROM rocker/shiny:3.6.3
 ARG BRANCH=development
 FROM hzibraunschweig/sormas-stats-base:${BRANCH}
 # ---------------------------------------------
