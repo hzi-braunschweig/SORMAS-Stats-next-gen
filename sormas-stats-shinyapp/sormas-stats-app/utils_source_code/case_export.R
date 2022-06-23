@@ -3,23 +3,27 @@
 # The case table would be merged with person, region, district, etc to et other attributs of the case
 case_export = function(sormas_db, fromDate, toDate){ 
   # reading cases
-  queryCase <- paste0("SELECT distinct id AS case_id, disease, reportdate, creationdate, person_id, responsibleregion_id AS region_id, responsibledistrict_id AS district_id, 
-  caseclassification, epidnumber, symptoms_id, healthfacility_id, outcome,caseorigin,quarantine
-                          FROM public.cases 
-                          WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ")
+  queryCase <- paste0("SELECT distinct id AS case_id, disease, reportdate, creationdate, person_id, responsibleregion_id AS region_id, 
+  responsibledistrict_id AS district_id, caseclassification, epidnumber, symptoms_id, healthfacility_id, outcome,caseorigin,quarantine
+  FROM public.cases 
+  WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ")
   case = dbGetQuery(sormas_db,queryCase)
   ### reading person data 
-  queryPerson <- sprintf("SELECT id AS person_id, sex, occupationtype, presentcondition, birthdate_dd, birthdate_mm, birthdate_yyyy
-                        FROM public.person
-                        WHERE id  in (%s)", paste("'", base::unique(c(case$person_id)), "'",collapse=",") ) 
+  queryPerson = base::paste0("SELECT id AS person_id, sex, occupationtype, presentcondition, birthdate_dd, birthdate_mm, birthdate_yyyy
+  FROM public.person
+  WHERE id IN (SELECT person_id AS id
+  FROM public.cases
+  WHERE deleted = FALSE AND caseclassification != 'NO_CASE' AND reportdate between '", fromDate, "' and '", toDate, "')")
   person = dbGetQuery(sormas_db, queryPerson)
-  #reading symptom data corresponding to selected cases only
-  querySymptom = sprintf(
-    "SELECT id AS symptoms_id, onsetdate
-     FROM public.symptoms
-     WHERE id in (%s)", paste("'", base::unique(c(case$symptoms_id)), "'",collapse=",") # SORMAS create a symptom entry for every case
-  )
-  symptoms =  dbGetQuery(sormas_db,querySymptom)
+  ###  reading symptom data corresponding to selected cases only
+  querySymptom = base::paste0("SELECT id AS symptoms_id, onsetdate
+  FROM public.symptoms
+  WHERE id IN
+  (SELECT distinct symptoms_id AS id
+  FROM public.cases 
+  WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "')")
+  symptoms = dbGetQuery(sormas_db, querySymptom)
+  
   # reading region
   region = dbGetQuery(sormas_db,"select distinct id AS region_id, name AS region_name
                          from public.region ") 
@@ -30,8 +34,8 @@ case_export = function(sormas_db, fromDate, toDate){
   ## Cleaning-up tables
   # Computing birthday of person using day, month and year
   # Assigning DOB to person with only year of birth using January 1. This is just a rough estimated birth date and should be improved
-  person = fixBirthDate(person) %>% # This method assign the birthdate of the person as first January of the year of birth. Improvement will follow
-    dplyr::select(person_id, sex, occupationtype,presentcondition, date_of_birth)  #dropping unused variables
+  person = fixBirthDate(person) %>% # This method assign the birth date of the person as first January of the year of birth. Improvement will follow
+    dplyr::select(person_id, sex, occupationtype,presentcondition, date_of_birth)  #dropping unused variables used to compute date_of_birth
     
   # Fixing date formats
   case = case %>%

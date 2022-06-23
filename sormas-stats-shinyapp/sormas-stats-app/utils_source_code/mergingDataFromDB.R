@@ -32,7 +32,7 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   base::paste0("SELECT id, onsetdate
   FROM public.symptoms
   WHERE id IN
-  (SELECT symptoms_id AS id
+  (SELECT distinct symptoms_id AS id
   FROM public.cases
   WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "')"))
   
@@ -57,7 +57,7 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   location = dbGetQuery(sormas_db,
   base::paste0("SELECT id, district_id, region_id
   FROM public.location
-  WHERE id IN ( SELECT eventlocation_id  FROM public.events WHERE  deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ) "))
+  WHERE id IN ( SELECT distinct eventlocation_id  FROM public.events WHERE  deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ) "))
   
   
   ## reading person data  ###
@@ -65,14 +65,14 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
 person_case = dbGetQuery(sormas_db,
 base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
  FROM public.person
- WHERE id IN (SELECT person_id AS id
+ WHERE id IN (SELECT distinct person_id AS id
  FROM public.cases
  WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "')"))
 
 person_contact = dbGetQuery(sormas_db,
 base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
  FROM public.person 
- WHERE id IN (SELECT person_id AS id
+ WHERE id IN (SELECT distinct person_id AS id
  FROM public.contact
  WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "')")) 
 
