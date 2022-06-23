@@ -37,7 +37,6 @@ shinyServer(
       if("contRegionDist" %in% loading_data_config_vector){contRegionDist = importDataFrontEndOutput$contRegionDist}
       nodeLineList = importDataFrontEndOutput$nodeLineList  # id here is person id
       elist = importDataFrontEndOutput$elist  # id here is contact id
-      #siDat = importDataFrontEndOutput$siDat 
       
       ## The code below would need to be transformed in to independent functions later
       #### loading case data-----
