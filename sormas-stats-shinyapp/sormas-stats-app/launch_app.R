@@ -1,5 +1,5 @@
 
-# Before launching the applicaton using this file, make sure that the "connection to db" section in the global.R file is defined
+# Before launching the application using this file, make sure that the "connection to db" section in the global.R file is defined
 # with the right posgres user account credentials.
 # more information on renv here https://rstudio.github.io/renv/articles/renv.html
  renv::consent(provided = TRUE)
