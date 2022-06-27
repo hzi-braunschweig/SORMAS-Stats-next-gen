@@ -11,7 +11,7 @@ regionShapes@data$StateName = as.character(regionShapes@data$StateName)
 regionShapes@data$StateName[regionShapes@data$StateName == "Fct, Abuja"] = "FCT"
 regionShapes@data$StateName[regionShapes@data$StateName == "Akwa Ibom"] = "Akwa-Ibom"
 
-# loading shapfiles for France
+# loading shape files for France
 # This is a general version of the app and that is whdy we load shapfiles from different countries
 regionShapesFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), layer = "a_reg2019")
 departementShapesFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), layer = "a_dep_2019")
@@ -23,7 +23,7 @@ CommuneFrance = rgdal::readOGR(dsn = file.path("./data/shapefiles_france"), laye
 # export(departementShapesFrance@data, "departementFrance.csv")
 # export(CommuneFrance@data, "CommuneFrance.csv")
 
-# Replaceing names in shapfile with correct names from data earlier exported
+# Replacing names in shape file with correct names from data earlier exported
 regionShapesFrance@data = read.csv2( file = file.path("./data/shapefiles_france/regionFrance.csv"), sep = "," )
 departementShapesFrance@data = read.csv2( file = file.path("./data/shapefiles_france/departementFrance.csv"), sep = "," )
 CommuneFrance@data = read.csv2( file = file.path("./data/shapefiles_france/CommuneFrance.csv"), sep = "," )

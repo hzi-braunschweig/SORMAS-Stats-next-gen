@@ -59,9 +59,8 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   FROM public.location
   WHERE id IN ( SELECT distinct eventlocation_id  FROM public.events WHERE  deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ) "))
   
-  
-  ## reading person data  ###
-  ## only persons linked to cases, contacts or eps
+## reading person data  ###
+## only persons linked to cases, contacts or eps
 person_case = dbGetQuery(sormas_db,
 base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
  FROM public.person
@@ -139,36 +138,28 @@ person = dplyr::bind_rows(person_case, person_contact, person_event_part) %>%
                   followupstatus,followupuntil, resultingcase_id, caseclassification_case, contactstatus,
                   region_name,district_name, outcome_case,caze_id, relationtocase, uuid_case, uuid, reportdate_case) %>%
     dplyr::filter(person_idcase != person_id ) 
-  
-  ## defining contact categories based on proximity
-  # Would later add a configuration for this
-  contRegionDist$label = NA
-  contRegionDist$label[contRegionDist$contactproximity %in% c("FACE_TO_FACE_LONG","TOUCHED_FLUID","MEDICAL_UNSAVE","CLOTHES_OR_OTHER","PHYSICAL_CONTACT" )] = 1 
-  contRegionDist$label[!(contRegionDist$contactproximity %in% c("FACE_TO_FACE_LONG","TOUCHED_FLUID","MEDICAL_UNSAVE","CLOTHES_OR_OTHER","PHYSICAL_CONTACT" ))] = 2
-  
   #defining attributes of elist from contRegionDist
   elist =  contRegionDist %>%
     dplyr::rename(from = person_idcase, to = person_id) %>%
-    dplyr::mutate(uuid_label = substr(uuid,1,6), smooth = TRUE, dashes = ifelse(label == 2,TRUE, FALSE), arrows = "to", uuid_case= substr(uuid_case,1,6),
-                  eventstatus = NA,  entityType = "Case", archivedEvent = NA, risklevel_event = NA, .keep = "all") %>%
+    # defining risk of transmission based on contact proximity
+    dplyr::mutate(label = base::ifelse(contactproximity %in% c("FACE_TO_FACE_LONG","TOUCHED_FLUID","MEDICAL_UNSAVE","CLOTHES_OR_OTHER","PHYSICAL_CONTACT"),"2", "1"), .keep = "all" ) %>% 
+    dplyr::mutate(uuid_label = substr(uuid,1,6), smooth = TRUE, dashes = base::ifelse(label == "1",TRUE, FALSE), arrows = "to", uuid_case= substr(uuid_case,1,6),
+                  eventstatus = NA,  entityType = "Case", archivedEvent = NA, risklevel_event = NA, 
+                  .keep = "all") %>%
     dplyr::left_join(., person, by=c("from" = "id_person" )) %>%
     dplyr::mutate(from_uuid_person = substr(uuid_person,1,6), sex_from_person = sex , .keep = "unused") %>%
     dplyr::left_join(., person, by=c("to" = "id_person" )) %>%
     dplyr::mutate(to_uuid_person = substr(uuid_person,1,6), sex_to_person = sex, .keep = "unused") 
-  
   # defining node data
   #get person id from resulting case id
   contConvCase = case[case$caze_id %in% elist$resultingcase_id,] ## cases resulted from contacts
-  
   idPersonCaseCont = base::unique(as.character(c(elist$to, elist$from, contConvCase$person_idcase))) # uniqur persons in either case or contact table
-  personUnique = person[person$id_person %in% idPersonCaseCont,] # uniqur personts in network diagram of elist
-  
+  personUnique = person[person$id_person %in% idPersonCaseCont,] # unique persons in network diagram 
   Classification = rep("HEALTHY",nrow(personUnique)) # classification if person
   personId = personUnique$id
   # selzcting cases that belongs to cntact table or cntacts converted to cases
   idCaseUnique = base::unique(na.omit(c(elist$caze_id, elist$resultingcase_id)))
   caseUnique = case[case$caze_id %in% idCaseUnique, ]
-  
   casPersonId = caseUnique$person_idcase # using caseUnique table, person id that belong to the set of cases in network
   personClass = as.character(caseUnique$caseclassification_case)
   
@@ -182,8 +173,8 @@ person = dplyr::bind_rows(person_case, person_contact, person_event_part) %>%
       }
     }
   }
+  # This loop need to be replaced with an optimal solution and should consider disease also since a person can be liked to multiple diseases, each haveing a different classification
   nodeLineList = data.frame(personUnique, Classification)
-  
   # defining node attributes
   nodeLineList = nodeLineList %>%
     dplyr::mutate(group = Classification,  uuid_person = substr(uuid_person,1,6), label = substr(uuid_person,1,6),
@@ -202,19 +193,17 @@ person = dplyr::bind_rows(person_case, person_contact, person_event_part) %>%
     dplyr::left_join(. , district, by = c("district_idEvent" = "district_id")) %>%  # Merging with district :  eventsParticipantEventsCasesRegDist
     dplyr::mutate(from = event_id, to = person_id_eventparticipant, id = id_eventparticipant, resultingcase_id = resultingcase_id_eventparticipant,
                   reportdatetime = reportdatetime_event, disease = disease_events, caze_id = event_id, relationtocase = NA, .keep = "all")  %>% # Adding relationtocase and contactcategory:eventsParticipantEventsCasesRegDist
-    dplyr::mutate(., uuid_label = substr(uuid_eventparticipant,1,6), from_uuid_person = substr(uuevent_id,1,6) , label = 1, smooth = TRUE, dashes = FALSE, arrows = "to",
-                  entityType = "Event", .keep = "unused" ) %>%  # definint elist based on event and event participant
+    dplyr::mutate(., uuid_label = substr(uuid_eventparticipant,1,6), from_uuid_person = substr(uuevent_id,1,6) , label = "2", smooth = TRUE, dashes = FALSE, arrows = "to",
+                  entityType = "Event", .keep = "unused" ) %>%  # defining elist based on event and event participant
     dplyr::left_join(., person, by=c("to" = "id_person" )) %>%
     dplyr::mutate(to_uuid_person = substr(uuid_person,1,6), .keep = "unused" )
   
   #defining node properties for elistEvent nodes
   eventNode = data.frame(id = elistEvent$event_id,  Classification = c("EVENT"), group =c("EVENT"),label = elistEvent$from_uuid_person, code = c("f0c0") )
-  
   caseNode =    elistEvent %>%
     dplyr::mutate(id = person_id_eventparticipant,  Classification = caseclassification_case, 
                   group = ifelse(is.na(caseclassification_case) ==T, "HEALTHY", caseclassification_case),
                   label = substr(to_uuid_person,1,6), code = c("f007"),  .keep = "none")
-  
   nodeListCaseEvent = base::rbind(eventNode, caseNode)
   nodeListCaseEvent = nodeListCaseEvent %>%
     dplyr::mutate(value = 1,shape = c("icon"), sex = NA)
@@ -224,10 +213,8 @@ person = dplyr::bind_rows(person_case, person_contact, person_event_part) %>%
   nodeLineList = nodeLineList %>%
     dplyr::mutate(id = id_person, .keep = "unused" ) %>%
     dplyr::select(-c(uuid_person))
-  
   nodeListCaseEvent = nodeListCaseEvent[,colnames(nodeLineList)]  # order columns as in nodelist
   nodeListCaseEvent = base::rbind(nodeListCaseEvent, nodeLineList)
-  
   # deleting duplicate nodes at random, this is not the optimum method to do,
   nodeListCaseEvent = dplyr::distinct(nodeListCaseEvent, label,  .keep_all = T)  %>% 
     dplyr::mutate(., title = label, uuid_node = label) # labelling nodes
@@ -237,11 +224,10 @@ person = dplyr::bind_rows(person_case, person_contact, person_event_part) %>%
   elist =  elist %>%
     dplyr::select(from,	to,	smooth,	dashes,	arrows,	label,	id,	caze_id,	resultingcase_id,	region_name,	district_name,	reportdatetime,
                   disease,	caseclassification_case,	relationtocase,	eventstatus,	entityType, uuid_label, from_uuid_person,archivedEvent, risklevel_event, to_uuid_person) 
-  
   elistEvent  = elistEvent %>%
     dplyr::select(event_id,	to,	smooth,	dashes,	arrows,	label,	id,	caze_id,	resultingcase_id,	region_name,	district_name,	reportdatetime,
                   disease,	caseclassification_case,	relationtocase,	eventstatus,	entityType, uuid_label, from_uuid_person, archivedEvent, risklevel_event, to_uuid_person) %>%
-    dplyr::mutate(from =event_id,  .keep = "unused" )
+    dplyr::mutate(from =event_id,  .keep = "unused")
   
   # selecting few columns from elist to match those in elistEvent
   elist = elist[ , colnames(elistEvent)]
