@@ -9,7 +9,3 @@
 # renv::snapshot()  #  save the state of your project to renv.lock  , do not run in active session 
 
 shiny::runApp(appDir = getwd(), launch.browser = TRUE, host = "127.0.0.1")    
-
-
-
-    

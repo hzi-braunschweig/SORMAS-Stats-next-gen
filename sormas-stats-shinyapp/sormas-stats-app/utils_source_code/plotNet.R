@@ -6,7 +6,7 @@ plotNet = function(nodeLineList, elist, IgraphLayout=TRUE)
   mainStyle = paste(defaultFont, "color: #6591C4", ";font-weight: 600", "font-size: 1.6em", "text-align:center;", sep="; ")
   submainStyle = paste(defaultFont, "text-align:center;", sep="; ")
   footerStyle = defaultFont
-  addNodesS <- data.frame(label = c("Healthy","Not_classified" ,"Suspected", "Probable", "Confirmed", "Not case", "1 = High risk", "2 = Low risk", "Event"), shape = "icon",
+  addNodesS <- data.frame(label = c("Healthy","Not_classified" ,"Suspected", "Probable", "Confirmed", "Not case", "2 = High risk", "1 = Low risk", "Event"), shape = "icon",
                           icon.code = c("f007", "f007", "f007", "f007", "f007","f007", "f178", "f178", "f013"),
                           icon.size = c(25, 25, 25, 25, 25,25,25,25,25), icon.color = c("#17bd27", "#706c67", "#ffff00", "#ffa500", "#f70707","#99bd17", "#0d0c0c", "#0d0c0c", "#0000ff"))
   if(IgraphLayout ==FALSE){
