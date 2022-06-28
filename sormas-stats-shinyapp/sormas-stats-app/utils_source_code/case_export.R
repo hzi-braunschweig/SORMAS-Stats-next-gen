@@ -51,7 +51,7 @@ case_export = function(sormas_db, fromDate, toDate){
     dplyr::left_join(., region, by="region_id") %>% 
     dplyr::left_join(., district, by="district_id") %>% 
     #compute derived variables
-    dplyr::mutate(age=floor(as.numeric(round((reportdate - date_of_birth)/365))), reportweek = lubridate::week(reportdate), 
+    dplyr::mutate(age=floor(as.numeric(reportdate - date_of_birth)/365), reportweek = lubridate::week(reportdate), 
                   reportmonth = lubridate::month(reportdate), reportyear=lubridate::year(reportdate),
                   total = rep(1, nrow(case)) # variable total is added for plotting time series
                   )
