@@ -1,22 +1,24 @@
 # SORMAS-Stats-next-gen
 SORMAS-Stats contain functions to analyze and visualize surveillance data collected by SORMAS.
 
+
 ## Run docker container
 
 ### Prerequisites
+(1) You should begin this tutorial after installing and configuring the SORMAS app on your system, and create some data in the database. Information on how to install SORMAS can be found on the SORMAS-Docker repository https://github.com/hzi-braunschweig/SORMAS-Docker.
 
-(1) You need to install a container engine (e.g. Docker) 
+(2) You need to install a container engine (e.g. Docker) 
 
 ### Run container
 
-(1) Pull the latests version from hub.docker.com
+(3) Pull the latests version from hub.docker.com
 
 ```
 docker pull hzibraunschweig/sormas-stats:latest
 ```
 If you like to pull an image built from development branch, you need to pull the tag 'developemnt'. 
 
-(2) Run the image
+(4) Run the image
 
 ```
 docker run -p 0.0.0.0:3838:3838 hzibraunschweig/sormas-stats:latest
