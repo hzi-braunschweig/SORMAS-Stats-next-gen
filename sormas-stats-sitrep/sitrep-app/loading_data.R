@@ -46,7 +46,7 @@ timeseries_data <- GetTimeseriesData(case_data_line_list, as.Date(fromDate), as.
 overview_table <- GetOverviewEpidTable(epid_data = epid_base)
 
 # Regional epid table
-region_table <- GetRegionEpidTable(epid_data = epid_base)
+region_table <- GetRegionEpidTable(epid_data = epid_base, geographic_units = geographic_units)
 
 # insert dynamic references to table cells
 text <- GetDynamicText(text = text,
