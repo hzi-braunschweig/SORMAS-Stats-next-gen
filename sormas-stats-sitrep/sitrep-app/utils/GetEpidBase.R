@@ -95,12 +95,15 @@ GetEpidBase <- function(data_line_list){
   # Join the 3 dataframes for cases, hospitalizations and deaths
   # on id_district (full join). 
   # Then summarize total confirmed and new confirmed cases
-  epid_base <- epid_base_cases %>% 
+  epid_base_prep <- epid_base_cases %>% 
     dplyr::full_join(epid_base_hospitalizations, by ="id_district") %>% 
     dplyr::full_join(epid_base_deaths, by = "id_district") %>% 
     dplyr::mutate(TOTAL_CONFIRMED_CASES = rowSums(across(starts_with("CASE_CONFIRMED")), na.rm = TRUE)) %>%
     dplyr::mutate(TOTAL_NEW_CONFIRMED_CASES = rowSums(across(starts_with("NEW_CASE_CONFIRMED")), na.rm = TRUE)) %>% 
     dplyr::select(-any_of(c("CASE_n", "NEW_CASE_n", "HOSP_n", "NEW_HOSP_n", "DEATH_n", "NEW_DEATH_n")))
+  
+  # update empty dataframe with the epid_base_prep
+  epid_base <- dplyr::rows_update(empty_df, epid_base_prep, by = "id_district")
   
  return(epid_base) 
 }
