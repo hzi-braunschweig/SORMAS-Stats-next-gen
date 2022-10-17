@@ -1,6 +1,6 @@
 # CONFIGURATION FOR PULLING DATA AT THE TIME OF GENERATING REPORT
 
-reportDate = Sys.Date() # date which appears on the report
+reportDate = Sys.Date # date which appears on the report
 toDate = reportDate -1 # latest date of the data being queried
 toDateSQL = toDate +1 # +1 is added because between sql command does not consider end of interval
 
@@ -9,8 +9,8 @@ fromDate = toDate - duration + 1 # earliest date of the data being queried
 fromDateSQL = fromDate - 1 # -1 is added because between sql command does not consider beginning of interval
 
 # Defining connection to db
-DB_USER = "postgres"
-DB_PASS = "HZIsormas"
+DB_USER = "sormas_user"
+DB_PASS = "password"
 DB_HOST = "127.0.0.1"
 DB_PORT = "5432"
 DB_NAME = "sormas"

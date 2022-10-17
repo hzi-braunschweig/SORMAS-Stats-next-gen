@@ -1,6 +1,6 @@
 # Initializing or restoring renv files
 # renv::consent(provided = TRUE)
-renv::restore()  # to restore the state and versions of packages of your project from renv.lock OR to revert back to previous state
+# renv::restore()  # to restore the state and versions of packages of your project from renv.lock OR to revert back to previous state
 # renv::init()   # to initialize, do not run in active session
 # renv::init(bare = TRUE) # initialize the project without attempting to discover and install R package dependencies
 # renv::snapshot()  #  save the state of your project to renv.lock  , do not run in active session
