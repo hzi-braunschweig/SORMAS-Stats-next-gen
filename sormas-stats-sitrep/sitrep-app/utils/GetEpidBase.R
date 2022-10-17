@@ -31,7 +31,7 @@ GetEpidBase <- function(data_line_list){
   
   # Get base data frame with all districs as rows and the comlplete categories
   # as columns
-  empty_df <- GetCompleteDistrictsCategoriesDf(data_line_list = data_line_list)
+  empty_df <- GetCompleteDistrictsCategoriesDf()
   
   
   # Get dataframe with base indicators for cases
@@ -101,9 +101,6 @@ GetEpidBase <- function(data_line_list){
     dplyr::mutate(TOTAL_CONFIRMED_CASES = rowSums(across(starts_with("CASE_CONFIRMED")), na.rm = TRUE)) %>%
     dplyr::mutate(TOTAL_NEW_CONFIRMED_CASES = rowSums(across(starts_with("NEW_CASE_CONFIRMED")), na.rm = TRUE)) %>% 
     dplyr::select(-any_of(c("CASE_n", "NEW_CASE_n", "HOSP_n", "NEW_HOSP_n", "DEATH_n", "NEW_DEATH_n")))
-  
-  # Update the empty df with the epid base computed above
-  epid_baseTest <- dplyr::rows_update(empty_df, epid_base, by = "id_district")
   
  return(epid_base) 
 }

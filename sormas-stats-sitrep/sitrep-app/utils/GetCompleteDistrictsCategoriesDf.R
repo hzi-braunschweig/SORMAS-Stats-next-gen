@@ -18,7 +18,7 @@
 #' @export
 #'
 #' @examples
-GetCompleteDistrictsCategoriesDf <- function(data_line_list){
+GetCompleteDistrictsCategoriesDf <- function(){
   
   ####### HARD CODED COMPLETE VARIABLE CATEGORIES #########
   
@@ -66,19 +66,15 @@ GetCompleteDistrictsCategoriesDf <- function(data_line_list){
                hospitalization_columns,
                death_columns)
   
-  # subsettinig data_line_list by unique district id per row
-  data_line_list = dplyr::distinct(data_line_list, id_district, .keep_all = TRUE)
   # Initialize data frame
-  df0 <- data.frame(matrix(0, ncol = length(columns), nrow = nrow(data_line_list)))
+  df0 <- data.frame(matrix(0, ncol = length(columns), nrow = nrow(geographic_units)))
   # Assign column names
   colnames(df0) <- columns
   # input id_district, name_district, id_region and name_region
-  df0$id_district <- data_line_list$id_district # geographic_units$id_district
-  df0$name_district <- data_line_list$name_district
-  df0$id_region <- data_line_list$id_region #   geographic_units$id_region
-  df0$name_region <- data_line_list$name_region
+  df0$id_district <- geographic_units$id_district # geographic_units$id_district
+  df0$name_district <- geographic_units$name_district
+  df0$id_region <- geographic_units$id_region #   geographic_units$id_region
+  df0$name_region <- geographic_units$name_region
   
   return(df0)
 }
-## test run
-# View(GetCompleteDistrictsCategoriesDf(data_line_list = data_line_list))
