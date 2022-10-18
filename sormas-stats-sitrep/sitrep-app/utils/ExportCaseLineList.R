@@ -58,8 +58,8 @@ ExportCaseLineList <- function(sormas_db, fromDateSQL, toDateSQL){
   
   hospitalizations <- DBI::dbGetQuery(sormas_db, queryHospitalizations)
   
-  # Case table SQL query
-  queryCases <- base::sprintf("SELECT  DISTINCT id AS id_case,
+  # Case table SQL query based on report date
+  queryCases_report_date <- base::sprintf("SELECT  DISTINCT id AS id_case,
     responsibledistrict_id AS id_district,
     responsibleregion_id AS id_region,
     caseclassification AS caseclassification_case,
@@ -71,16 +71,86 @@ ExportCaseLineList <- function(sormas_db, fromDateSQL, toDateSQL){
     hospitalization_id AS id_hospitalization
     FROM public.cases 
     WHERE (deleted = FALSE AND caseclassification != 'NO_CASE')
-    AND (reportdate between '%s' and '%s' 
-         OR person_id IN (%s) 
-         OR hospitalization_id IN (%s) 
-         OR symptoms_id IN (%s))",
-                              fromDateSQL, toDateSQL,
-                              paste("'", base::unique(c(persons$id_person)), "'",collapse=","),
-                              paste("'", base::unique(c(hospitalizations$id_hospitalization)), "'",collapse=","),
-                              paste("'", base::unique(c(symptoms$id_symptoms)), "'",collapse=","))
+    AND (reportdate between '%s' and '%s')",
+                              fromDateSQL, toDateSQL)
+
+  cases_report_date <- DBI::dbGetQuery(sormas_db,queryCases_report_date)
   
-  cases <- DBI::dbGetQuery(sormas_db,queryCases)
+
+  if (length(persons$id_person) > 0){  
+  
+  # Case table SQL query based on person id
+  queryCases_person_id <- base::sprintf("SELECT  DISTINCT id AS id_case,
+    responsibledistrict_id AS id_district,
+    responsibleregion_id AS id_region,
+    caseclassification AS caseclassification_case,
+    EndOfIsolationReason AS end_of_iso_reason_case,
+    reportdate AS report_date_case,
+    disease AS disease_case,
+    symptoms_id AS id_symptoms,
+    person_id AS id_person,
+    hospitalization_id AS id_hospitalization
+    FROM public.cases 
+    WHERE (deleted = FALSE AND caseclassification != 'NO_CASE')
+    AND (person_id IN (%s))",
+    paste("'", base::unique(c(persons$id_person)), "'",collapse=","))
+  
+  cases_person_id <- DBI::dbGetQuery(sormas_db,queryCases_person_id)
+  }  else {
+    cases_person_id <- data.frame()
+  }
+
+  
+  if ( length(hospitalizations$id_hospitalization) > 0) {
+  
+  # Case table SQL query based on hospitalization id
+  queryCases_hospitalization_id <- base::sprintf("SELECT  DISTINCT id AS id_case,
+    responsibledistrict_id AS id_district,
+    responsibleregion_id AS id_region,
+    caseclassification AS caseclassification_case,
+    EndOfIsolationReason AS end_of_iso_reason_case,
+    reportdate AS report_date_case,
+    disease AS disease_case,
+    symptoms_id AS id_symptoms,
+    person_id AS id_person,
+    hospitalization_id AS id_hospitalization
+    FROM public.cases 
+    WHERE (deleted = FALSE AND caseclassification != 'NO_CASE')
+    AND (hospitalization_id IN (%s))",
+    paste("'", base::unique(c(hospitalizations$id_hospitalization)), "'",collapse=","))
+  
+  cases_hospitalization_id <- DBI::dbGetQuery(sormas_db,queryCases_hospitalization_id)
+  } else {
+    cases_hospitalization_id <- data.frame()
+  }
+  
+  if ( length(symptoms$id_symptoms) > 0) {
+  # Case table SQL query based on symptoms id
+  queryCases_symptoms_id <- base::sprintf("SELECT  DISTINCT id AS id_case,
+    responsibledistrict_id AS id_district,
+    responsibleregion_id AS id_region,
+    caseclassification AS caseclassification_case,
+    EndOfIsolationReason AS end_of_iso_reason_case,
+    reportdate AS report_date_case,
+    disease AS disease_case,
+    symptoms_id AS id_symptoms,
+    person_id AS id_person,
+    hospitalization_id AS id_hospitalization
+    FROM public.cases 
+    WHERE (deleted = FALSE AND caseclassification != 'NO_CASE')
+    AND (symptoms_id IN (%s))",
+                                                 paste("'", base::unique(c(symptoms$id_symptoms)), "'",collapse=","))
+  
+  cases_symptoms_id <- DBI::dbGetQuery(sormas_db,queryCases_symptoms_id)
+  } else {
+    cases_symptoms_id <- data.frame()
+  }
+  
+  # bind rows of all the results of all case queries into one df
+  cases <- dplyr::bind_rows(cases_report_date,
+                            cases_person_id,
+                            cases_hospitalization_id,
+                            cases_symptoms_id)
   
   # Separate query for birthdate and sex
   queryBirthdateSex <- base::sprintf("SELECT DISTINCT id AS id_person,

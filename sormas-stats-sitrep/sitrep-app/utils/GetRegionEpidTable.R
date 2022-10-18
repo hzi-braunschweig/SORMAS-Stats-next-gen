@@ -15,16 +15,16 @@
 #' @export
 #'
 #' @examples
-GetRegionEpidTable <- function(epid_data){
+GetRegionEpidTable <- function(epid_data, geographic_units){
   ## building region epid table
   region_epid_table <- epid_data %>% 
     dplyr::group_by(name_region) %>% 
     dplyr::summarise("Total cases" = sum(TOTAL_CONFIRMED_CASES),
                      "New cases" = sum(TOTAL_NEW_CONFIRMED_CASES),
                      "Total hospitalizations" = sum(HOSP_YES),
-                     #"New hospitalizations" = sum(NEW_HOSP_YES),
-                     "Total deaths" = sum(DEATH_EPIDEMIC_DISEASE)
-                     #"New deaths" = sum(NEW_DEATH_EPIDEMIC_DISEASE)
+                     "New hospitalizations" = sum(NEW_HOSP_YES),
+                     "Total deaths" = sum(DEATH_EPIDEMIC_DISEASE),
+                     "New deaths" = sum(NEW_DEATH_EPIDEMIC_DISEASE)
                      ) %>% 
     dplyr::rename(Region = name_region)
 
