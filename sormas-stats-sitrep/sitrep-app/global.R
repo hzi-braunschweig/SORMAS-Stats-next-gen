@@ -1,6 +1,6 @@
 # CONFIGURATION FOR PULLING DATA AT THE TIME OF GENERATING REPORT
 
-reportDate = Sys.Date # date which appears on the report
+reportDate = Sys.Date() # date which appears on the report
 toDate = reportDate -1 # latest date of the data being queried
 toDateSQL = toDate +1 # +1 is added because between sql command does not consider end of interval
 
