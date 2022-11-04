@@ -59,7 +59,7 @@ selEventRegionDistIdentificationSourceUi = reactive({
 # Authenticating and renaming selected data 
 # This authentication would apply to all previous filters that this object depends on
 eventDataDiseaseRegionTimeAuthFilter = reactive({
-  req(credentials()$user_auth)
+   
   selEventRegionDistIdentificationSourceUi()
 })
 # Adding control based on eventDataAnalysisAction icon on front ui
@@ -520,7 +520,6 @@ output$eventCountbyJurisdictionTable <- DT::renderDataTable({
 })
 # event map by administrative area ----
 output$eventMapUi <- renderPlot({
-  req(credentials()$user_auth)
   map_text_size = input$eventMapTextSizeUi
   if(input$eventMapShapesUi == "Region")
   {
@@ -544,23 +543,19 @@ output$eventMapUi <- renderPlot({
 #https://github.com/atmajitg/bloodbanks  to get sample app
 # Reactive expression for the data subsetted to what the user selected
 filteredData <- reactive({
-  req(credentials()$user_auth)
   eventData[eventData$n_ep >= input$range[1] & eventData$n_ep <= input$range[2],]
 })
 # This reactive expression represents the palette function,
 # which changes as the user makes selections in UI.
 colorpal <- reactive({
-  req(credentials()$user_auth)
   colorNumeric(input$colors, eventData$n_ep)
 })
 output$map <- renderLeaflet({
-  req(credentials()$user_auth)
   # Use leaflet() here, and only include aspects of the map that
   # won't need to change dynamically (at least, not unless the
   # entire map is being torn down and recreated).
   leaflet(eventData) %>% addTiles() %>%
     fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat))
-  
 })
 # Incremental changes to the map (in this case, replacing the
 # circles when a new color is chosen) should be performed in

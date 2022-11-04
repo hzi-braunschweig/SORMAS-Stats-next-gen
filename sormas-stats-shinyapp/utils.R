@@ -1,3 +1,4 @@
+## This file contains random codes that may be useful 
 
 ## Wrapper for debugging errors 
 base::try({

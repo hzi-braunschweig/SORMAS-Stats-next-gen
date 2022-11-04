@@ -23,7 +23,7 @@ if(is.null(input$regionCaseUi))
 })
 # filter by district of case
 casePersonRegionDistFilter = reactive({
-  req(credentials()$user_auth)
+  
   if(is.null(input$districtCaseUi))
   {
     temp = casePersonRegionFilter()
@@ -403,7 +403,6 @@ output$regionMapCaseCount <- renderPlot({
 # using casePersonFilter() and infectorInfecteeData
 # Filtering by disease, time, region of infector and  deduplication (unique infector-infectee persons)
 infectorInfecteeDataDiseaseRegionFilter = reactive({
-  req(credentials()$user_auth)
   if(is.null(input$regionCaseUi))
   {
     ret = infectorInfecteeData %>% 
@@ -442,30 +441,13 @@ observe({
 })
 # filter by serial interval range 
 # Adding control based on apply changes icon on front ui
-## Wrapper for debugging errors 
-### begin debugging, this wrapper was added to debug an error that happens when deploying the app
-# on the demo server. The wrapper base::try({should be deleted when there are no more errors to track.
-base::try({
-  # The withLogErrors call ensures that stack traces are captured
-  # and that errors that bubble up are logged using warning().
-  shiny::withLogErrors({
-    # tryCatch and withVisible are just here to add some noise to
-    # the stack trace.
-    base::tryCatch(
-      base::withVisible({
-        # add function here whose output should be traced 
-        infectorInfecteeDataDiseaseRegionDistSerialIntFilter  =  eventReactive(input$caseDataAnalysisAction, {
-          temp = infectorInfecteeDataDiseaseRegionDist() %>%
-            tidyr::drop_na(serial_interval) %>%    # Dropping rows with NA fo SI
-            dplyr::filter(., serial_interval %in% c(input$serialIntervalRangeUi[1] : input$serialIntervalRangeUi[2]))  # filter by SI range
-          return(temp)
-        }, ignoreNULL = FALSE)
-        
-      })
-    )
-  })
-})
-# end debugging
+infectorInfecteeDataDiseaseRegionDistSerialIntFilter  =  eventReactive(input$caseDataAnalysisAction, {
+  temp = infectorInfecteeDataDiseaseRegionDist() %>%
+    tidyr::drop_na(serial_interval) %>%    # Dropping rows with NA fo SI
+    dplyr::filter(., serial_interval %in% c(input$serialIntervalRangeUi[1] : input$serialIntervalRangeUi[2]))  # filter by SI range
+  return(temp)
+}, ignoreNULL = FALSE)
+
 #Preparing data and estimating rt
 rt_data = eventReactive(input$caseDataAnalysisAction, {
   # This is a list of all the data needed to estimate and plot Rt
@@ -528,35 +510,20 @@ output$rtSummary_table <- DT::renderDataTable({
 })
 ## SI analysis
 # model selection for SI  
-# Adding controls to print errors
-################ begin debugging
-base::try({
-  # The withLogErrors call ensures that stack traces are captured
-  # and that errors that bubble up are logged using warning().
-  shiny::withLogErrors({
-    # tryCatch and withVisible are just here to add some noise to
-    # the stack trace.
-    base::tryCatch(
-      base::withVisible({
-    # add function here whose output should be traced here
-    # fiting normal, weibull, gamma, lnorm distributions to serial intervals 
-    output$si_model_fitTable <- DT::renderDataTable({
-      temp = fit_distribution(serial_interval = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
-      res = DT::datatable(temp,
-      options = list(
-       dom = 't',
-       fixedColumns = TRUE,
-       #autoWidth = TRUE,
-       columnDefs = list(list(className = 'dt-center', targets = "_all")),
-       searching = FALSE
-      ), 
-      rownames = FALSE )
-      return(res)
-    }) 
-      })
-    )
-  })
-})
+# fiting normal, weibull, gamma, lnorm distributions to serial intervals 
+output$si_model_fitTable <- DT::renderDataTable({
+  temp = fit_distribution(serial_interval = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
+  res = DT::datatable(temp,
+                      options = list(
+                        dom = 't',
+                        fixedColumns = TRUE,
+                        #autoWidth = TRUE,
+                        columnDefs = list(list(className = 'dt-center', targets = "_all")),
+                        searching = FALSE
+                      ), 
+                      rownames = FALSE )
+  return(res)
+}) 
 # summary statistics for SI
 output$si_summaryTable <- DT::renderDataTable({
   temp = summary_statistics(x = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()$serial_interval)
@@ -611,27 +578,14 @@ output$si_mean_CI_table <- DT::renderDataTable({
 # fitting user chosen distribution to SI
 # Any output or computation that depend on siRet (ie data and parameters used to generate siRet) would run only when 
 # caseDataAnalysisAction is clicked
-##### begin debugging
-## Wrapper for debugging errors 
-base::try({
-  # The withLogErrors call ensures that stack traces are captured
-  # and that errors that bubble up are logged using warning().
-  shiny::withLogErrors({
-    # tryCatch and withVisible are just here to add some noise to
-    # the stack trace.
-    base::tryCatch(
-      base::withVisible({
-        # add function here whose output should be traced 
-        siRet = eventReactive(input$caseDataAnalysisAction, { 
-          temp = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
-          siRet = serialIntervalPlot(infectorInfecteePair = temp,  distr = input$siDistMethodUi, niter = input$niter_SI_UI,
-                                     minSi = input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2] ) 
-          return(siRet)
-        }, ignoreNULL = FALSE)
-      })
-    )
-  })
-})
+
+siRet = eventReactive(input$caseDataAnalysisAction, { 
+  temp = infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
+  siRet = serialIntervalPlot(infectorInfecteePair = temp,  distr = input$siDistMethodUi, niter = input$niter_SI_UI,
+                             minSi = input$serialIntervalRangeUi[1], maxSi = input$serialIntervalRangeUi[2] ) 
+  return(siRet)
+}, ignoreNULL = FALSE)
+
 # plotting SI
 output$distribution_SI_plot <- renderPlot({
   temp = siRet()
@@ -680,25 +634,12 @@ output$nodedegree_summaryTable <- DT::renderDataTable({
 })
 
 # Estimation of dispersion parameter k and R
-##### begging debugging
-base::try({
-  # The withLogErrors call ensures that stack traces are captured
-  # and that errors that bubble up are logged using warning().
-  shiny::withLogErrors({
-    # tryCatch and withVisible are just here to add some noise to
-    # the stack trace.
-    base::tryCatch(
-      base::withVisible({
-        # add function here whose output should be traced 
-        kRet <- eventReactive(input$caseDataAnalysisAction, {
-          temp =  infectorInfecteeDataDiseaseRegionDist() # infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
-          kRet = offspringDistPlot(infectorInfecteePair = temp, polyDegree = input$polyDegree_RtK_UI)
-          return(kRet)
-        }, ignoreNULL = FALSE) 
-      })
-    )
-  })
-})
+kRet <- eventReactive(input$caseDataAnalysisAction, {
+  temp =  infectorInfecteeDataDiseaseRegionDist() # infectorInfecteeDataDiseaseRegionDistSerialIntFilter()
+  kRet = offspringDistPlot(infectorInfecteePair = temp, polyDegree = input$polyDegree_RtK_UI)
+  return(kRet)
+}, ignoreNULL = FALSE) 
+
 # plotting k
 output$distribution_k_plot <- renderPlot({
   temp = kRet()
