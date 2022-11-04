@@ -19,6 +19,9 @@ colCase="red"   # case colour
 colEvent = "blue"   # event colour
 colPerson = "black"   # contact person or event participant person colour
 colEdge = "black"
+
+#Default app languge
+default_language = "en" # can be fr, de or any other language included in the translations folder
  
 # Defining connection to db
 # credentials for local instance

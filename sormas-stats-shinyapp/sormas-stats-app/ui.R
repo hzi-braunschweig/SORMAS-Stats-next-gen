@@ -64,7 +64,6 @@ dashboardPage( # the use of shiny dashboard is to make sure that all icons are f
 )
 )
 ),
-
 # Footer ------
 tags$footer(
 hr(style = "border-color: #cbcbcb;"),

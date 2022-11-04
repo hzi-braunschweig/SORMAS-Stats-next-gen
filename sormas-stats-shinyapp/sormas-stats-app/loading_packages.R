@@ -6,6 +6,7 @@ library(shinythemes)
 library(shinyWidgets)
 library(shinyjs)
 library(shinycssloaders)
+library(shiny.i18n) # for translation
 
 library(visNetwork)
 library(ggplot2)
