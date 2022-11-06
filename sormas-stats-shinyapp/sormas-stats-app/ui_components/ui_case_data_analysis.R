@@ -223,7 +223,7 @@ sidebarLayout(
                      )
            ),
            tags$br(),tags$br(),
-           "You can add some description text here")
+           "You can add more indicators you wish and some description text here")
   ,
   tabPanel("Cases by region", value = 6,
            fluidRow(
