@@ -7,7 +7,7 @@ showModal(modalDialog(title = NULL, "Loading data from the database.", "Just a m
 sormas_db = DBI::dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
 
 # Extracting user data, Hashing Passwords with sodium ----
-users = userExport(sormas_db=sormas_db, authenticat_user= authenticat_user_global)
+#users = userExport(sormas_db=sormas_db, authenticat_user= authenticat_user_global)
 
 ## Extracting event Data -----
 eventData = eventExport(sormas_db,fromDate = event_fromDate, toDate = event_toDate)
