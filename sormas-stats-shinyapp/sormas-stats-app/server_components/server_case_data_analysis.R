@@ -326,6 +326,7 @@ if(input$caseByRegionIndicatorTypeUi == "Proportion"){
 ## plotting case pyramid ########
 output$casePyramidPlot <- renderPlotly({
   temp = casePersonFilter()
+  if(!(dataframe_is_empty(temp))){ 
   if(input$sexCategoryUi == "Male X Female")
   {
     fg =  pyramidPlotFunction(data = temp, sexCat = "MaleFemale")
@@ -338,11 +339,16 @@ output$casePyramidPlot <- renderPlotly({
   {
     fg = pyramidPlotFunction(data = temp, sexCat = "FemaleOther")
   }
+  }else{
+    fg = empty_dataframe_plotly()
+  }
   return(fg)
 })
-#### Plotting time series plot for cases ###
+## Plotting time series plot for cases ##
 output$caseTimeSeriesPlot <- renderPlotly({
   temp = casePersonFilter()
+  #check if data frame is not empty and plot  else plot an empty plot
+  if(!(dataframe_is_empty(temp))){ 
   if (input$timeUnitUi == "Day")
   {
     if(input$byRegiontimeUnitUi == F)
@@ -364,11 +370,15 @@ output$caseTimeSeriesPlot <- renderPlotly({
     monthSumCase = stats::aggregate(total ~ reportmonth+ reportyear, data = temp, sum, na.rm = F)
     fg=  timeSeriesPlotMonth(data = monthSumCase )
   }
+  }else{
+    fg = empty_dataframe_plotly()
+  }
   return(fg)
 })
 ## Plotting epicure
 output$caseEpicurvePlot <- renderPlotly({
   temp = casePersonFilter()
+  if(!(dataframe_is_empty(temp))){ 
   if (input$timeUnitEpicurveUi == "Day")
   {
     dateSumCaseClass = stats::aggregate(total ~ reportdate + caseclassification, data = temp, sum, na.rm = F)
@@ -383,19 +393,37 @@ output$caseEpicurvePlot <- renderPlotly({
   {
     fg =   epicurveMonth(data = temp)
   }
+  } else{
+    fg = empty_dataframe_plotly()
+  }
   return(fg)
 })
 
-### Map for cases ####
+## Map for cases ####
 ## map plot
 output$regionMapCaseCount <- renderPlot({
+  temp = casePersonFilter()
+  if(!(dataframe_is_empty(temp))){
   if(input$caseMapshapesUi == "By region")
   {
-    fg = regionMapPlot(data = casePersonFilter(), lnd = regionShapes)
+    if(input$caseIndicatorTypeMapUi == "Count"){
+      fg = regionMapPlot(data = temp, lnd = regionShapes)
+    }
+    if(input$caseIndicatorTypeMapUi == "Incidence proportion / 100,000"){
+      fg = empty_dataframe_plotly()
+    }
   }
   if(input$caseMapshapesUi == "By district")
   {
-    fg = districtMapPlot(data = casePersonFilter(), districtShapes =districtShapes)
+    if(input$caseIndicatorTypeMapUi == "Count"){
+    fg = districtMapPlot(data = temp, districtShapes =districtShapes)
+    }
+    if(input$caseIndicatorTypeMapUi == "Incidence proportion / 100,000"){
+      fg = empty_dataframe_plotly()
+    }
+  }
+    }else{
+    fg = empty_dataframe_plotly()
   }
   return(fg)
 })
