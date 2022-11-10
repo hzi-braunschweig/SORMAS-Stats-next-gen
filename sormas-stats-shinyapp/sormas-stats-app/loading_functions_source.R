@@ -47,3 +47,4 @@ base::source(file.path("./utils_source_code","sourceNodeDegreeCounter.R"))
 # General utils functions
 base::source(file.path("./utils_source_code","vector_is_empty.R"))
 base::source(file.path("./utils_source_code","dataframe_is_empty.R"))
+base::source(file.path("./utils_source_code","empty_dataframe_plotly.R"))
