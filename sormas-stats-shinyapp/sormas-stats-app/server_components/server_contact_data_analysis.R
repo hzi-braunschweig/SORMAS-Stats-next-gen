@@ -4,7 +4,6 @@
 
 # Filter contact data  based on region district time and disease
 contRegionDistDiseaseDate = reactive({
-  req(credentials()$user_auth)
   if(is.null(input$regionContactUi))
   {
     contRegionDist[((contRegionDist$disease == input$diseaseContactUi) & (contRegionDist$reportdatetime >= (min(input$reportdateContactUi))) & (contRegionDist$reportdatetime <= (max(input$reportdateContactUi)) )), ]

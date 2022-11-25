@@ -202,7 +202,7 @@ nodeToPlot = reactive({
 
 ## plotting network
 output$transChain <- renderVisNetwork({
-  req(credentials()$user_auth)
+   
   if(input$visNetworkDiagramUi == TRUE){
     plotNet(nodeLineList= nodeToPlot(), elist = elistToPlot(), IgraphLayout= input$IgraphLayoutUi) 
   } 
@@ -211,7 +211,7 @@ output$transChain <- renderVisNetwork({
 ## computation of network parameters using transmission network data ----
 ## total number of contacts
 output$totalEdges <- renderInfoBox({
-  req(credentials()$user_auth)
+   
   infoBox(
     title = NULL, 
     value =  nrow(elistSel2ResCaseSourseCase() ),
@@ -222,7 +222,7 @@ output$totalEdges <- renderInfoBox({
 })  
 ## Total number of edges (contacts or event participants) resulting to cases
 output$totalReultingcasesEdges <- renderInfoBox({
-  req(credentials()$user_auth)
+   
   temp = elistSel2ResCaseSourseCase() %>%
     dplyr::filter(resultingcase_id != "NA")
   infoBox(
@@ -236,7 +236,7 @@ output$totalReultingcasesEdges <- renderInfoBox({
 ## Total number of unique infector-infectee pair
 # this is the same as contacts resulting to cases
 output$totalInfectorInfecteePair <- renderInfoBox({
-  req(credentials()$user_auth)
+   
   temp =  elistSel2ResCaseSourseCase() %>%
     dplyr::filter(resultingcase_id != "NA") # deleting records with missing person id for infector
   # no need to count unique pairs of person since elist has unique pairs of nodes when exported from sormas db
@@ -250,7 +250,7 @@ output$totalInfectorInfecteePair <- renderInfoBox({
 
 ## total number of nodes: ie person and events
 output$totalNodes <- renderInfoBox({
-  req(credentials()$user_auth)
+   
   infoBox(
     title = NULL, 
     value = length(unique(c(elistSel2ResCaseSourseCase()$from_uuid_person, elistSel2ResCaseSourseCase()$to_uuid_person ))),
@@ -262,7 +262,6 @@ output$totalNodes <- renderInfoBox({
 }) 
 ## total number of event nodes
 output$totalEventNodes <- renderInfoBox({
-  req(credentials()$user_auth)
   temp = as.numeric(
     elistSel2ResCaseSourseCase() %>%
       dplyr::select(from_uuid_person, entityType ) %>%
@@ -279,7 +278,6 @@ output$totalEventNodes <- renderInfoBox({
 }) 
 ## total number of person nodes
 output$totalPersonNodes <- renderInfoBox({
-  req(credentials()$user_auth)
   id_vec = compute_person_node_uuid(elist = elistSel2ResCaseSourseCase()) 
   infoBox(
     title =NULL, 
@@ -290,7 +288,6 @@ output$totalPersonNodes <- renderInfoBox({
 }) 
 ## Total number of nodes (persons) converted to cases
 output$totalReultingcasesNodes <- renderInfoBox({
-  req(credentials()$user_auth)
   temp = elistSel2ResCaseSourseCase() %>%
     dplyr::filter(resultingcase_id != "NA") %>%
     dplyr::distinct_at(., vars(to_uuid_person), .keep_all = TRUE) 
@@ -304,7 +301,6 @@ output$totalReultingcasesNodes <- renderInfoBox({
 })  
 ## Total number of ep and contact persons 
 output$totalContactEpPersonNodes <- renderInfoBox({
-  req(credentials()$user_auth)
   temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = elistSel2ResCaseSourseCase() )$n_contact_ep_nodes)
   infoBox(
     # title = "∑ Person", 
@@ -316,7 +312,6 @@ output$totalContactEpPersonNodes <- renderInfoBox({
 })  
 ## Prpportion of ep and contact person converted to case
 output$propContactEpPersonConverted <- renderInfoBox({
-  req(credentials()$user_auth)
   temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = elistSel2ResCaseSourseCase() )$prop_converted)
   infoBox(
     #title = "% Converted", 
@@ -329,26 +324,23 @@ output$propContactEpPersonConverted <- renderInfoBox({
 
 ### Computing network parameters using igraph----
 graphObject <- reactive({
-  req(credentials()$user_auth)
+   
   net = convertNetworkToGraph(elist=elistSel2ResCaseSourseCase(), nodeLineList=nodeLineList) # converting network to graph object
   return(net)
 })
 # computing summary of node degree 
 output$nodeDegreeSummary <- renderPrint({
-  req(credentials()$user_auth)
   net = graphObject()
   deg <- degree(net, mode="all") 
   summary(deg)  # output
 })
 # computing summary of node betweeness
 output$nodeBetweenessSummary <- renderPrint({
-  req(credentials()$user_auth)
   net = graphObject()
   summary(betweenness(net, directed=F)) 
 })
 # degree histogram
 output$nodeDegreeHist <- renderPlot({
-  req(credentials()$user_auth)
   net = graphObject() 
   deg <- degree(net, mode="all") # 
   hist(deg, breaks=20, xlim = c(1, max(deg)), main = NULL, xlab = "Contacts per case", col = "grey") # breaks=1:vcount(net)-1
@@ -356,7 +348,6 @@ output$nodeDegreeHist <- renderPlot({
 # variance-to-mean ratio (VMR) for node degree: 
 # https://en.wikipedia.org/wiki/Index_of_dispersion
 output$nodeVMR <- renderInfoBox({
-  req(credentials()$user_auth)
   net = graphObject() 
   deg <- degree(net, mode="all") # extract degree
   node_mvr = round(var(deg) / mean(deg), 2)
@@ -369,7 +360,6 @@ output$nodeVMR <- renderInfoBox({
 }) 
 # Betweeness histogram
 output$nodeBetweenessHist <- renderPlot({
-  req(credentials()$user_auth)
   net = graphObject()
   betweenness_score = betweenness(net, directed=F, weights=NA)
   hist(betweenness_score,  breaks=20, xlim = c(0, max(betweenness_score) + 2),main = NULL, col = "grey", xlab = "Betweeness score" )
@@ -377,7 +367,6 @@ output$nodeBetweenessHist <- renderPlot({
 
 # Edge density: The proportion of present edges from all possible edges in the network.
 output$edgeDensity <- renderInfoBox({
-  req(credentials()$user_auth)
   net = graphObject() 
   edge_density = round(edge_density(net, loops=F), 2)
   infoBox(
@@ -389,7 +378,6 @@ output$edgeDensity <- renderInfoBox({
 }) 
 # Diameter: longest geodesic distance ie longest undirected chain, thus extract the source case
 output$diameterDirected <- renderInfoBox({
-  req(credentials()$user_auth)
   net = graphObject()
   temp = diameter(net, directed=TRUE) # # number of contact in longest chain of infector-infectee pairs
   infoBox(
@@ -401,7 +389,6 @@ output$diameterDirected <- renderInfoBox({
   )
 }) 
 output$diameterUndirected <- renderInfoBox({
-  req(credentials()$user_auth)
   net = graphObject() 
   temp = diameter(net, directed=FALSE) # # number of contact in longest undirected chain
   infoBox(
@@ -413,7 +400,6 @@ output$diameterUndirected <- renderInfoBox({
 }) 
 ## summary of source/ infector nodes for cases and evnet
 output$totInfectorCaseEventNodes <- renderInfoBox({
-  req(credentials()$user_auth)
   temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$sum_caseEvent_nodes
   infoBox(
     title = NULL, 
@@ -424,7 +410,6 @@ output$totInfectorCaseEventNodes <- renderInfoBox({
 }) 
 #
 output$totSourceInfectorCaseEventNodes <- renderInfoBox({
-  req(credentials()$user_auth)
   temp = prop_missing_source_case_nodes(elist= elistSel2ResCaseSourseCase(), 
                                         nodeLineList = nodeLineList)$sum_missing_source_case_nodes
   infoBox(
@@ -436,7 +421,6 @@ output$totSourceInfectorCaseEventNodes <- renderInfoBox({
 }) 
 ##
 output$propInfectorCaseEventNodes <- renderInfoBox({
-  req(credentials()$user_auth)
   temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(),
                                         nodeLineList = nodeLineList)$prop_missing_source_case_nodes
   infoBox(
@@ -448,7 +432,6 @@ output$propInfectorCaseEventNodes <- renderInfoBox({
 }) 
 # summary pronting uuid of app parant nodes
 output$sourceNodeUUID <- renderPrint({
-  req(credentials()$user_auth)
   temp = prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(),
                                         nodeLineList = nodeLineList)$source_node_uuid
   cat(temp)
@@ -456,7 +439,6 @@ output$sourceNodeUUID <- renderPrint({
 
 # Sum of parent source nodes ie infectors (cases, event) with unknown infectors
 output$transChainSumUI <- renderInfoBox({
-  req(credentials()$user_auth)
   temp = length(prop_missing_source_case_nodes(elist=elistSel2ResCaseSourseCase(), nodeLineList = nodeLineList)$source_node_uuid)
   infoBox(
     #title = "∑ chains", 
@@ -468,7 +450,6 @@ output$transChainSumUI <- renderInfoBox({
 }) 
 ##
 output$transitivityScore <- renderInfoBox({
-  req(credentials()$user_auth)
   net = graphObject() 
   temp = round(transitivity(net), 2)
   infoBox(
@@ -481,7 +462,6 @@ output$transitivityScore <- renderInfoBox({
 
 # computing case counts by case classification from graphObject 
 output$nodeClassificationCountTable <- DT::renderDataTable({
-  req(credentials()$user_auth)
   net =  graphObject() 
   temp = as.data.frame(table(V(net)$group))
   temp = temp %>% rename("Node classification" = Var1, Total = Freq)

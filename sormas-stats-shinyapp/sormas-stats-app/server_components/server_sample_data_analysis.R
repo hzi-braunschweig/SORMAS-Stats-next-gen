@@ -42,7 +42,6 @@ selSampleRegionDiseaseTimeDist = reactive({
 # filter 2, etc.
 # checking if user is authenticated before creating ui elements
 sample_table_filtered = reactive({
-  req(credentials()$user_auth)
   selSampleRegionDiseaseTimeDist()
 }) 
 # Adding control based on "apply changes" icon  ---

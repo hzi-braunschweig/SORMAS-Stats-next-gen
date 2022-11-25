@@ -8,9 +8,6 @@ uniquePersonPersonContact = TRUE # or FALSE to keep only one contact between the
 event_fromDate = as.character(Sys.Date() - event_delay - 1) #  you can directly define fromDate as: fromDate = as.character("yyyy-mm-dd")
 event_toDate = as.character(Sys.Date() + 1) # or toDate = as.character("yyyy-mm-dd"), +1 is added because between sql commant does not consider end of intervals
 
-# User authentication
-authenticat_user_global = FALSE
-
 # defining "Report date" delay to be used as default on front end
 delay_default_UI = 1000 # This value should be changed to say 14 on production servers
 # Defining colours to be used by dashboard icons for entities

@@ -69,11 +69,11 @@ tags$footer(
 hr(style = "border-color: #cbcbcb;"),
 fluidRow(
   column(9,
-         p('All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), style = "font-size: 85%"),
+         p('All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), '. Messages in red of the form "Error: ..." means there is no available data to analyse. Please change your filter option or inform your server admin.', style = "font-size: 85%"),
          p("App created by the ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen", 'SORMAS-Stats Team', target = '_blank'), style = "font-size: 85%"),
          p("To use this app and other related SORMAS apps, find all the source codes on Github:", tags$a(href = "https://github.com/hzi-braunschweig", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
          p("Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ", tags$a(href = "https://github.com/hzi-braunschweig/SORMAS-Stats/discussions", tags$i(class = 'fa fa-github', style = 'color:#5000a5'), target = '_blank'), style = "font-size: 85%"),
-         p(tags$em("Last updated:", toDate), style = 'font-size:75%')) #  tags$em(toDate), "Last updated: June 27, 2022"
+         p("This app contins data reported in SORMAS between:", fromDate, 'to', Sys.Date(),  style = 'font-size:85%')  ) #  tags$em(toDate), "Last updated: June 27, 2022", toDate
   ,
   column(3, align = "right",
          p('Powered by:', tags$a(href = " ", target = '_blank'), '', style = "font-size: 85%"),

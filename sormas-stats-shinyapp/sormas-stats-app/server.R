@@ -13,20 +13,7 @@ msg <- try({
 if(inherits(msg, "try-error")){
   showModal(modalDialog(title = "Startup error", as.character(msg), easyClose = TRUE))
 }
-# Call login module 
-credentials <- shinyauthr::loginServer(
-  id = "login",
-  data = users,
-  user_col = username,
-  pwd_col = password,
-  sodium_hashed = TRUE,
-  log_out = reactive(logout_init())
-)
-# call the logout module with reactive trigger to hide/show
-logout_init <- shinyauthr::logoutServer(
-  id = "logout",
-  active = reactive(credentials()$user_auth)
-)
+
 #### TRANSMISSION CHAIN ANALYSIS ----
 # Sourcing the component of server to render the network tab. To remove this tab, comment this line and restart R
 base::source(file.path("./server_components","server_transmission_network.R"), local = TRUE)$value
@@ -35,7 +22,7 @@ base::source(file.path("./server_components","server_transmission_network.R"), l
 base::source(file.path("./server_components","server_contact_data_analysis.R"), local = TRUE)$value 
 
 #### CASE DATA ANALYSIS ----
-base::source(file.path("./server_components","server_case_data_analysis.R"), local = TRUE)$value   
+base::source(file.path("./server_components","server_case_data_analysis.R"), local = TRUE)$value 
     
 #### EVETN DATA ANALYSIS ----
 base::source(file.path("./server_components","server_event_data_analysis.R"), local = TRUE)$value 
