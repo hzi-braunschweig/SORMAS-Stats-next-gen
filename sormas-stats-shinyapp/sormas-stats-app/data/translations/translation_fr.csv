@@ -37,4 +37,42 @@ Find all the source codes on Github:, Retrouvez tous les codes sources sur Githu
 Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on , Vous voulez contribuer ? Vous avez une question ? Identifier un bogue ou faire une demande ? Ouvrez une discussion sur 
 This app contains data reported in SORMAS between:, Cette application contient des données rapportées dans SORMAS entre:
 Powered by:, Propulsé par:
+You can request more indicators you want to see here, Vous pouvez demander plus d'indicateurs que vous voulez voir ici
+Meaning of column headers, Signification des en-têtes de colonne
+Name:, Nom:
+Name of administrative unit, Nom de l'unité administrative
+Total number of cases reported within the time interval specified in the filter, Nombre total de cas signalés dans l'intervalle de temps spécifié dans le filtre
+Total_last24hrs:, Total_dernières24heures:
+Total number of cases reported in the last 24 hrs, Nombre total de cas signalés au cours des dernières 24 heures
+Total number of confirmed cases, Nombre total de cas confirmés
+Total number of suspected cases, Nombre total de cas suspects
+Total number of recovered cases, Nombre total de cas récupérés
+Total number of imported cases, Nombre total de cas importés
+Total number of cases that are not on quarantine, Nombre total de cas qui ne sont pas en quarantaine
+Total number of probable cases, Nombre total de cas probables
+Total number of unclassified cases, Nombre total de cas non classifiés
+Total number of death cases, Nombre total de décès
+No_Outcome:, Pas d'issue:
+Total number of cases  with no outcome, Nombre total de cas sans issue
+Total number of cases with unknown outcome, Nombre total de cas à l'issue inconnue
+Total number of cases quarantine at home, Nombre total de cas en quarantaine à domicile
+Total number of cases quarantine at other places, Nombre total de cas en quarantaine dans d'autres endroits
+Total number of cases with unknown quarantine, Nombre total de cas dont la quarantaine est inconnue
+Total number of cases quarantine in an institution, Nombre total de cas en quarantaine dans une institution
+Total number of cases resulting from local transmission, Nombre total de cas résultant d'une transmission locale
+Case data analysis, Analyse des données de cas
+Please select filter options and click on `Apply changes` to run analyses., Veuillez sélectionner les options de filtrage et cliquer sur "Appliquer les changements" pour lancer les analyses.
+
+
+
+
+
+
+
+
+
+
+
+
+
 

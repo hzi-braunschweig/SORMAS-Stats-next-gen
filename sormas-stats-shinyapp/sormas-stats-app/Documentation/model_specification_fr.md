@@ -1,24 +1,26 @@
-About
+À propos
 =====
 
-SORMAS-Stats is a user-friendly R-Shiny web application that facilitates the estimation of key epidemiological parameters. We included epidemiological parameters such as incubation period (*IP*), serial interval (*SI*), time-varying reproduction number (*Rt*), effective reproduction number (*R*) and over-dispersion parameter (*k*) in the application. The following visualisations and analysis types are included in the app: network diagram, time series, table, chart, and map. Details about SORMAS-Stats is described in the articles cited below. 
+SORMAS-Stats est une application web R-Shiny conviviale qui facilite l'estimation de paramètres épidémiologiques clés. Nous avons inclus dans l'application des paramètres épidémiologiques tels que la période d'incubation (*IP*), l'intervalle sériel (*SI*), le nombre de reproduction variant dans le temps (*Rt*), le nombre de reproduction effectif (*R*) et le paramètre de dispersion (*k*). Les visualisations et les types d'analyse suivants sont inclus dans l'application : diagramme de réseau, série chronologique, tableau, graphique et carte. Des détails sur SORMAS-Stats sont décrits dans les articles cités ci-dessous. 
 
 A Novel Tool for Real-time Estimation of Epidemiological Parameters of Communicable Diseases Using Contact-Tracing Data: Development and Deployment
 --------------------------------------------------------
-Authors: 
+Les auteurs : 
 
-- Bernard C. Silenou :  Specification and implementation
+- Bernard C. Silenou :  Spécification et programmation
 
-- Carolin Verset: Specification and implementation 
+- Carolin Verset: Spécification et programmation
 
-- Ghozzi Stéphane: Specification and supervision
+- Ghozzi Stéphane:  Spécification et supervision
 
-- Basil Benduri Kaburi: Testing and feature review
+- Basil Benduri Kaburi: l'assurance de la qualité
+
+- Henrik Schanze: l'assurance de la qualité
 
 - Gérard Krause: Supervision
 
 
-SORMAS related publications
+Publications liées à SORMAS
 --------
 1. Silenou BC, Verset C, Kaburi BB, Leuci O, Ghozzi S, Duboudin C, Krause G. A Novel Tool for Real-time Estimation of Epidemiological Parameters of Communicable Diseases Using Contact-Tracing Data: Development and Deployment. JMIR Public Health Surveill. 2022 May 31;8(5):e34438. doi: 10.2196/34438. PMID: 35486812; PMCID: PMC9159465.
 2. Bernard C Silenou, Daniel Tom-Aba, Olawunmi Adeoye, Chinedu C Arinze, Ferdinand Oyiri, Anthony K Suleman, Adesola Yinka-Ogunleye, Juliane Dörrbecker,  Chikwe Ihekweazu, and Gérard Krause. Use of surveillance outbreak response  management and analysis system for human monkeypox outbreak, nigeria,  2017–2019. Emerging infectious diseases, 26(2):345, 2020.
@@ -26,7 +28,7 @@ SORMAS related publications
 4. Yinka-Ogunleye et al. Outbreak of human monkeypox in Nigeria in 2017–18: a clinical and epidemiological report. Lancet Infect Dis, 2019.
 5. Tom-Aba, D., Silenou, B.C., Doerrbecker, J., Fourie, C., Leitner, C., Wahnschaffe, M., Strysewske, M., Arinze, C.C. and Krause, G., 2020. The surveillance outbreak response management and analysis system (SORMAS): digital health global goods maturity assessment. *JMIR public health and surveillance*, *6*(2), p.e15860.
 
-Demo apps
+Applications démo
 --------
 * [Connect to demo SORMAS-Stats app version] (https://sormas.helmholtz-hzi.de/sormas-stats-shinyapp/)
 Username: stats   Password: aeJahpho3shi    

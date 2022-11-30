@@ -1,11 +1,11 @@
 ###### Case data analysis ##########
 # This sub section of the ui.r file renders the case data analysis tab
 # All front-end methods related to this tab should be added in this file
-tabPanel("Case data analysis", icon = icon("procedures"),
+tabPanel(i18n$t("Case data analysis"), icon = icon("procedures"),
 sidebarLayout(
  sidebarPanel( 
-   span(tags$i(h5("Please select filter options and click on `Apply changes` to run analyses.")), style="color:#045a8d"),
-   actionButton(inputId = "caseDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+   span(tags$i(h5(i18n$t("Please select filter options and click on `Apply changes` to run analyses."))), style="color:#045a8d"),
+   actionButton(inputId = "caseDataAnalysisAction", label = i18n$t("Apply changes"), icon =  icon("running"),
                 class = "btn-primary", width = '55%'),
    hr(),
    conditionalPanel(condition = "input.tabs1==0",
@@ -224,20 +224,20 @@ sidebarLayout(
                               infoBoxOutput("importedCases", width = 2)
                      )
            ),
-           tags$br(),tags$br(),
-           "You can add more indicators you wish and some description text here")
+           tags$br(), #tags$br(),
+           i18n$t("You can request more indicators you want to see here"))
   ,
   tabPanel("Cases by region", value = 6,
            fluidRow(
              column(12, DT::dataTableOutput("caseCountbyRegionTable"))    
            ),
-           h4(strong("Meaning of column headers")),
-           h5(strong("Name:"), "Name of administrative unit,", strong("Total:"), "Total number of cases reported within the time interval specified in the filter,", strong("Total_last24hrs:"), "Total number of cases reported in the last 24 hrs,", 
-              strong("Confirmed:"),  "Total number of confirmed cases,", strong("Probable:"), "Total number of probable cases,",  strong("Unclassified:"), "Total number of unclassified cases,",
-              strong("Suspected:"), "Total number of suspected cases,", strong("Deseases:"), "Total number of death cases,", strong("No_Outcome:"), "Total number of cases without an outcome yet,",
-              strong("Recovered:"), "Total number of recovered cases,", strong("Unk_Outcome:"), "Total number of cases with unknown outcome,", strong("In_Country:"), "Total number of cases resulting from local transmission,",
-              strong("Imported:"), "Total number of imported cases,", strong("Home_Q:"), "Total number of cases quarantine at home,", strong("Institutional_Q:"), "Total number of cases quarantine in an institurion,",
-              strong("No_Q:"), "Total number of cases that are not on quarantine,", strong("Other_Q:"), "Total number of cases quarantine at other places,", strong("Unk_Q:"), "Total number of cases with unknown quarantine"
+           h4(strong(i18n$t("Meaning of column headers"))),
+           h5(strong(i18n$t("Name:")), i18n$t("Name of administrative unit"), strong("Total:"), i18n$t("Total number of cases reported within the time interval specified in the filter"), strong("Total_last24hrs:"), i18n$t("Total number of cases reported in the last 24 hrs"), 
+              strong("Confirmed:"),  i18n$t("Total number of confirmed cases"), strong("Probable:"), i18n$t("Total number of probable cases"),  strong("Unclassified:"), i18n$t("Total number of unclassified cases"),
+              strong("Suspected:"), i18n$t("Total number of suspected cases"), strong("Deseases:"), i18n$t("Total number of death cases"), strong("No_Outcome:"), i18n$t("Total number of cases  with no outcome"),
+              strong("Recovered:"), i18n$t("Total number of recovered cases"), strong("Unk_Outcome:"), i18n$t("Total number of cases with unknown outcome"), strong("In_Country:"), i18n$t("Total number of cases resulting from local transmission"),
+              strong("Imported:"), i18n$t("Total number of imported cases"), strong("Home_Q:"), i18n$t("Total number of cases quarantine at home"), strong("Institutional_Q:"), i18n$t("Total number of cases quarantine in an institution"),
+              strong("No_Q:"), i18n$t("Total number of cases that are not on quarantine"), strong("Other_Q:"), i18n$t("Total number of cases quarantine at other places"), strong("Unk_Q:"), i18n$t("Total number of cases with unknown quarantine")
            )
   )
   ,

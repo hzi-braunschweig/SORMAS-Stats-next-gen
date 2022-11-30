@@ -1,19 +1,21 @@
 About
 =====
 
-SORMAS-Stats is a user-friendly R-Shiny web application that facilitates the estimation of key epidemiological parameters. We included epidemiological parameters such as incubation period (*IP*), serial interval (*SI*), time-varying reproduction number (*Rt*), effective reproduction number (*R*) and over-dispersion parameter (*k*) in the application. The following visualisations and analysis types are included in the app: network diagram, time series, table, chart, and map. Details about SORMAS-Stats is described in the articles cited below. 
+SORMAS-Stats is a user-friendly R-Shiny web application that facilitates the estimation of key epidemiological parameters. We included epidemiological parameters such as incubation period (*IP*), serial interval (*SI*), time-varying reproduction number (*Rt*), effective reproduction number (*R*) and dispersion parameter (*k*) in the application. The following visualisations and analysis types are included in the app: network diagram, time series, table, chart, and map. Details about SORMAS-Stats is described in the articles cited below. 
 
 A Novel Tool for Real-time Estimation of Epidemiological Parameters of Communicable Diseases Using Contact-Tracing Data: Development and Deployment
 --------------------------------------------------------
 Authors: 
 
-- Bernard C. Silenou :  Specification and implementation
+- Bernard C. Silenou :  Specification and programming
 
-- Carolin Verset: Specification and implementation 
+- Carolin Verset: Specification and programming 
 
 - Ghozzi Stéphane: Specification and supervision
 
-- Basil Benduri Kaburi: Testing and feature review
+- Basil Benduri Kaburi: Quality assurance
+
+- Henrik Schanze: Quality assurance
 
 - Gérard Krause: Supervision
 
