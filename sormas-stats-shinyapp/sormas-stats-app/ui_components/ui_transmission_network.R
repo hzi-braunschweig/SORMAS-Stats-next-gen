@@ -28,7 +28,7 @@ tabPanel("Transmission Network",
               # filter by Region
               pickerInput(
                 inputId = "regionNetworkUi",
-                label = 'Region of infection',
+                label = i18n$t('Region of infection'),
                 choices = sort(levels(as.factor(elist$region_name))),
                 options = list(
                   `actions-box` = TRUE, 
@@ -42,7 +42,7 @@ tabPanel("Transmission Network",
               # filter by entity type
               pickerInput(
                 inputId = "contactEntitiyTypeUi", 
-                label = 'Source infector entity type',
+                label = i18n$t('Source infector entity type'),
                 choices = sort(unique(elist$entityType)), 
                 options = list(
                   `actions-box` = TRUE, 
@@ -55,7 +55,7 @@ tabPanel("Transmission Network",
               # filter by relationship with infector
               pickerInput(
                 inputId = "relationCaseUi", 
-                label = 'Contact settings',
+                label = i18n$t('Contact settings'),
                 choices = sort(levels(as.factor(elist$relationtocase))), 
                 options = list(
                   `actions-box` = TRUE, 
@@ -68,7 +68,7 @@ tabPanel("Transmission Network",
               # filter by event status
               pickerInput(
                 inputId = "eventstatusUI", 
-                label = 'Event Status',
+                label = i18n$t('Event status'),
                 choices = sort(levels(as.factor(elist$eventstatus))), 
                 options = list(
                   `actions-box` = TRUE, 
@@ -81,7 +81,7 @@ tabPanel("Transmission Network",
               # filter by event risk level
               pickerInput(
                 inputId = "risklevelUI", 
-                label = 'Event risk level',
+                label = i18n$t('Event risk level'),
                 choices = sort(levels(as.factor(elist$risklevel_event))), 
                 options = list(
                   `actions-box` = TRUE, 
@@ -90,29 +90,29 @@ tabPanel("Transmission Network",
                 selected = NULL,
                 multiple = TRUE
               ),
-              checkboxInput("resultingCaseOnlyUi", "Only chains with resulting cases ?", TRUE),
-              checkboxInput("excludeHealthyEventPartUi", "Exclude healthy event participant ?", FALSE),
-              checkboxInput("activeEventsOnlyUi", "Only chains with active events ?", FALSE),
-              checkboxInput("IgraphLayoutUi", "Fast and fixed visualization ?", TRUE),
-              checkboxInput("visNetworkDiagramUi", "Visualize network diagram ?", TRUE),
+              checkboxInput("resultingCaseOnlyUi", i18n$t("Only chains with resulting cases ?"), TRUE),
+              checkboxInput("excludeHealthyEventPartUi", i18n$t("Exclude healthy event participant ?"), FALSE),
+              checkboxInput("activeEventsOnlyUi", i18n$t("Only chains with active events ?"), FALSE),
+              checkboxInput("IgraphLayoutUi", i18n$t("Fast and fixed visualization ?"), TRUE),
+              checkboxInput("visNetworkDiagramUi", i18n$t("Visualize network diagram ?"), TRUE),
               selectizeInput(
                 inputId = "visSelectedChainsUi"
-                , label = h5("Source infector node IDs (comma delimited)")
+                , label = h5(i18n$t("Source infector node IDs (comma delimited)"))
                 , choices = NULL
                 , multiple = TRUE
                 , options = list(create = TRUE)
               ),
-              numericInput("nodeDegreeMinUi", h5("Minimum source infector node contact"), value = 1, min = 1),
-              textInput("visSingleNodeUi", label = h5("Only contacts of this ID"),
-                        value = "", placeholder = "Enter uuid of node ..." ),
+              numericInput("nodeDegreeMinUi", h5(i18n$t("Minimum source infector node contact")), value = 1, min = 1),
+              textInput("visSingleNodeUi", label = h5(i18n$t("Only contacts of this ID")),
+                        value = "", placeholder = "Enter uuid of node ..."),
               
               # adding action button to apply filters
-              actionButton(inputId = "transChainAction", label = "Apply changes", icon =  icon("running"),
+              actionButton(inputId = "transChainAction", label = i18n$t("Apply changes"), icon =  icon("running"),
                            class = "btn-primary", width = '65%'), #  class = "btn-primary" for normal size icon, ref: https://www.jquery-az.com/boots/demo.php?ex=12.0_1
               #span(tags$i(h6("Click this button to update the output displayed on this dashboard each time you modify the filters.")), style="color:#045a8d"),
 
               # add logout button to UI
-              shinyauthr::logoutUI(id = "logout"),
+              #shinyauthr::logoutUI(id = "logout"),
               #br(),
               #hr(),
               #h6("Powered by:"),
@@ -123,8 +123,8 @@ tabPanel("Transmission Network",
             mainPanel(
               width = 10,
               # add login panel UI function
-              shinyauthr::loginUI(id = "login", title = "Please authenticate to begin analysis. Default credential is
-                                               username: ars password: sormas-stats"),
+              #shinyauthr::loginUI(id = "login", title = "Please authenticate to begin analysis. Default credential is
+              #                                 username: ars password: sormas-stats"),
               # add logout button to UI
               # div(class = "pull-right", shinyauthr::logoutUI(id = "logout")), # can also be "pull-left" or "pull-middle"
               
@@ -137,7 +137,7 @@ tabPanel("Transmission Network",
               fluidRow(
                 column(width = 6, align = "left",
                        box(
-                         h4(helpText("Source infector node ID. Use this ID to extract a single chain",  )),
+                         h4(helpText(i18n$t("Source infector node ID. Use this ID to extract a single chain"),  )),
                          #footer = "Node degree",
                          status ="primary", #  "success", # or "warning", 
                          solidHeader = FALSE,
@@ -150,11 +150,11 @@ tabPanel("Transmission Network",
                 )
                 ,
                 column(width = 6, align = "left",
-                       p('* Zoom in the network diagram to see the contact categories and IDs for person and event nodes.', style = "font-size: 95%"),
-                       p('* High risk => Type of contact is Face_to_face_long, Medical_unsave, Touched_fluid, Touched_cloth, Physical_contact, otherwise, Low risk', style = "font-size: 95%"),
-                       p('* Right click on the network diagram or legend to download or copy.', style = "font-size: 95%"),
-                       p("* The filters on the left panel are based on complete data, thus entities with missing values (NULL or UNKNOWN) for the variable used for filtering are dropped.", style = "font-size: 95%"),
-                       p('* All of the data used to generate indicators and figures in this app were obtained from', tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), '.', style = "font-size: 95%")
+                       p(i18n$t('* Zoom in the network diagram to see the contact categories and IDs for person and event nodes'), style = "font-size: 95%"),
+                       p(i18n$t('* High risk means Type of contact is Face_to_face_long or Medical_unsave or Touched_fluid or Touched_cloth or Physical_contact else Low risk'), style = "font-size: 95%"),
+                       p(i18n$t('* Right click on the network diagram or legend to download or copy.'), style = "font-size: 95%"),
+                       p(i18n$t('* The filters are based on complete data and entities with missing values for the variable used for filtering are not considered'), style = "font-size: 95%"),
+                       p(i18n$t('* The data used to generate indicators and figures in this app were obtained from'), tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), '.', style = "font-size: 95%")
                 )
               )
             ) # end of main panel
@@ -163,7 +163,7 @@ tabPanel("Transmission Network",
           ,
           # network parameters
           wellPanel(style = "background: white", 
-                    h4(helpText("Network summary indicators")),
+                    h4(helpText(i18n$t("Summary indicators"))),
                     fluidRow(
                       column(2, infoBoxOutput("totalEdges", width = 12)),
                       column(2, infoBoxOutput("totalNodes", width = 12)),
@@ -195,13 +195,13 @@ tabPanel("Transmission Network",
           fluidRow( width = 12,
                     column(2,
                            wellPanel(
-                             h4(helpText("Total node counts by classification")),
+                             h4(helpText(i18n$t("Total node counts by classification"))),
                              div( DT::dataTableOutput("nodeClassificationCountTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%")
                            )
                     ),
                     column(5,
                            wellPanel(
-                             h4(helpText("Histogram of betweeness score")),
+                             h4(helpText(i18n$t("Histogram of betweeness score"))),
                              #div( DT::dataTableOutput("networkParameter2Table")  , style = "font-size: 100%; width: 100%" )
                              fluidRow(
                                width = 12,
@@ -211,7 +211,7 @@ tabPanel("Transmission Network",
                              fluidRow(
                                width = 12,
                                box(
-                                 h4(helpText("Summary of node betweeness")),
+                                 h4(helpText(i18n$t("Summary of node betweeness"))),
                                  #footer = "Node degree",
                                  status ="primary", #  "success", # or "warning", 
                                  solidHeader = FALSE,
@@ -227,7 +227,7 @@ tabPanel("Transmission Network",
                     ,
                     column(5,
                            wellPanel(
-                             h4(helpText("Histogram of number of contacts per node (Node degree)")),
+                             h4(helpText(i18n$t("Histogram of number of contacts per node (Node degree)"))),
                              fluidRow(
                                width = 12,
                                plotOutput("nodeDegreeHist", width = "100%", height = "40vh")
@@ -235,7 +235,7 @@ tabPanel("Transmission Network",
                              fluidRow(
                                width = 12,
                                box(
-                                 h4(helpText("Summary of number of ontacts per node (Node degree)")),
+                                 h4(helpText(i18n$t("Summary of number of contacts per node (Node degree)"))),
                                  #footer = "Node degree",
                                  status ="primary", #  "success", # or "warning", 
                                  solidHeader = FALSE,

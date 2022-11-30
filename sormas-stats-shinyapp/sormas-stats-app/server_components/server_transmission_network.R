@@ -12,7 +12,7 @@ output$pickerInputDistrict2 <- renderUI({
   }else{
     choicesRegionNetworkUI = NULL
   }
-  pickerInput(inputId = 'districtUi2', label = 'District of infection',
+  pickerInput(inputId = 'districtUi2', label = i18n$t('District of infection'),
               choices = choicesRegionNetworkUI, 
               options = list(
                 `actions-box` = TRUE, 
