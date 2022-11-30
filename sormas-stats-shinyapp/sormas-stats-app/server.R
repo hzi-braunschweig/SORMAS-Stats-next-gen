@@ -1,5 +1,11 @@
 shinyServer(
-  function(input, output,session) { 
+function(input, output,session) { 
+### LANGUAGE SETTINGS ----   
+observeEvent(input$selected_language, {
+  # update language in session
+  shiny.i18n::update_lang(session, input$selected_language)
+})    
+
 #### EXTRACTING DATA FROM SORMAS DATABASE -----
 msg <- try({
       base::source(file.path("./server_components","server_loading_data_from_sormas.R"), local = TRUE)$value

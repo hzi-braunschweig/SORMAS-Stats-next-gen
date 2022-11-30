@@ -1,0 +1,78 @@
+en, fr
+Change language,  Changer de langue
+Select, Sélectionner
+Disease, Maladie
+Report date (dd-mm-yyyy), Date du rapport (jj-mm-aaaa)
+Region of infection, Région d'infection
+District of infection, District d'infection
+Source infector entity type, Type d'entité d'infecteur source
+Contact settings, Paramètres du contact
+Event status, Statut de l'événement
+Event risk level, Niveau de risque de l'événement
+Only chains with resulting cases ?, Seulement les chaînes avec des cas résultants ?
+Exclude healthy event participant ?, Exclure les participants de l'événement en bonne santé ?
+Only chains with active events ?,  Seulement les chaînes avec des événements actifs ?
+Fast and fixed visualization ?,  Visualisation rapide et fixe ?
+Visualize network diagram ?,  Visualiser le diagramme de contamination ?
+Source infector node IDs (comma delimited), ID des nœuds de l'infecteur source (délimité par des virgules)
+Minimum source infector node contact, Contact minimal de la source nœud 
+Only contacts of this ID, Seulement les contacts de cet ID
+Apply changes, Appliquer les changements
+Source infector node ID. Use this ID to extract a single chain, ID de nœud d'infecteur source. Utilisez cet ID pour extraire une seule chaîne
+* Zoom in the network diagram to see the contact categories and IDs for person and event nodes, * Zoomer dans le diagramme du réseau pour voir les catégories de contact et les ID des nœuds de personnes et d'événements
+* High risk means Type of contact is Face_to_face_long or Medical_unsave or Touched_fluid or Touched_cloth or Physical_contact else Low risk, * Risque élevé signifie que le type de contact est Face_to_face_long ou Medical_unsave ou Touched_fluid ou Touched_cloth ou Physical_contact sinon Risque Faible.
+* Right click on the network diagram or legend to download or copy., * Cliquez à droite sur le diagramme ou la légende pour télécharger ou le copier.
+* The filters are based on complete data and entities with missing values for the variable used for filtering are not considered,  * Les filtres sont basés sur des données complètes et les entités ayant des valeurs manquantes pour la variable utilisée pour le filtrage ne sont pas prises en compte
+* The data used to generate indicators and figures in this app were obtained from,  * Les données utilisées pour générer les indicateurs et les chiffres de cette application ont été obtenues auprès de 
+Summary indicators, Indicateurs sommaires
+Total node counts by classification,  Nombre total de nœuds par classification
+Histogram of betweeness score, Histogramme de l'indice d'équivalence
+Summary of node betweeness, Résumé de l'écart des nœuds
+Histogram of number of contacts per node (Node degree), Histogramme du nombre de contacts par nœud (degré de nœud)
+Summary of number of contacts per node (Node degree), Résumé du nombre de contacts par nœud (degré de nœud)
+The data used in this app were obtained from, Les données utilisées dans cette application ont été obtenues auprès de
+. Messages in red of the form Error: ... means there is no available data to analyse. Please change your filter option or inform your server admin, . Les messages en rouge de la forme Error : ... signifient qu'il n'y a pas de données disponibles à analyser. Veuillez changer votre option de filtre ou informer votre administrateur de serveur
+App created by the , Application créée par le 
+Find all the source codes on Github:, Retrouvez tous les codes sources sur Github :
+Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on , Vous voulez contribuer ? Vous avez une question ? Identifier un bogue ou faire une demande ? Ouvrez une discussion sur 
+This app contains data reported in SORMAS between:, Cette application contient des données rapportées dans SORMAS entre:
+Powered by:, Propulsé par:
+You can request more indicators you want to see here, Vous pouvez demander plus d'indicateurs que vous voulez voir ici
+Meaning of column headers, Signification des en-têtes de colonne
+Name:, Nom:
+Name of administrative unit, Nom de l'unité administrative
+Total number of cases reported within the time interval specified in the filter, Nombre total de cas signalés dans l'intervalle de temps spécifié dans le filtre
+Total_last24hrs:, Total_dernières24heures:
+Total number of cases reported in the last 24 hrs, Nombre total de cas signalés au cours des dernières 24 heures
+Total number of confirmed cases, Nombre total de cas confirmés
+Total number of suspected cases, Nombre total de cas suspects
+Total number of recovered cases, Nombre total de cas récupérés
+Total number of imported cases, Nombre total de cas importés
+Total number of cases that are not on quarantine, Nombre total de cas qui ne sont pas en quarantaine
+Total number of probable cases, Nombre total de cas probables
+Total number of unclassified cases, Nombre total de cas non classifiés
+Total number of death cases, Nombre total de décès
+No_Outcome:, Pas d'issue:
+Total number of cases  with no outcome, Nombre total de cas sans issue
+Total number of cases with unknown outcome, Nombre total de cas à l'issue inconnue
+Total number of cases quarantine at home, Nombre total de cas en quarantaine à domicile
+Total number of cases quarantine at other places, Nombre total de cas en quarantaine dans d'autres endroits
+Total number of cases with unknown quarantine, Nombre total de cas dont la quarantaine est inconnue
+Total number of cases quarantine in an institution, Nombre total de cas en quarantaine dans une institution
+Total number of cases resulting from local transmission, Nombre total de cas résultant d'une transmission locale
+Case data analysis, Analyse des données de cas
+Please select filter options and click on `Apply changes` to run analyses., Veuillez sélectionner les options de filtrage et cliquer sur "Appliquer les changements" pour lancer les analyses.
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -36,3 +36,7 @@ eventData <- data.frame()
 contRegionDist <-data.frame()
 users <- data.frame(username = character(), password = character(), stringsAsFactors = FALSE)
 sample_table <- data.frame()
+
+# Loading translation file 
+i18n <- Translator$new(translation_csvs_path =  file.path("./data/translations"))
+i18n$set_translation_language(default_language) # Selecting default language
