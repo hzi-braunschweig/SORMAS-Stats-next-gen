@@ -9,7 +9,7 @@ sidebarLayout(
                 class = "btn-primary", width = '55%'),
    hr(),
    conditionalPanel(condition = "input.tabs1==0",
-                    radioButtons("caseDashboardIndicatorTypeUi","Indicator type",  
+                    radioButtons("caseDashboardIndicatorTypeUi",i18n$t("Indicator type"),  
                                  choices = c("Count","Proportion"),
                                  selected = c("Count")) 
    ),
@@ -123,13 +123,13 @@ sidebarLayout(
  mainPanel(
    fluidRow(
      column(2, 
-            pickerInput("diseaseCaseUi", "Disease",
+            pickerInput("diseaseCaseUi", i18n$t("Disease"),
                         choices = sort(levels(as.factor(casePersonRegionDist$disease))),
                         selected = c("CORONAVIRUS"),
                         multiple = FALSE)
      ),
      column(2,
-            dateRangeInput("reportdateCaseUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
+            dateRangeInput("reportdateCaseUi",i18n$t("Report date (dd-mm-yyyy)"), start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                            max = NULL, format = "dd-mm-yyyy", startview = "month",
                            weekstart = 0, language = "en", separator = " to ", width = NULL,
                            autoclose = TRUE)
@@ -137,7 +137,7 @@ sidebarLayout(
      column(2, 
             pickerInput(
               inputId = "regionCaseUi",
-              label = 'Region of case',
+              label = i18n$t('Region of case'),
               choices = sort(levels(as.factor(casePersonRegionDist$region_name))),
               options = list(
                 `actions-box` = TRUE,
@@ -149,7 +149,7 @@ sidebarLayout(
      ),
      column(2, pickerInput(
        inputId = "classificationCaseUi",
-       label = 'Classification of case',
+       label = i18n$t('Classification of case'),
        choices = sort(levels(as.factor(casePersonRegionDist$caseclassification))),
        options = list(
          `actions-box` = TRUE,
@@ -159,7 +159,7 @@ sidebarLayout(
      )),
      column(2, pickerInput(
        inputId = "facilityCaseUi",
-       label = 'Facility id of case',
+       label = i18n$t('Facility id of case'),
        choices = sort(levels(as.factor(casePersonRegionDist$healthfacility_id))),
        options = list(
          `actions-box` = TRUE,
@@ -170,9 +170,9 @@ sidebarLayout(
    )
    ,
   tabsetPanel(id="tabs1",
-  tabPanel("Case dashboard", value = 0,
+  tabPanel(i18n$t("Case dashboard"), value = 0,
            wellPanel(style = "background: white",
-                     h4('Case classification'),
+                     h4(i18n$t('Case classification')),
                      fluidRow(width = 12,
                               infoBoxOutput("allCase", width = 2),
                               infoBoxOutput("UnclassifiedCases",width = 2),
@@ -180,7 +180,7 @@ sidebarLayout(
                               infoBoxOutput("probableCases",width = 2),
                               infoBoxOutput("confirmedCases", width = 2)
                      ),
-                     h4('Case quarantine'),
+                     h4(i18n$t('Case quarantine')),
                      fluidRow(width=12,
                               infoBoxOutput("institutionalQCases",width = 2),
                               infoBoxOutput("homeQCases", width = 2),
@@ -189,7 +189,7 @@ sidebarLayout(
                               infoBoxOutput("unknownQCases", width = 2),
                               infoBoxOutput("MissingQCases", width = 2)
                      ),
-                     h4('Case gender'),
+                     h4(i18n$t('Case gender')),
                      fluidRow(width=12,
                               infoBoxOutput("maleSexCases",width = 2),
                               infoBoxOutput("femaleSexCases", width = 2),
@@ -197,7 +197,7 @@ sidebarLayout(
                               infoBoxOutput("unknownSexCases", width = 2),
                               infoBoxOutput("MissingSexCases", width = 2)
                      ),
-                     h4('Case age'),
+                     h4(i18n$t('Case age')),
                      fluidRow(width=12,
                               infoBoxOutput("minAgeCases",width = 2),
                               infoBoxOutput("medianAgeCases", width = 2),
@@ -205,20 +205,20 @@ sidebarLayout(
                               infoBoxOutput("maxAgeCases", width = 2),
                               infoBoxOutput("missingAgeCases", width = 2)
                      ),
-                     h4('Case outcome'),
+                     h4(i18n$t('Case outcome')),
                      fluidRow(width=12,
                               infoBoxOutput("diseasedCases",width = 2),
                               infoBoxOutput("recoveredCases", width = 2),
                               infoBoxOutput("unknownOutcomeCases", width = 2),
                               infoBoxOutput("noOutcomeCases",width = 2)
                      ),
-                     h4('Case occupation'),
+                     h4(i18n$t('Case occupation')),
                      fluidRow(width=12,
                               infoBoxOutput("healthWorkerOcupCases",width = 2),
                               infoBoxOutput("otherOcupCases", width = 2),
                               infoBoxOutput("MissingOcupCases", width = 2)
                      ),
-                     h4('Case Origin'),
+                     h4(i18n$t('Case Origin')),
                      fluidRow(width=12,
                               infoBoxOutput("incountryCases",width = 2),
                               infoBoxOutput("importedCases", width = 2)
@@ -227,7 +227,7 @@ sidebarLayout(
            tags$br(), #tags$br(),
            i18n$t("You can request more indicators you want to see here"))
   ,
-  tabPanel("Cases by region", value = 6,
+  tabPanel(i18n$t("Cases by region"), value = 6,
            fluidRow(
              column(12, DT::dataTableOutput("caseCountbyRegionTable"))    
            ),
@@ -241,13 +241,13 @@ sidebarLayout(
            )
   )
   ,
-  tabPanel("Epidemic curve", value = 1, plotlyOutput("caseEpicurvePlot", width = "100%", height = "80vh"))
+  tabPanel(i18n$t("Epidemic curve"), value = 1, plotlyOutput("caseEpicurvePlot", width = "100%", height = "80vh"))
   ,
-  tabPanel("Time series plot", value = 2, plotlyOutput("caseTimeSeriesPlot", width = "100%", height = "80vh"))
+  tabPanel(i18n$t("Time series plot"), value = 2, plotlyOutput("caseTimeSeriesPlot", width = "100%", height = "80vh"))
   ,
-  tabPanel("Case Pyramid",  value = 3,
+  tabPanel(i18n$t("Case Pyramid"),  value = 3,
            wellPanel(
-             h4(helpText("Case pyramid by Sex and Age")), 
+             h4(helpText(i18n$t("Case pyramid by Sex and Age"))), 
              plotlyOutput("casePyramidPlot", width = "80%", height = "75vh"), # height = "auto"
              style = "background: white"
            ) 
@@ -255,12 +255,11 @@ sidebarLayout(
   ,
   tabPanel("Administrative map", value = 4, plotOutput("regionMapCaseCount", width = "100%", height = "80vh"))
   ,
-  tabPanel("Serial interval analysis", value = 7,
+  tabPanel(i18n$t("Serial interval analysis"), value = 7,
            fluidRow(width = 10,
                     column(12,
                             wellPanel(
-                              h4(helpText("Medel selection: Goodness-of-fit criteria and statistics.  
-                                                             Model with smallest values correspond to distribtion with best fit." )),
+                              h4(helpText(i18n$t("Model selection: Goodness-of-fit criteria and statistics. Model with smallest values correspond to distribution with best fit." ))),
                               div( DT::dataTableOutput("si_model_fitTable", width = "100%", height = "auto"), 
                                    style = "font-size: 100%; width: 100%")
                             )
@@ -270,7 +269,7 @@ sidebarLayout(
                      column(6,
                             conditionalPanel(condition = 'input.showModelDiagnosticsPanel_SI',
                                              wellPanel(
-                                               h4(helpText("Empirical and theoretical CDFs")),
+                                               h4(helpText(i18n$t("Empirical and theoretical CDFs"))),
                                                fluidRow(
                                                  width = 12,
                                                  plotOutput("SI_model_cdf_plot", width = "100%", height = "60vh")
@@ -281,7 +280,7 @@ sidebarLayout(
                      column(6,
                             conditionalPanel(condition = 'input.showModelDiagnosticsPanel_SI',
                                              wellPanel(
-                                               h4(helpText("Q-Q plot")),
+                                               h4(helpText(i18n$t("Q-Q plot"))),
                                                fluidRow(
                                                  width = 12,
                                                  plotOutput("SI_model_qq_plot", width = "100%", height = "60vh")
@@ -293,7 +292,7 @@ sidebarLayout(
            fluidRow( width = 10,
                      column(6,
                             wellPanel(
-                              h4(helpText("Empirical and theoretical density")),
+                              h4(helpText(i18n$t("Empirical and theoretical density"))),
                               fluidRow(
                                 width = 12,
                                 plotOutput("SI_hist_model_plot", width = "100%", height = "60vh")
@@ -305,14 +304,14 @@ sidebarLayout(
                               fluidRow(
                                 width = 12,
                                 box(
-                                  h4(helpText("Summary statistics for observed serial interval")),
+                                  h4(helpText(i18n$t("Summary statistics for observed serial interval"))),
                                   status ="primary", 
                                   solidHeader = FALSE,
                                   collapsible = TRUE,
                                   collapsed = FALSE,
                                   width = 15,
                                   div(DT::dataTableOutput("si_summaryTable", width = "100%", height = "auto"), style = "font-size: 100%; width: 100%"),
-                                  h5(helpText("n_value <= 0: number of records with negative or zero serial interval. This corresponds to assymptomatic transmissiion."))
+                                  h5(helpText(i18n$t("n_value <= 0: number of records with negative or zero serial interval. This corresponds to asymptomatic transmission.")))
                                 )
                               ),
                               fluidRow(
