@@ -82,19 +82,19 @@ output$sample_analysis_output <- renderUI({
              fluidRow(width=10,                                                         
                       column(6,                                                                
                              wellPanel(
-                               h4(helpText("To add some figures or info boxes here.")) 
+                               h4(helpText(i18n$t("You can request more indicators you want to see here"))) 
                              )
                       ),
                       column(6,                    
                              wellPanel(
-                               h4(helpText("To add some info boxes here")) 
+                               h4(helpText(i18n$t("You can request more indicators you want to see here"))) 
                              ) )
              ) ## end of fluid row
     )
   )
   # check for configuration and add more panels 
 if(sample_custom_indicators=="t"){
-panels[[2]]=tabPanel("Custom indicators",
+panels[[2]]=tabPanel(i18n$t("Custom indicators"),
 fluidRow(width=10,                                                         
 column(6,                                                                
  wellPanel(

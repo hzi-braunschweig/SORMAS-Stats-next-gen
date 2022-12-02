@@ -153,13 +153,13 @@ tabPanel("Transmission Network",
                        p(i18n$t('* Zoom in the network diagram to see the contact categories and IDs for person and event nodes'), style = "font-size: 95%"),
                        p(i18n$t('* High risk means Type of contact is Face_to_face_long or Medical_unsave or Touched_fluid or Touched_cloth or Physical_contact else Low risk'), style = "font-size: 95%"),
                        p(i18n$t('* Right click on the network diagram or legend to download or copy.'), style = "font-size: 95%"),
-                       p(i18n$t('* The filters are based on complete data and entities with missing values for the variable used for filtering are not considered'), style = "font-size: 95%"),
+                       p(i18n$t('* The filters are based on complete data. Entities with missing values for the variable used for filtering are not considered'), style = "font-size: 95%"),
                        p(i18n$t('* The data used to generate indicators and figures in this app were obtained from'), tags$a(href = "https://demo.sormas.org/sormas-ui/", 'SORMAS', target = '_blank'), '.', style = "font-size: 95%")
                 )
               )
             ) # end of main panel
             
-          )
+          ) 
           ,
           # network parameters
           wellPanel(style = "background: white", 

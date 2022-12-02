@@ -31,8 +31,8 @@ base::source(file.path("./server_components","server_event_data_analysis.R"), lo
 base::source(file.path("./server_components","server_sample_data_analysis.R"), local = TRUE)$value 
     
 ## MODEL SPECIFICATION ----
-    output$model_specificationUI <- renderUI(
-      includeMarkdown(paste0("Documentation/model_specification_", input$language,".md"))
+    output$documentsUI <- renderUI(
+      includeMarkdown(paste0("data/documents/documents_", input$language,".md"))
     )
 } 
 )

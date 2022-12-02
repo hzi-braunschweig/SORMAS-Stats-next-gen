@@ -9,7 +9,7 @@ output$pickerInputdistrictCaseUi <- renderUI({
    distinct(district_name) %>%
    .$district_name
   }else{temp = NULL}
-  pickerInput(inputId = 'districtCaseUi', label = 'District of case',
+  pickerInput(inputId = 'districtCaseUi', label = i18n$t('District of case'),
               choices = temp, options = list(`actions-box` = TRUE, size = 12),
               selected = NULL, multiple = TRUE)
   })

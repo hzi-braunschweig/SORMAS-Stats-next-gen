@@ -22,8 +22,8 @@ base::source(file.path("./ui_components","ui_contact_data_analysis.R"), local = 
 # Sample data analysis ########
 base::source(file.path("./ui_components","ui_sample_data_analysis.R"), local = TRUE)$value,
 
-# Model specification ----
-tabPanel("Model specification",
+# Documents ----
+tabPanel(i18n$t("Documents"),
          icon = icon("book"),
          radioButtons(inputId = "language", 
                       label = "",
@@ -31,29 +31,24 @@ tabPanel("Model specification",
                       choiceNames = c("English", "Français", "Deutsch"),
                       selected = "en",
                       inline = TRUE),
-uiOutput("model_specificationUI")
+uiOutput("documentsUI")
 ),
 
 # About ------
-tabPanel(title = "About", 
+tabPanel(title = i18n$t("About"), 
 fluidRow( 
 dashboardPage( # the use of shiny dashboard is to make sure that all icons are fine, do not remove or deactivate this tab.
   dashboardHeader( ),
   dashboardSidebar(disable = TRUE),
    dashboardBody(
-h4(strong("About SORMAS and SORMAS-Stats")),
-h5("The Surveillance, Outbreak Response Management and Analysis System (SORMAS) is an open-source mHealth (mobile health) system that organises and facilitates infectious
-disease control and outbreak management procedures in addition to disease surveillance and epidemiologic analysis for all administrative
-levels of a public health system. SORMAS includes specific interfaces for 12 users (e.g., laboratorian, contact tracing officer, epidemiologist), 
-disease-specific process modules for 21 epidemic-prone diseases, and a customizable process module for unforeseen emerging diseases and a COVID-19 module, 
-which we developed to support countries in the outbreak response. Users can operate SORMAS on the web or mobile app and bidirectionally synchronized with a central server via mobile telecommunication networks."),
+h4(strong(i18n$t("About SORMAS and SORMAS-Stats"))),
+h5(i18n$t("The Surveillance, Outbreak Response Management and Analysis System (SORMAS) is an open-source mobile health app that facilitates infectious disease control and outbreak management procedures in addition to disease surveillance and epidemiologic analysis for all levels of a public health system. SORMAS includes specific interfaces for 12 users (e.g., laboratorian, contact tracing officer, epidemiologist), disease-specific process modules for 21 epidemic-prone diseases and a customizable process module for unforeseen emerging diseases and a COVID-19 module, which we developed to support countries in the outbreak response. Users can operate SORMAS on the web or mobile app and synchronize bi-directionally with a central server via mobile telecommunication networks.")),
      
- h5("SORMAS-Stats contain functions to analyze and visualize surveillance data collected by SORMAS."), 
-     h4(strong("Users, diseases and control measures in SORMAS")),
+h5(i18n$t("SORMAS-Stats contain functions to analyze and visualize surveillance data collected by SORMAS.")), 
+     h4(strong(i18n$t("Users, diseases and control measures in SORMAS"))),
      img(src = "process-flow-sormas.png", width = "800", height = "900"),  img(src = "sormas_diseases.png", width = "800", height = "900"),
-#   h5(" Add more txt  and gifures here...")
-
- )
+#   h5("Add more text and figures here...")
+)
 )
 )
 ),
