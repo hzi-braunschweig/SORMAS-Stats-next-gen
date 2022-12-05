@@ -47,13 +47,14 @@ sidebarPanel(width = 2,
                      selected = "Location category",
                      multiple = FALSE
                    )
-  ),
-  conditionalPanel(condition =  "input.tabEvent == 3",
-                   radioButtons("eventMapShapesUi","Choose map administrative area",  choices = c("Region","Departement", "Commune"),
-                                selected = c("Region")),
-                   sliderInput("eventMapTextSizeUi", label = "Choose text size for map", min = 0, 
-                               max = 2, step = 0.2, value = 1.2)
-  )               
+  )
+  # ,
+  # conditionalPanel(condition =  "input.tabEvent == 3",
+  #                  radioButtons("eventMapShapesUi","Choose map administrative area",  choices = c("Region","Departement", "Commune"),
+  #                               selected = c("Region")),
+  #                  sliderInput("eventMapTextSizeUi", label = "Choose text size for map", min = 0, 
+  #                              max = 2, step = 0.2, value = 1.2)
+  # )               
  ), 
 mainPanel(width = 10,
  fluidRow(
@@ -190,21 +191,22 @@ tabsetPanel(id= "tabEvent",
                            )              
                     )
           ) 
- ),
- tabPanel("Shapfile map", value = 3,
-          plotOutput("eventMapUi", width = "100%", height = "95vh")),
- tabPanel("Leaflet map",  #  value = 10, 
-          leafletOutput("map", width = "100%", height = 900),
-          absolutePanel(top = 10, right = 10,
-            sliderInput("range", "Magnitudes", min(eventData$n_ep), max(eventData$n_ep),  # this can be used to represent number of ep per event node
-                        value = range(eventData$n_ep), step = 1
-            ),
-            selectInput("colors", "Choose color Scheme to plot entities",
-                        rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
-            ),
-            checkboxInput("legend", "Show legend", TRUE)                       
-          )
  )
+ #,
+ # tabPanel("Shapfile map", value = 3, plotOutput("eventMapUi", width = "100%", height = "95vh")), # commneted because development is not complete
+ # tabPanel("Leaflet map",  #  value = 10, 
+ #          leafletOutput("map", width = "100%", height = 900),
+ #          absolutePanel(top = 10, right = 10,
+ #            sliderInput("range", "Magnitudes", min(eventData$n_ep), max(eventData$n_ep),  # this can be used to represent number of ep per event node
+ #                        value = range(eventData$n_ep), step = 1
+ #            ),
+ #            selectInput("colors", "Choose color Scheme to plot entities",
+ #                        rownames(subset(brewer.pal.info, category %in% c("seq", "div")))
+ #            ),
+ #            checkboxInput("legend", "Show legend", TRUE)                       
+ #          )
+ # )
+ 
  ) 
  ) # closing main panel                       
 )  # closing sidbarlayout

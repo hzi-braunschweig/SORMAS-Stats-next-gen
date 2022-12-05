@@ -252,8 +252,8 @@ sidebarLayout(
              style = "background: white"
            ) 
   )
-  ,
-  tabPanel("Administrative map", value = 4, plotOutput("regionMapCaseCount", width = "100%", height = "80vh"))
+  #,
+ # tabPanel("Administrative map", value = 4, plotOutput("regionMapCaseCount", width = "100%", height = "80vh")) # commented because the development of this tab is not complete
   ,
   tabPanel(i18n$t("Serial interval analysis"), value = 7,
            fluidRow(width = 10,
