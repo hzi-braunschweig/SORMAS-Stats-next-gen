@@ -35,7 +35,7 @@ casePersonRegionDist <-data.frame()
 event_variable_data <-data.frame()
 eventData <- data.frame()
 contRegionDist <-data.frame()
-users <- data.frame(username = character(), password = character(), stringsAsFactors = FALSE)
+#users <- data.frame(username = character(), password = character(), stringsAsFactors = FALSE)
 sample_table <- data.frame()
 
 # Loading translation file 

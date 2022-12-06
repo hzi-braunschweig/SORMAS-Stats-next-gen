@@ -13,7 +13,7 @@ output$pickerInputdistrictEventUi <- renderUI({
   }else{
     temp = NULL
   }
-  pickerInput(inputId = 'districtEventUi', label = 'District of event',
+  pickerInput(inputId = 'districtEventUi', label =i18n$t('District of event'),
               choices = temp, 
               options = list(
                 `actions-box` = TRUE, 

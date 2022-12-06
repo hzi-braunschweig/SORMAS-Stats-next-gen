@@ -1,11 +1,50 @@
 en; de
-MtCars Dataset Exdeorer; MtCars-Datensatz-Explorer  
 Change language;  Sprache ändern
 Select; Auswählen
 Disease; Krankheit
 Disease network diagram; Diagramm des Krankheitsnetzwerks
-Transmission Network; Übertragungsnetz
-Report date (dd-mm-yyyy); Berichtsdatum (tt-mm-jjjj)
-Region of infection; Region of infection
-District of infection;  District of infection
-Source infector entity type; Source infector entity type
+Transmission network; Übertragungsnetz
+Report date (dd-mm-yyyy); Meldedatum (tt-mm-jjjj)
+Region of infection; Bundesland der Infektion
+District of infection; Landkreis/Kreisfreie Stadt der Infektion
+Source infector entity type; Entitätstyp des Infektionsursprung
+Contact settings; Kontakteinstellungen
+Event status; Ereignisstatus
+Event risk level; Risikoniveau des Ereignis
+Only chains with resulting cases ?; Nur Ketten die zu Fall führen ?
+Exclude healthy event participant ?; Gesunde Ereignisteilnehmer ausschließen ?
+Only chains with active events ?;  Nur Ketten mit aktiven Ereignissen ?
+Fast and fixed visualization ?;  Schnelle und fixierte Darstellung ?
+Visualize network diagram ?;  Netwerkdiagramm darstellen ?
+Source infector node IDs (comma delimited); Infektionsursprung-Knoten-ID (durch Komma getrennt)
+Minimum source infector node contact; Kleinste Anzahl von Kontakten des Infektionsursprungs
+Only contacts of this ID; Nur Kontakte dieser ID
+Apply changes; Änderungen überehmen
+Source infector node ID. Use this ID to extract a single chain; Knoten-ID des Infektionsursprunges. Nutzen Sie diese ID um einzelne Ketten zu extrahieren
+* Zoom in the network diagram to see the contact categories and IDs for person and event nodes; * Vergrößern Sie das Netzwerkdiagramm um die Kontaktkategorien und IDs von Personen und Ereignissen zu sehen
+* High risk means Type of contact is Face_to_face_long or Medical_unsave or Touched_fluid or Touched_cloth or Physical_contact else Low risk; * Hohes Risiko bedeutet Art des Kontaktes ist Face_to_face_long oder Medical_unsave oder Touched_fluid oder Touched_cloth oder Physical_contact ansonsten geringes Risiko
+* Right click on the network diagram or legend to download or copy.; * Zum Runterladen oder Kopieren des Netzwerkdiagramms rechtsklicken.
+* The filters are based on complete data. Entities with missing values for the variable used for filtering are not considered;  * Filter basieren auf vollständigen Daten. Entitäten mit fehlenden Werten für Variablen nötig für Filter werden ignoriert
+* The data used to generate indicators and figures in this app were obtained from;  * Die Daten die benutzt wurden um diese Indikatoren und Grafiken in dieser App zu erstellen stammen aus
+Summary indicators; Zusammenfassende Indikatoren
+Total node counts by classification;  Gesamtzahl an Knoten nach Kategorie
+Histogram of betweeness score; Histogramm des Betweeness-Scores
+Summary of node betweeness; Zusammenfassung der Betweeness
+Histogram of number of contacts per node (Node degree); Histogramme der Kontakanzahl pro Knoten (Knotengrad)
+Summary of number of contacts per node (Node degree); Zusammenfassung der Kontaktanzahl pro Knoten (Knotengrad)
+The data used in this app were obtained from; Die Daten in dieser App stammen aus
+. Messages in red of the form Error: ... means there is no available data to analyse. Please change your filter option or inform your server admin; . Nachrichten in rot der Form Error: ... bedeuten dass keine Daten sehr Analyse vorhanden sind. Bitte ändern Sie die Filtereinstellungen oder informieren Sie Ihren Serveradministrator
+App created by the ; Dies App wurde erstellt von
+Find all the source codes on Github:; Der gesamte Quellcode ist auf Github zu finden:
+Want to contribute? Have a question? Identify a bug or want to make a request? Open a discussion on ; Sie möchten etwas beitragen? Sie haben Fragen? Sie haben einen Bug gefunden oder möchten eine Anfrage stellen? Eröffnen Sie eine Diskussion auf
+This app contains data reported in SORMAS between:; Diese App enthält die in SORMAS gemeldeten Daten zwischen:
+Powered by:; Unterstützt durch:
+You can request more indicators you want to see here; Sie können weitere Indikatoren anfordern die Sie hier sehen möchten
+Meaning of column headers; Bedeutung der Spaltenüberschriften
+Name:; Name:
+Name of administrative unit; Name der Verwaltungsstelle
+Total number of cases reported within the time interval specified in the filter; Gesamtzahl gemeldeter Fälle im gewählten Zeitintervall
+Total_last24hrs:; Gesamt_letzte24Stunden:
+Total number of cases reported in the last 24 hrs; Gesamtzahl gemeldeter Fälle in den letzten 24 Stunden
+Total number of confirmed cases; Gesamtzahl klinisch-labordiagnostisch bestätigter Fälle
+Total number of suspected cases; Gesamtzahl klinisch diagnostizierter Fälle

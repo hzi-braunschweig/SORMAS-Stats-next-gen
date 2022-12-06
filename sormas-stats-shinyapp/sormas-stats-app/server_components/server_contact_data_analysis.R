@@ -212,7 +212,7 @@ output$conPerGerionExpTable <- renderPrint({
 # The output object "contact_analysis_output" should be placed below the computation of elements needed in it
 output$contact_analysis_output <- renderUI({
 panels <- list(
-tabPanel("Contact dashboard",
+tabPanel(i18n$t("Contact dashboard"),
 wellPanel(style = "background: white", 
 fluidRow(width = 12,
  column(2, infoBoxOutput("allCont", width = 12)),
@@ -230,34 +230,31 @@ fluidRow(width=12,
  column(2, infoBoxOutput("meanConPerCase", width = 12)),
  column(2,infoBoxOutput("maxConPerCase", width = 12)) )
 ),
-plotOutput("plot", width = "100%", height = "90vh"),downloadButton("downloadBarplot", "Download this plot")
+plotOutput("plot", width = "100%", height = "90vh"),downloadButton("downloadBarplot", i18n$t("Download"))
  , tags$br(),tags$br(),
- " Each bar in this plot represents a region or district and the height of the bar corresponds to the number of contacts 
-     in the region or district."
+i18n$t("Each bar in this plot represents a region or district and the height of the bar corresponds to the number of contacts in the region or district.")
 ),
-tabPanel("Contact per region export", icon = icon("table"),
+tabPanel(i18n$t("Contact per region export"), icon = icon("table"),
 width = 10,
 dashboardPage( # the use of shiny dashboard is to make sure that all icons are fine, do not remove or deactivate this tab.
 dashboardHeader( ),
 dashboardSidebar(disable = TRUE,
-pickerInput("conPerson", "Contact entity type", choices = c("Contact", "Contact person"), # option to view contact or contact person
+pickerInput("conPerson", i18n$t("Contact entity type"), choices = c("Contact"), # "Contact person", option to view contact or contact person
             selected = c("Contact"),multiple = FALSE) ),
 dashboardBody(
- numericInput("maxrowsContByRegion", "Rows to show", 20),
+ numericInput("maxrowsContByRegion", i18n$t("Rows to show"), 20),
  verbatimTextOutput("conPerGerionExpTable"),
- downloadButton("conPerGerionExpCsv", "Download as CSV"),tags$br(),tags$br(),
- "Each row in this data is a region with corresponding number of contacts.
-     The data was obtained by summing the number of contacts in each region.
-     The resgion of the source case was used in case the region of the contact was missing." )
+ downloadButton("conPerGerionExpCsv", i18n$t("Download")),tags$br(),tags$br(),
+ i18n$t("Each row in this data is a region with corresponding number of contacts. The data was obtained by summing the number of contacts in each region. The region of the source case was used in case the region of the contact was missing."))
  )) )
 if(contact_per_case_plot=="t"){
-  panels[[3]]  = tabPanel("Contact per case plot", plotOutput("plotContPerCase", width = "100%", height = "90vh"),  
-                          downloadButton("downloadContPerCasePlot", "Download this plot"), tags$br(),tags$br(), "Contact per case.")}
+  panels[[3]]  = tabPanel(i18n$t("Contact per case plot"), plotOutput("plotContPerCase", width = "100%", height = "90vh"),  
+                          downloadButton("downloadContPerCasePlot", i18n$t("Download")), tags$br(),tags$br(), i18n$t("Contact per case"))}
 if(contact_per_case_export == "t"){
-panels[[4]] <-tabPanel("Contacts per case export", numericInput("maxrows", "Rows to show", 20),
+panels[[4]] <-tabPanel(i18n$t("Contacts per case export"), numericInput("maxrows", i18n$t("Rows to show"), 20),
  verbatimTextOutput("conPerCaseExpTable"),
- downloadButton("conPerCaseExpCsv", "Download as CSV"),tags$br(),tags$br(),
- "Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table")
+ downloadButton("conPerCaseExpCsv", i18n$t("Download")),tags$br(),tags$br(),
+ i18n$t("Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table"))
 }
 base::do.call(tabsetPanel, panels)
 })  

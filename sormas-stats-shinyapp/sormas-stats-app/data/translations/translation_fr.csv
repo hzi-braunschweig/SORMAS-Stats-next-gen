@@ -94,6 +94,121 @@ Q-Q plot; Graphique Q-Q
 Empirical and theoretical density; Densité empirique et théorique
 Summary statistics for observed serial interval; Statistiques récapitulatives pour l'intervalle de série observé
 n_value <= 0: number of records with negative or zero serial interval. This corresponds to asymptomatic transmission.; n_value <= 0 : nombre d'enregistrements avec un intervalle sériel négatif ou nul. Cela correspond à une transmission asymptomatique.
+Please select filter options and click on the `Apply changes` icon below. Click on `Visualize network diagram` to plot the diagram.; Veuillez sélectionner les options de filtrage et cliquer sur l'icône "Appliquer les changements" ci-dessous. Cliquez sur "Visualiser le diagramme du réseau" pour tracer le diagramme.
+Transmission network; Diagramme de contamination
+Dispersion analysis; Analyse de dispersion
+Distributions of number of infectee per infector (offspring distribution); Distributions du nombre d'infectés par infecteur (distribution de la descendance)
+Serial interval and fitted distribution for model with best fit to the data; Intervalle sériel et distribution ajustée pour le modèle le mieux ajusté aux données
+Estimate of mean serial interval; Estimation de l'intervalle sériel moyen
+Summary statistics for observed offsring distribution; Statistiques sommaires pour la distribution de la progéniture observée
+n_value <= 0: number of terminal infectee nodes. This corresponds to cases that were infected but did not infect further cases.; n_value <= 0 : nombre de nœuds terminaux infectés. Cela correspond aux cas qui ont été infectés mais qui n'ont pas infecté d'autres cas.
+Estimates of reproduction number (R) and dispersion parameter (k) using NB distribution; Estimations du nombre de reproduction (R) et du paramètre de dispersion (k) en utilisant la distribution NB
+SD: standard deviation, CI: confidence interval, a lower dispersion parameter k indicates  higher transmission heterogeneity, i.e. more transmissions resulted from a small number of people.; SD : écart-type, CI : intervalle de confiance, un paramètre de dispersion k plus faible indique une plus grande hétérogénéité de la transmission, c'est-à-dire que davantage de transmissions proviennent d'un petit nombre de personnes.
+Reproduction number (Rt); Nombre de reproduction (Rt)
+Estimate of time dependent reproduction number Rt; Estimation du nombre de reproduction dépendant du temps Rt
+Summary of estimated mean time dependent reproduction number; Résumé de l'estimation du nombre moyen de reproduction en fonction du temps
+Parameter estimate and 95% CI of distribtion with best fit to the data; Estimation des paramètres et IC 95% de la distribution avec le meilleur ajustement aux données.
+Choose; Choisissez
+Cummulative cases; Cas cumulés
+Cumulative cases by region; Cas cumulés par région
+Choose sex category; Choisissez la catégorie de sexe
+Choose region to plot shapes; Choisir la région pour tracer les cart
+Choose distribution for SI; Choisissez la distribution pour le SI
+Select distribution for SI; Sélectionner la distribution pour le SI
+Only select if SI estimation method is parametric; A sélectionner uniquement si la méthode d'estimation du SI est paramétrique
+SI estimation method; Méthode d'estimation du SI
+Specify SI mean; Préciser la moyenne SI
+Specify SI Std Dev; Précisez écart-type de SI
+Choose maximum value for SI; Choisir la valeur maximale pour SI
+Ploting parameters; Paramètres de placement
+Show legend of estimated Rt plot?; Afficher la légende du tracé du Rt estimé ?
+This section estimates the time dependent reproduction number Rt, t = week. The data used are the case-based incidence data and transmission network data.; Cette section estime le nombre de reproduction dépendant du temps Rt, t = semaine. Les données utilisées sont les données d'incidence par cas et les données du réseau de transmission.; Nous commençons par estimer la distribution de l'intervalle sériel (IS) et l'utilisons pour estimer Rt. La distribution de l'IS peut être estimée de manière paramétrique en spécifiant la moyenne et la std de l'IS OU en utilisant les données du réseau de transmission.
+We begin by estimating the serial interval (SI) distribution and use it to estimate Rt. The SI distribution can be estimated parametrically by specifying the mean and std for SI OR by using the transmission network data.; Nous commençons par estimer la distribution de l'intervalle sériel (IS) et l'utilisons pour estimer Rt. La distribution de l'IS peut être estimée de manière paramétrique en spécifiant la moyenne et la std de l'IS OU en utilisant les données du réseau de transmission.
+For `SI estimation method` using transmission data, the analysis is based on 1500 MCMC iterations and may take some time, repenting on your data size.; Pour la `méthode d'estimation de l'IS` utilisant les données de transmission, l'analyse est basée sur 1500 itérations MCMC et peut prendre un certain temps, en fonction de la taille de vos données.
+Summary statistics for observed offspring distribution; Statistiques sommaires pour la distribution de la progéniture observée
+Choose the serial interval range; Choisissez la plage d'intervalles de série
+Choose distribution with best fit; Choisissez la distribution la mieux adaptée
+Distribution with best fit has smallest AIC or BIC; La distribution la mieux ajustée a le plus petit AIC ou BIC.
+Specify number of bootstrap iteration; Spécifier le nombre d'itérations de bootstrap
+Show model diagnostics plots; Afficher les graphiques de diagnostic du modèle
+This section estimates the serial interval (SI). The data used here is the case-based data of infector-infertee pairs extracted from the transmission network data.; Cette section estime l'intervalle sériel (IS). Les données utilisées ici sont les données basées sur les cas de paires infecteur-inféré extraites des données du réseau de transmission.
+Different distributions are fitted to the observed SI. After choosing the distribution with best fit based on smallest AIC, the app then estimate the mean SI and 95% CI using bootstrap.; Différentes distributions sont ajustées au SI observé. Après avoir choisi la distribution la mieux ajustée en fonction de l'AIC le plus faible, l'application estime ensuite l'IS moyen et l'IC à 95% en utilisant le bootstrap.
+Specify degree of the polynomial curve; Spécifier le degré de la courbe polynomiale
+This section estimates the superspreading parameter (k) and effective reproduction number (R). The data used here is the case-based infector-infertee pairs extracted from the transmission network data.; Cette section estime le paramètre de super diffusion (k) et le nombre de reproduction effectif (R). Les données utilisées ici sont les paires infecteur-inféré basées sur les cas, extraites des données du réseau de transmission.
+A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the superspreading parameter (k). The 95% confidence interval is estimated using `confint` function of the R `stats` package.; Une distribution binomiale négative (NB) est ajustée à la distribution de la progéniture (nombre d'infecteurs par infecté). La moyenne de la NB estime le nombre effectif de reproducteurs (R) tandis que le paramètre de dispersion estime le paramètre de super propagation (k). L'intervalle de confiance à 95% est estimé en utilisant la fonction `confint` du paquet R `stats`.
+Event data analysis; Analyse des données d'événements
+Please select filter options and click on the `Apply changes` icon below.; Veuillez sélectionner les options de filtrage et cliquer sur l'icône "Appliquer les changements" ci-dessous.
+The relevant date filter uses  the date of event and if missing, impute with report date.; Le filtre de la date pertinente utilise la date de l'événement et, en cas d'absence, impute avec la date du rapport.
+Choose table columns; Choisissez les colonnes du tableau
+Choose variables to use for table columns; Choisissez les variables à utiliser pour les colonnes du tableau
+Choose variables to plot 2X2 table; Choisir les variables pour tracer le tableau 2X2
+Please select 2 variables; Veuillez sélectionner 2 variables
+Only 2 variables can be selected; Seules 2 variables peuvent être sélectionnées
+Transpose 2 X 2 table ?; Transposer le tableau 2 X 2 ?
+Choose variable to plot Pie chart; Choisissez une variable pour tracer un graphique circulaire
+Choose variable to plot bar graph; Choisissez une variable pour tracer un graphique à barres
+Relevant date (dd-mm-yyyy); Date pertinente (jj-mm-aaaa)
+Region of event; Région de l'événement
+Identification source; Source d'identification
+Event dashboard; Tableau de bord des événements
+Bar chart for events by region/district grouped by event status; Diagramme à barres pour les événements par région/district regroupés par statut de l'événement
+Table 1: Event status by type of place; Tableau 1 : Statut de l'événement par type de lieu
+Table 2: Event status by management status; Tableau 2 : Statut des événements par statut de gestion
+Table 3: Event status by risk level; Tableau 3 : Statut des événements par niveau de risque
+Fig 2: Event status; Fig 2 : Statut de l'événement
+Fig 3: Event source type; Fig 3 : Type de source d'événement
+Fig 4: Event district; Fig 4 : District de l'événement
+Event by Jurisdiction; Evénement par juridiction
+2 X 2 table. Change filter options plot for other variables.; Tableau 2 X 2. Modifier le tracé des options de filtre pour d'autres variables.
+Dynamic bar graph. Change filter options to plot for another variables.; Graphique à barres dynamique. Changez les options de filtrage pour tracer pour d'autres variables.
+Dynamic pie chart. Change filter options to plot for another variables.; Graphique circulaire dynamique. Modifiez les options de filtrage pour obtenir un graphique pour une autre variable.
+District of event; District de l'événement
+Contact dashboard; Tableau de bord de contact
+Contact data analysis; Analyse des données de contact
+Region of contact; Région de contact
+Download; Télécharger 
+Each bar in this plot represents a region or district and the height of the bar corresponds to the number of contacts in the region or district.; Chaque barre de ce graphique représente une région ou un district et la hauteur de la barre correspond au nombre de contacts dans la région ou le district.
+Contact per region export; Contact par région export
+Contact entity type; Type d'entité de contact
+Rows to show; Lignes à afficher
+Each row in this data is a region with corresponding number of contacts. The data was obtained by summing the number of contacts in each region. The region of the source case was used in case the region of the contact was missing.; Chaque ligne de ces données est une région avec le nombre de contacts correspondant. Les données ont été obtenues en additionnant le nombre de contacts dans chaque région. La région du cas source a été utilisée dans le cas où la région du contact était manquante.
+Contact per case plot; Contact par cas graphique
+Contact per case; Contact par cas
+Contacts per case export, Contact par cas export
+Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table; Chaque ligne de ces données correspond à un cas. Les données ont été obtenues en additionnant le nombre de contacts pour chaque cas. Les cas sans contact ne sont pas inclus dans ce tableau.
+Sample data analysis; Analyse des données d'échantillon
+The date filter uses the report date of sample, not the report date of the associated entity (case, contact, event participant, ...); Le filtre de date utilise la date de rapport de l'échantillon, et non la date de rapport de l'entité associée (cas, contact, participant à l'événement, ...).
+Choose sample purpose; Choisir le but de l'échantillon
+Region of sample; Région de l'échantillon
+Sample dashboard; Tableau de bord de l'échantillon
+Dynamic pie chart; Graphique circulaire dynamique
+Dynamic bar graph; Barre graphique dynamique
+Choose custom indicator variable; Choisissez une variable d'indicateur personnalisée
+District of sample; District de l'échantillon
+Please select filter options and click on `Apply changes` to run analysis.; Veuillez sélectionner les options de filtre et cliquer sur "Appliquer les changements" pour lancer l'analyse.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,5 +1,6 @@
 shinyUI(bootstrapPage(
 useShinyjs(),
+shiny.i18n::usei18n(i18n), # # language settings that applies to the whole app
 tags$style("@import url(https://use.fontawesome.com/releases/v5.7.2/css/all.css);"),
 navbarPage(
 theme = shinytheme("cerulean"),  # to change the theme, other options are: darkly, flatly

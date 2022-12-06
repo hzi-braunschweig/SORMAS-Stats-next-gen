@@ -1,48 +1,48 @@
 ###### Event data analysis ##########
 # This sub section of the ui.r file renders the event data analysis tab
 # All front-end methods related to this tab should be added in this file
-tabPanel("Event data analysis", icon = icon("procedures"),
+tabPanel(i18n$t("Event data analysis"), icon = icon("procedures"),
 sidebarLayout(position = "left",
 sidebarPanel(width = 2,
-  span(tags$i(h5("Please select filter options and click on `Apply changes` to run analysis.")), style="color:#045a8d"),
-  span(tags$i(h5("The relevant date filter uses  the date of event and if missing, impute with report date.")), style="color:#045a8d"),
-  actionButton(inputId = "eventDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+  span(tags$i(h5(i18n$t("Please select filter options and click on the `Apply changes` icon below."))), style="color:#045a8d"),
+  span(tags$i(h5(i18n$t("The relevant date filter uses  the date of event and if missing, impute with report date."))), style="color:#045a8d"),
+  actionButton(inputId = "eventDataAnalysisAction", label = i18n$t("Apply changes"), icon =  icon("running"),
                class = "btn-primary", width = '55%'),
   hr(),
   conditionalPanel(condition =  "input.tabEvent == 1",
                    pickerInput(
                      inputId = "eventTableColumnVaribleUi", 
-                     label = 'Choose table columns',
+                     label = i18n$t('Choose table columns'),
                      choices = c(levels(as.factor(event_variable_data$event_variable)) ) ,
                      selected = c("Name", "Total", "Event status"),
                      multiple = TRUE,
                      options = pickerOptions(
                        actionsBox = TRUE,
-                       header = "Choose variables to use for table columns",
+                       header = i18n$t("Choose variables to use for table columns"),
                      ))
   ),
   conditionalPanel(condition =  "input.tabEvent == 2",
                    pickerInput(
                      inputId = "twoByTwotableEventVariblesUi", 
-                     label = 'Choose variables to plot 2X2 table',
+                     label = i18n$t('Choose variables to plot 2X2 table'),
                      choices = c(levels(as.factor(colnames(eventData)))),
                      multiple = TRUE,
                      options = pickerOptions(
                        actionsBox = TRUE,
-                       title = "Please select 2 varibles",
-                       header = "Only 2 variables can be selected",
+                       title = i18n$t("Please select 2 variables"),
+                       header = i18n$t("Only 2 variables can be selected"),
                        maxOptions = 2
                      )
                    ),
-                   checkboxInput("transpose2x1TableEventUi", "Transpose 2 X 2 table ?", TRUE),
+                   checkboxInput("transpose2x1TableEventUi", i18n$t("Transpose 2 X 2 table ?"), TRUE),
                    pickerInput(
-                     "piechartEventVaribleUi", 'Choose variable to plot Pie chart',
+                     "piechartEventVaribleUi", i18n$t('Choose variable to plot Pie chart'),
                      choices = c("Event Status",levels(as.factor(colnames(eventData)))) ,
                      selected = "Event Status",
                      multiple = FALSE
                    ),
                    pickerInput(
-                     "barplotEventVaribleUi", 'Choose variable to plot bar graph',
+                     "barplotEventVaribleUi", i18n$t('Choose variable to plot bar graph'),
                      choices = c("Location category",levels(as.factor(colnames(eventData)))) ,
                      selected = "Location category",
                      multiple = FALSE
@@ -60,12 +60,12 @@ mainPanel(width = 10,
  fluidRow(
    # filter by disease of event 
    column(2, 
-          pickerInput("diseaseEventUi", "Disease", choices = sort(levels(as.factor(eventData$disease_event))), 
+          pickerInput("diseaseEventUi", i18n$t("Disease"), choices = sort(levels(as.factor(eventData$disease_event))), 
                       selected = c("CORONAVIRUS"),multiple = FALSE)
    ),
    # filter by date of event 
    column(2, 
-          dateRangeInput("reportdateEventUi","Relevant date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
+          dateRangeInput("reportdateEventUi",i18n$t("Relevant date (dd-mm-yyyy)") , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                          max = NULL, format = "dd-mm-yyyy", startview = "month",
                          weekstart = 0, language = "en", separator = " to ", width = NULL,
                          autoclose = TRUE)
@@ -74,7 +74,7 @@ mainPanel(width = 10,
    column(2,
           pickerInput(
             inputId = "regionEventUi",
-            label = 'Region of event',
+            label = i18n$t('Region of event'),
             choices = sort(levels(as.factor(eventData$region_name))),
             options = list(
               `actions-box` = TRUE, 
@@ -92,7 +92,7 @@ mainPanel(width = 10,
    column(2,
           pickerInput(
             inputId = "eventIdentificationSourceUi",
-            label = 'Identification source',
+            label =  i18n$t('Identification source'),
             choices = sort(levels(as.factor(eventData$event_identification_source))),
             #choices = sort(levels(as.factor( c("forward_tracing", "backward_tracing", "unknown", "NA")  ))),
             options = list(
@@ -105,11 +105,11 @@ mainPanel(width = 10,
    ),
    #filter by indicator type
    column(2, 
-          radioButtons("EventIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion"),selected = c("Count"), inline = TRUE)
+          radioButtons("EventIndicatorTypeUi",  i18n$t("Indicator type"),  choices = c("Count","Proportion"),selected = c("Count"), inline = TRUE)
    ) 		   
  ),  
 tabsetPanel(id= "tabEvent",
- tabPanel("Event dashboard", value = 0,
+ tabPanel( i18n$t("Event dashboard"), value = 0,
           wellPanel(style = "background: white", 
                     fluidRow(
                       column(2, infoBoxOutput("totalEvent", width = 12)),
@@ -131,7 +131,7 @@ tabsetPanel(id= "tabEvent",
                     
           ),
           wellPanel(
-            h4(helpText("Barplot for events by region/district grouped by event status")) , 
+            h4(helpText(i18n$t("Bar chart for events by region/district grouped by event status"))) , 
             #plotOutput("eventBarplotUi", width = "100%", height = "auto")
             plotlyOutput("eventBarplotUi", width = "100%", height = "70vh")
             ,
@@ -139,54 +139,54 @@ tabsetPanel(id= "tabEvent",
           ),
           fluidRow(
             column(4,
-                   h4(helpText("Table 1: Event status by type of place")), div(DT::dataTableOutput("eventCuntbytyplaceTable") , style = "font-size: 85%; width: 95%" )  
+                   h4(helpText(i18n$t("Table 1: Event status by type of place"))), div(DT::dataTableOutput("eventCuntbytyplaceTable") , style = "font-size: 85%; width: 95%" )  
             )
             ,
             column(4,
-                   h4(helpText("Table 2: Event status by management status")) ,  div( DT::dataTableOutput("eventStatusByMangemantStatusTable")  , style = "font-size: 85%; width: 95%" )
+                   h4(helpText(i18n$t("Table 2: Event status by management status"))),  div( DT::dataTableOutput("eventStatusByMangemantStatusTable")  , style = "font-size: 85%; width: 95%" )
                    )
             ,
             column(4,
-                   h4(helpText("Table 3: Event status by risk level")) ,  div( DT::dataTableOutput("eventStatusByRisklevelTable")  , style = "font-size: 85%; width: 95%" )
+                   h4(helpText(i18n$t("Table 3: Event status by risk level"))),  div( DT::dataTableOutput("eventStatusByRisklevelTable")  , style = "font-size: 85%; width: 95%" )
                    )
           )
           ,
           fluidRow(
             column(4,
-                   h4(helpText("Fig 2: Event status")), div(plotlyOutput("pieCdhartEventStatusUi", width = "95%", height = "50vh") , style = "font-size: 95%; width: 95%" )
+                   h4(helpText(i18n$t("Fig 2: Event status"))), div(plotlyOutput("pieCdhartEventStatusUi", width = "95%", height = "50vh") , style = "font-size: 95%; width: 95%" )
             )
             ,
             column(4,
-                   h4(helpText("Fig 3: Event source type")) ,  div(plotlyOutput("pitChartEventSourceTypeUi", width = "95%", height = "50vh") , style = "font-size: 95%; width: 95%" )
+                   h4(helpText(i18n$t("Fig 3: Event source type"))),  div(plotlyOutput("pitChartEventSourceTypeUi", width = "95%", height = "50vh") , style = "font-size: 95%; width: 95%" )
             )
             ,
             column(4,
-                   h4(helpText("Fig 4: Event district")) ,  div(plotlyOutput("pitChartEventDidtrictUi", width = "95%", height = "50vh") , style = "font-size: 95%; width: 95%" )
+                   h4(helpText(i18n$t("Fig 4: Event district"))),  div(plotlyOutput("pitChartEventDidtrictUi", width = "95%", height = "50vh") , style = "font-size: 95%; width: 95%" )
             )
           )
  )
  ,
- tabPanel("Event by Jurisdiction", value = 1,
+ tabPanel(i18n$t("Event by Jurisdiction"), value = 1,
           fluidRow(
             column(12, DT::dataTableOutput("eventCountbyJurisdictionTable") )    
           )
  )
  ,
- tabPanel("Custom indicators",  value = 2,
+ tabPanel(i18n$t("Custom indicators"),  value = 2,
           wellPanel(
-            h4(helpText("2 X 2 table. Click on 'Choose variables to plot 2X2 table' to generate the same table for other attributes.")) ,
+            h4(helpText(i18n$t("2 X 2 table. Change filter options plot for other variables."))),
             DT::dataTableOutput("dynamic2x2TableEventUi")
           ),
           fluidRow( width = 10,                                                         
                     column(6,                                                                
                            wellPanel(
-                             h4(helpText("Dynamic pie chart: Click on 'Choose variable to plot Pie chart' to plot for another varaible.")) ,
+                             h4(helpText(i18n$t("Dynamic pie chart. Change filter options to plot for another variables."))) ,
                              div(plotlyOutput("pieCdhartEventUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
                            )
                     ),
                     column(6,                    
                            wellPanel(
-                             h4(helpText("Dynamic bar graph: Click on 'Choose variable to plot bar graph' to plot for another varaible.")) ,
+                             h4(helpText(i18n$t("Dynamic bar graph. Change filter options to plot for another variables."))),
                              div(plotlyOutput("barChartEventUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
                            )              
                     )

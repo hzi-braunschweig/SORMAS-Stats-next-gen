@@ -1,18 +1,17 @@
 ###### Sample data analysis ##########
 # This sub section of the ui.r file renders the sample data analysis tab
 # All front-end methods related to this tab should be added in this file
-tabPanel("Sample data analysis",
-icon = icon("vial"),
+tabPanel(i18n$t("Sample data analysis"), icon = icon("vial"),
 sidebarLayout(position = "left",
 sidebarPanel(width = 2,
-             span(tags$i(h5("Please select filter options and click on `Apply changes` to run analysis.")), style="color:#045a8d"),
-             span(tags$i(h5("The date filter uses the report date of sample, not the report date of the essociated entity (case, contact, event participant, ...)")), style="color:#045a8d"),
-             actionButton(inputId = "sampleDataAnalysisAction", label = "Apply changes", icon =  icon("running"),
+             span(tags$i(h5(i18n$t("Please select filter options and click on `Apply changes` to run analysis."))), style="color:#045a8d"),
+             span(tags$i(h5(i18n$t("The date filter uses the report date of sample, not the report date of the associated entity (case, contact, event participant, ...)"))), style="color:#045a8d"),
+             actionButton(inputId = "sampleDataAnalysisAction", label = i18n$t("Apply changes"), icon =  icon("running"),
                           class = "btn-primary", width = '55%'),
              hr(),
              pickerInput(
                inputId = "samplepurposeUi",
-               label = 'Choose sample pursope',
+               label = i18n$t('Choose sample purpose'),
                choices = sort(levels(as.factor(sample_table$samplepurpose))),
                options = list(`actions-box` = TRUE, size = 12),
                selected = NULL,multiple = TRUE),
@@ -23,12 +22,12 @@ mainPanel(width = 10,
           fluidRow(
             # filter by disease ----
             column(2,
-                   pickerInput("diseaseSampleUi", "Disease", choices = sort(levels(as.factor(sample_table$disease_sample))),
+                   pickerInput("diseaseSampleUi", i18n$t("Disease"), choices = sort(levels(as.factor(sample_table$disease_sample))),
                                selected = c("CORONAVIRUS"), multiple = FALSE)
             ),
             # filter by date of sample report ----
             column(2, 
-                   dateRangeInput("reportdateSampleUi","Report date (dd-mm-yyyy)" , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
+                   dateRangeInput("reportdateSampleUi", i18n$t("Report date (dd-mm-yyyy)") , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                                   max = NULL, format = "dd-mm-yyyy", startview = "month",
                                   weekstart = 0, language = "en", separator = " to ", width = NULL,
                                   autoclose = TRUE)
@@ -37,7 +36,7 @@ mainPanel(width = 10,
             column(2,
                    pickerInput(
                      inputId = "regionSampleUi",
-                     label = 'Region of sample',
+                     label = i18n$t('Region of sample'),
                      choices = sort(levels(as.factor(sample_table$region_name))),
                      options = list(
                        `actions-box` = TRUE, 
@@ -53,7 +52,7 @@ mainPanel(width = 10,
             ),
             # filter by indicator type of sample ----
             column(2,
-                   radioButtons("sampleIndicatorTypeUi","Indicator type",  choices = c("Count","Proportion"),selected = c("Count"), inline = TRUE)
+                   radioButtons("sampleIndicatorTypeUi", i18n$t("Indicator type"),  choices = c("Count","Proportion"),selected = c("Count"), inline = TRUE)
             )
           ),
           # outputting the whole sample ui element built from the server side ------

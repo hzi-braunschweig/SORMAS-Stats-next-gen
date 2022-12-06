@@ -12,7 +12,7 @@ output$pickerInputdistrictSampleUi <- renderUI({
   }else{
     temp = NULL
   }
-  pickerInput(inputId = 'districtSampleUi', label = 'District of sample',
+  pickerInput(inputId = 'districtSampleUi', label = i18n$t('District of sample'),
               choices = temp, 
               options = list(`actions-box` = TRUE, size = 12),
               selected = NULL,
@@ -78,7 +78,7 @@ output$pieCdhartSampleUi <- renderPlotly({
 # The output object "sample_analysis_output" should be placed below the computation of elements needed in it
 output$sample_analysis_output <- renderUI({
   panels <- list(
-    tabPanel("Sample dashboard",
+    tabPanel(i18n$t("Sample dashboard"),
              fluidRow(width=10,                                                         
                       column(6,                                                                
                              wellPanel(
@@ -98,12 +98,12 @@ panels[[2]]=tabPanel(i18n$t("Custom indicators"),
 fluidRow(width=10,                                                         
 column(6,                                                                
  wellPanel(
-   h4(helpText("Dynamic pie chart")) ,
+   h4(helpText(i18n$t("Dynamic pie chart"))),
    div(plotlyOutput("pieCdhartSampleUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
  ) ),
 column(6,                    
  wellPanel(
-   h4(helpText("Dynamic bar graph")) ,
+   h4(helpText(i18n$t("Dynamic bar graph"))) ,
    div(plotlyOutput("barChartSampleUi", width = "100%", height = "50vh" ), style = "font-size: 100%; width: 100%" ) 
  )  )
 ) ## end of fluid row
@@ -116,7 +116,7 @@ output$sample_cuctom_indicator_filter = renderUI({
   if(sample_custom_indicators=="t"){
     pickerInput(
       inputId = "bargraphSampleVariableUi",
-      label = 'Choose custom indicator variable',
+      label = i18n$t('Choose custom indicator variable'),
       choices=sort(c("pathogentestresult","samplingreason","samplepurpose","shipped","received",
                      "specimencondition","samplesource","samplematerial")), 
       options = list(`actions-box` = TRUE, size = 12),
