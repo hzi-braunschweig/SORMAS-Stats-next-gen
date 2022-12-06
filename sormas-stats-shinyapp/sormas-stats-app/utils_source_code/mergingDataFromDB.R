@@ -40,7 +40,8 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   queryEvent <- base::paste0("SELECT id AS event_id, uuid AS uuevent_id, reportdatetime AS reportdatetime_event, eventstatus, disease AS disease_events,
   typeofplace, eventlocation_id, archived, risklevel AS risklevel_event
   FROM public.events
-  WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+  WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+  
   events = dbGetQuery(sormas_db,queryEvent)
   
   ## reading event participants linked to selected events
@@ -51,13 +52,13 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   WHERE deleted = FALSE and event_id  IN (
   SELECT id AS event_id
   FROM public.events
-  WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "')"))
+  WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "')"))
   
   ## reading location
   location = dbGetQuery(sormas_db,
   base::paste0("SELECT id, district_id, region_id
   FROM public.location
-  WHERE id IN ( SELECT distinct eventlocation_id  FROM public.events WHERE  deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "' ) "))
+  WHERE id IN ( SELECT distinct eventlocation_id  FROM public.events WHERE  deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ) "))
   
 ## reading person data  ###
 ## only persons linked to cases, contacts or eps
@@ -83,7 +84,7 @@ person_event_part = dbGetQuery(sormas_db,
  WHERE deleted = FALSE and event_id  IN (
  SELECT id AS event_id
  FROM public.events
- WHERE deleted = FALSE and eventstatus != 'DROPPED' and reportdatetime between '", fromDate, "' and '", toDate, "'))" )) 
+ WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "'))" )) 
 # row bind and keep distinct person id
 person = dplyr::bind_rows(person_case, person_contact, person_event_part) %>%
     dplyr::distinct(id_person, .keep_all = TRUE)

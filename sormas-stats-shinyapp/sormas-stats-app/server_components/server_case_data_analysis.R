@@ -400,33 +400,33 @@ output$caseEpicurvePlot <- renderPlotly({
 })
 
 ## Map for cases ####
-## map plot
-output$regionMapCaseCount <- renderPlot({
-  temp = casePersonFilter()
-  if(!(dataframe_is_empty(temp))){
-  if(input$caseMapshapesUi == "By region")
-  {
-    if(input$caseIndicatorTypeMapUi == "Count"){
-      fg = regionMapPlot(data = temp, lnd = regionShapes)
-    }
-    if(input$caseIndicatorTypeMapUi == "Incidence proportion / 100,000"){
-      fg = empty_dataframe_plotly()
-    }
-  }
-  if(input$caseMapshapesUi == "By district")
-  {
-    if(input$caseIndicatorTypeMapUi == "Count"){
-    fg = districtMapPlot(data = temp, districtShapes =districtShapes)
-    }
-    if(input$caseIndicatorTypeMapUi == "Incidence proportion / 100,000"){
-      fg = empty_dataframe_plotly()
-    }
-  }
-    }else{
-    fg = empty_dataframe_plotly()
-  }
-  return(fg)
-})
+## map plot # this plot is commneted because the development is not complete
+# output$regionMapCaseCount <- renderPlot({
+#   temp = casePersonFilter()
+#   if(!(dataframe_is_empty(temp))){
+#   if(input$caseMapshapesUi == "By region")
+#   {
+#     if(input$caseIndicatorTypeMapUi == "Count"){
+#       fg = regionMapPlot(data = temp, lnd = regionShapes)
+#     }
+#     if(input$caseIndicatorTypeMapUi == "Incidence proportion / 100,000"){
+#       fg = empty_dataframe_plotly()
+#     }
+#   }
+#   if(input$caseMapshapesUi == "By district")
+#   {
+#     if(input$caseIndicatorTypeMapUi == "Count"){
+#     fg = districtMapPlot(data = temp, districtShapes =districtShapes)
+#     }
+#     if(input$caseIndicatorTypeMapUi == "Incidence proportion / 100,000"){
+#       fg = empty_dataframe_plotly()
+#     }
+#   }
+#     }else{
+#     fg = empty_dataframe_plotly()
+#   }
+#   return(fg)
+# })
 ## Rt analysis and plotting-----
 # using casePersonFilter() and infectorInfecteeData
 # Filtering by disease, time, region of infector and  deduplication (unique infector-infectee persons)

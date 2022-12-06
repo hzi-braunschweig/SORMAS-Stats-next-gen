@@ -1,22 +1,21 @@
 ###### Transmission chain analysis ##########
 # This sub section of the ui.r file renders the transmission network diagram tab
 # All front-end methods related to this tab should be added in this file
-tabPanel("Transmission Network", 
+
+tabPanel( i18n$t("Transmission Network"), 
           icon = icon("project-diagram"), # icon("filter"),
           sidebarLayout(
             sidebarPanel(
-              # language settings that applies to the whole app, not just this tab
-              shiny.i18n::usei18n(i18n),
               pickerInput('selected_language',
                   label=i18n$t('Change language'),
                   choices = i18n$get_languages(),
                   selected = i18n$get_key_translation()
                 ),
+              
               # Filter specific to network diagram only
-              span(tags$i(h5("Please select filter options and click on the `Apply changes` icon below. Click on `Visualize network diagram` to plot the network diagram.")), style="color:#045a8d"),
+              span(tags$i(h5(i18n$t("Please select filter options and click on the `Apply changes` icon below. Click on `Visualize network diagram` to plot the diagram."))), style="color:#045a8d"),
               pickerInput("diseaseUi", i18n$t("Disease"), 
-                          choices = c("CORONAVIRUS", "LASSA","MONKEYPOX", "LASSA", "CSM","EVD","NEW_INFLUENZA", "PLAGUE",
-                                      "UNDEFINED","UNSPECIFIED_VHF","MEASLES","OTHER"), 
+                          choices = c("CORONAVIRUS"), # sort(levels(as.factor(elist$disease))) # for more diseases
                           selected = c("CORONAVIRUS"),
                           multiple = FALSE),
               #br(),

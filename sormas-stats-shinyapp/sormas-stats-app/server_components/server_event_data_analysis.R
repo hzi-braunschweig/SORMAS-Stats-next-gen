@@ -13,7 +13,7 @@ output$pickerInputdistrictEventUi <- renderUI({
   }else{
     temp = NULL
   }
-  pickerInput(inputId = 'districtEventUi', label = 'District of event',
+  pickerInput(inputId = 'districtEventUi', label =i18n$t('District of event'),
               choices = temp, 
               options = list(
                 `actions-box` = TRUE, 
@@ -519,66 +519,68 @@ output$eventCountbyJurisdictionTable <- DT::renderDataTable({
   return(res)
 })
 # event map by administrative area ----
-output$eventMapUi <- renderPlot({
-  map_text_size = input$eventMapTextSizeUi
-  if(input$eventMapShapesUi == "Region")
-  {
-    fg = qtm(shp = regionShapesFrance, text = "libgeo", 
-             text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "top")) # fill.palette = "-Blues" to qhow in reverse order, type = "4star", "8star", "radar", "rose"
-  }
-  if(input$eventMapShapesUi == "Departement")
-  {
-    fg = qtm(shp = departementShapesFrance, text = "codgeo", 
-             text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "top")) 
-  }
-  if(input$eventMapShapesUi == "Commune") 
-  {
-    fg = qtm(shp = CommuneFrance, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "bottom")) 
-  }
-  return(fg)
-})
+# Commented because this tab is under development
+# output$eventMapUi <- renderPlot({
+#   map_text_size = input$eventMapTextSizeUi
+#   if(input$eventMapShapesUi == "Region")
+#   {
+#     fg = qtm(shp = regionShapesFrance, text = "libgeo", 
+#              text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "top")) # fill.palette = "-Blues" to qhow in reverse order, type = "4star", "8star", "radar", "rose"
+#   }
+#   if(input$eventMapShapesUi == "Departement")
+#   {
+#     fg = qtm(shp = departementShapesFrance, text = "codgeo", 
+#              text.size = map_text_size, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "top")) 
+#   }
+#   if(input$eventMapShapesUi == "Commune") 
+#   {
+#     fg = qtm(shp = CommuneFrance, style = "white", format = "World") + tm_compass(type="8star", position=c("left", "bottom")) 
+#   }
+#   return(fg)
+# })
 
-# event leaflet map ----
-# https://rstudio.github.io/leaflet/shiny.html 
-#https://github.com/atmajitg/bloodbanks  to get sample app
-# Reactive expression for the data subsetted to what the user selected
-filteredData <- reactive({
-  eventData[eventData$n_ep >= input$range[1] & eventData$n_ep <= input$range[2],]
-})
-# This reactive expression represents the palette function,
-# which changes as the user makes selections in UI.
-colorpal <- reactive({
-  colorNumeric(input$colors, eventData$n_ep)
-})
-output$map <- renderLeaflet({
-  # Use leaflet() here, and only include aspects of the map that
-  # won't need to change dynamically (at least, not unless the
-  # entire map is being torn down and recreated).
-  leaflet(eventData) %>% addTiles() %>%
-    fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat))
-})
-# Incremental changes to the map (in this case, replacing the
-# circles when a new color is chosen) should be performed in
-# an observer. Each independent set of things that can change
-# should be managed in its own observer.
-observe({
-  pal <- colorpal()
-  leafletProxy("map", data = filteredData()) %>%
-    clearShapes() %>%
-    addCircles(radius = ~10^n_ep/10, weight = 1, color = "#777777",
-               fillColor = ~pal(n_ep), fillOpacity = 0.7, popup = ~paste(n_ep)
-    )
-})
-# Use a separate observer to recreate the legend as needed.
-observe({
-  proxy <- leafletProxy("map", data = eventData)
-  # Remove any existing legend, and only if the legend is
-  # enabled, create a new one.
-  proxy %>% clearControls()
-  if (input$legend) {
-    pal <- colorpal()
-    proxy %>% addLegend(position = "bottomright",
-                        pal = pal, values = ~n_ep )
-  }
-})
+# # event leaflet map ---- Commented because development is not complete
+# # https://rstudio.github.io/leaflet/shiny.html 
+# #https://github.com/atmajitg/bloodbanks  to get sample app
+# # Reactive expression for the data subsetted to what the user selected
+# filteredData <- reactive({
+#   eventData[eventData$n_ep >= input$range[1] & eventData$n_ep <= input$range[2],]
+# })
+# # This reactive expression represents the palette function,
+# # which changes as the user makes selections in UI.
+# colorpal <- reactive({
+#   colorNumeric(input$colors, eventData$n_ep)
+# })
+# output$map <- renderLeaflet({
+#   # Use leaflet() here, and only include aspects of the map that
+#   # won't need to change dynamically (at least, not unless the
+#   # entire map is being torn down and recreated).
+#   leaflet(eventData) %>% addTiles() %>%
+#     fitBounds(~min(long), ~min(lat), ~max(long), ~max(lat))
+# })
+# # Incremental changes to the map (in this case, replacing the
+# # circles when a new color is chosen) should be performed in
+# # an observer. Each independent set of things that can change
+# # should be managed in its own observer.
+# 
+# observe({
+#   pal <- colorpal()
+#   leafletProxy("map", data = filteredData()) %>%
+#     clearShapes() %>%
+#     addCircles(radius = ~10^n_ep/10, weight = 1, color = "#777777",
+#                fillColor = ~pal(n_ep), fillOpacity = 0.7, popup = ~paste(n_ep)
+#     )
+# })
+# # Use a separate observer to recreate the legend as needed.
+# observe({
+#   proxy <- leafletProxy("map", data = eventData)
+#   # Remove any existing legend, and only if the legend is
+#   # enabled, create a new one.
+#   proxy %>% clearControls()
+#   if (input$legend) {
+#     pal <- colorpal()
+#     proxy %>% addLegend(position = "bottomright",
+#                         pal = pal, values = ~n_ep )
+#   }
+# })
 # End of event analysis 
