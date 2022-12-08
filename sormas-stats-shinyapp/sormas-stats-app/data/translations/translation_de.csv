@@ -3,7 +3,7 @@ Change language;  Sprache ändern
 Select; Auswählen
 Disease; Krankheit
 Disease network diagram; Diagramm des Krankheitsnetzwerks
-Transmission network; Übertragungsnetz
+Transmission network; Übertragungsnetzwerk
 Report date (dd-mm-yyyy); Meldedatum (tt-mm-jjjj)
 Region of infection; Bundesland der Infektion
 District of infection; Landkreis/Kreisfreie Stadt der Infektion
@@ -11,11 +11,11 @@ Source infector entity type; Entitätstyp des Infektionsursprung
 Contact settings; Kontakteinstellungen
 Event status; Ereignisstatus
 Event risk level; Risikoniveau des Ereignis
-Only chains with resulting cases ?; Nur Ketten die zu Fall führen ?
-Exclude healthy event participant ?; Gesunde Ereignisteilnehmer ausschließen ?
-Only chains with active events ?;  Nur Ketten mit aktiven Ereignissen ?
-Fast and fixed visualization ?;  Schnelle und fixierte Darstellung ?
-Visualize network diagram ?;  Netwerkdiagramm darstellen ?
+Only chains with resulting cases ?; Nur Ketten die zu Fall führen?
+Exclude healthy event participant ?; Gesunde Ereignisteilnehmer ausschließen?
+Only chains with active events ?;  Nur Ketten mit aktiven Ereignissen?
+Fast and fixed visualization ?;  Schnelle und fixierte Darstellung?
+Visualize network diagram ?;  Netwerkdiagramm darstellen?
 Source infector node IDs (comma delimited); Infektionsursprung-Knoten-ID (durch Komma getrennt)
 Minimum source infector node contact; Kleinste Anzahl von Kontakten des Infektionsursprungs
 Only contacts of this ID; Nur Kontakte dieser ID
@@ -30,7 +30,7 @@ Summary indicators; Zusammenfassende Indikatoren
 Total node counts by classification;  Gesamtzahl an Knoten nach Kategorie
 Histogram of betweeness score; Histogramm des Betweeness-Scores
 Summary of node betweeness; Zusammenfassung der Betweeness
-Histogram of number of contacts per node (Node degree); Histogramme der Kontakanzahl pro Knoten (Knotengrad)
+Histogram of number of contacts per node (Node degree); Histogramm der Kontakanzahl pro Knoten (Knotengrad)
 Summary of number of contacts per node (Node degree); Zusammenfassung der Kontaktanzahl pro Knoten (Knotengrad)
 The data used in this app were obtained from; Die Daten in dieser App stammen aus
 . Messages in red of the form Error: ... means there is no available data to analyse. Please change your filter option or inform your server admin; . Nachrichten in rot der Form Error: ... bedeuten dass keine Daten sehr Analyse vorhanden sind. Bitte ändern Sie die Filtereinstellungen oder informieren Sie Ihren Serveradministrator
@@ -48,3 +48,142 @@ Total_last24hrs:; Gesamt_letzte24Stunden:
 Total number of cases reported in the last 24 hrs; Gesamtzahl gemeldeter Fälle in den letzten 24 Stunden
 Total number of confirmed cases; Gesamtzahl klinisch-labordiagnostisch bestätigter Fälle
 Total number of suspected cases; Gesamtzahl klinisch diagnostizierter Fälle
+Total number of recovered cases; Gesamtzahl genesener Fälle
+Total number of imported cases; Gesamtzahl importierter Fälle
+Total number of cases that are not on quarantine; Gesamtzahl an Fällen nicht in Isolation
+Total number of probable cases; Gesamtzahl klinisch-epidemiologisch bestätigter Fälle
+Total number of unclassified cases; Gesamtzahl nicht klasifizierter Fälle
+Total number of death cases; Gesamtzahl Todesfälle
+No_Outcome:; Kein Ergebnis bekannt:
+Total number of cases  with no outcome; Gesamtzahl an Fällen noch ohne bekanntes Ergebnis
+Total number of cases with unknown outcome; Gesamtzahl an Fällen mit unbekannten Ergebnis
+Total number of cases quarantine at home; Gesamtzahl an Fällen in häuslicher Isolation
+Total number of cases quarantine at other places; Gesamtzahl an Fällen in sonstiger Isolation
+Total number of cases with unknown quarantine; Gesamtzahl an Fällen in unbekannter Isolation
+Total number of cases quarantine in an institution; Gesamtzahl an Fällen in institutioneller Isolation
+Total number of cases resulting from local transmission; Gesamtzahl der Fälle durch lokale Übertragung
+Case data analysis; Falldatenanalyse
+Please select filter options and click on `Apply changes` to run analyses.; Bitte wählen Sie Filter und drücken Sie auf "Änderungen überehmen" um die Analyse zu starten
+Documents; Dokumente
+About; Über
+SORMAS-Stats contain functions to analyze and visualize surveillance data collected by SORMAS.; SORMAS-Stats enthält Funktionen zur Analyse und Visualisierung der von SORMAS erfassten Überwachungsdaten.
+About SORMAS and SORMAS-Stats; Über SORMAS und SORMAS-Stats
+Users, diseases and control measures in SORMAS; Nutzer, Krankheiten und Kontrollmaßnahmen in SORMAS 
+The Surveillance, Outbreak Response Management and Analysis System (SORMAS) is an open-source mobile health app that facilitates infectious disease control and outbreak management procedures in addition to disease surveillance and epidemiologic analysis for all levels of a public health system. SORMAS includes specific interfaces for 12 users (e.g., laboratorian, contact tracing officer, epidemiologist), disease-specific process modules for 21 epidemic-prone diseases and a customizable process module for unforeseen emerging diseases and a COVID-19 module, which we developed to support countries in the outbreak response. Users can operate SORMAS on the web or mobile app and synchronize bi-directionally with a central server via mobile telecommunication networks.; Das Surveillance, Outbreak Response Management and Analysis System (SORMAS) ist eine Open-Source-App für das mobile Gesundheitswesen, die neben der Krankheitsüberwachung und der epidemiologischen Analyse für alle Ebenen des öffentlichen Gesundheitswesens auch die Kontrolle von Infektionskrankheiten und das Ausbruchsmanagement erleichtert. SORMAS umfasst spezifische Schnittstellen für 12 Benutzer (z. B. Laboranten, Kontaktverfolgungsbeamte, Epidemiologen), krankheitsspezifische Prozessmodule für 21 epidemieanfällige Krankheiten und ein anpassbares Prozessmodul für unvorhergesehene neu auftretende Krankheiten sowie ein COVID-19-Modul, das wir zur Unterstützung von Ländern bei der Reaktion auf Ausbrüche entwickelt haben. Die Nutzer können SORMAS über das Web oder eine mobile App bedienen und sich über Mobilfunknetze bidirektional mit einem zentralen Server synchronisieren.
+Indicator type; Indikatorart
+Region of case;  Region des Falles
+District of case; Distrikt des Falles
+Classification of case; Klassifikation des Falles
+Facility id of case; ID der Einrichtung des Falles
+Case dashboard; Fall-Dashboard
+Case classification; Fallklassifikation
+Case quarantine; Fall Quarantäne
+Case gender;  Geschlecht der Fälle
+Case age;  Alter der Fälle
+Case outcome; Fall Ergebnis
+Case occupation;  Beschäftigungsart der Fälle
+Case Origin; Fallherkunft
+Custom indicators; Benutzerdefinierte Indikatoren
+Cases by region; Fälle nach Region
+Epidemic curve;  Epidemiekurve
+Time series plot; Zeitreihen-Diagramm
+Case Pyramid; Fallpyramide
+Case pyramid by Sex and Age; Fallpyramide nach Geschlecht und Alter
+Serial interval analysis; Analyse des Seriellen Intevalls
+Model selection: Goodness-of-fit criteria and statistics. Model with smallest values correspond to distribution with best fit.; Modellauswahl: Anpassungskriterien und Statistiken. Das Modell mit den kleinsten Werten entspricht der Verteilung mit der besten Anpassung.
+Empirical and theoretical CDFs; Empirische und theoretische kumulierte Verteilungsfunktionen
+Q-Q plot; Q-Q-Diagramm
+Empirical and theoretical density; Empirische und theoretische Dichte
+Summary statistics for observed serial interval; Zusammenfassende Statistiken für das beobachtete serielle Intervall
+n_value <= 0: number of records with negative or zero serial interval. This corresponds to asymptomatic transmission.; n_value <= 0: Anzahl der Datensätze mit negativem oder verschwindenem seriellen Intervall. Dies entspricht einer asymptomatischen Übertragung.
+Please select filter options and click on the `Apply changes` icon below. Click on `Visualize network diagram` to plot the diagram.; Bitte wählen Sie die Filteroptionen aus und klicken Sie auf das Symbol "Änderungen übernehmen" unten. Klicken Sie auf "Netzwerkdiagramm darstellen", um das Diagramm zu erstellen.
+Dispersion analysis; Ausbreitungsanalyse
+Distributions of number of infectee per infector (offspring distribution); Verteilung der Anzahl der Infizierten pro Infiziertem (Nachkommenschafts-Verteilung)
+Serial interval and fitted distribution for model with best fit to the data; Serielles Intervall und angepasste Verteilung für das Modell mit der besten Anpassung an die Daten
+Estimate of mean serial interval; Schätzung des mittleren seriellen Intervalls
+Summary statistics for observed offsring distribution; Zusammenfassende Statistiken für die beobachtete Nachkommen-Verteilung
+n_value <= 0: number of terminal infectee nodes. This corresponds to cases that were infected but did not infect further cases.; n_value <= 0: Anzahl der terminalen Infektionsknoten. Dies entspricht den Fällen, die infiziert wurden, aber keine weiteren Fälle infiziert haben.
+Estimates of reproduction number (R) and dispersion parameter (k) using NB distribution; ESchätzungen der Reproduktionszahl (R) und des Streuungsparameters (k) unter Verwendung der NB-Verteilung
+SD: standard deviation, CI: confidence interval, a lower dispersion parameter k indicates  higher transmission heterogeneity, i.e. more transmissions resulted from a small number of people.; SD: Standardabweichung, CI: Konfidenzintervall, ein geringerer Streuungsparameter k deutet auf eine größere Übertragungsheterogenität hin, d.h. mehr Übertragungen gehen auf eine kleine Anzahl von Personen zurück.
+Reproduction number (Rt); Reproduktionszahl (Rt)
+Estimate of time dependent reproduction number Rt; Schätzung der zeitabhängigen Reproduktionszahl Rt
+Summary of estimated mean time dependent reproduction number; Zusammenfassung der geschätzten mittleren zeitabhängigen Reproduktionszahl
+Parameter estimate and 95% CI of distribtion with best fit to the data; Parameterschätzung und 95% CI der Verteilung mit bester Anpassung an die Daten
+Choose; Wählen Sie
+Cummulative cases; Summierte Fälle
+Cumulative cases by region; Summierte Fälle nach Region
+Choose sex category; Wählen Sie eine Geschlechtskategorie
+Choose region to plot shapes; Region wählen, um die Karten zu zeichnen
+Choose distribution for SI; Verteilung für SI wählen
+Select distribution for SI; Auswählen von Verteilung für SI
+Only select if SI estimation method is parametric; Nur auswählen, wenn die SI-Schätzungsmethode parametrisch ist
+SI estimation method; SI-Schätzungsmethode
+Specify SI mean; Geben Sie den SI-Mittelwert an
+Specify SI Std Dev; Geben Sie die SI Std.-Abweichung an
+Choose maximum value for SI; Wählen Sie den Höchstwert für SI
+Ploting parameters; Parameter plotten
+Show legend of estimated Rt plot?; Legende des geschätzten Rt-Plots anzeigen?
+This section estimates the time dependent reproduction number Rt, t = week. The data used are the case-based incidence data and transmission network data.; In diesem Abschnitt wird die zeitabhängige Reproduktionszahl Rt, t = Woche, geschätzt. Die verwendeten Daten sind die fallbezogenen Inzidenzdaten und die Daten des Übertragungsnetzes.
+We begin by estimating the serial interval (SI) distribution and use it to estimate Rt. The SI distribution can be estimated parametrically by specifying the mean and std for SI OR by using the transmission network data.; Wir beginnen mit der Schätzung der seriellen Intervallverteilung (SI) und verwenden sie zur Schätzung von Rt. Die SI-Verteilung kann parametrisch geschätzt werden, indem Mittelwert und Standard für SI angegeben werden ODER indem die Daten des Übertragungsnetzes verwendet werden.
+For `SI estimation method` using transmission data, the analysis is based on 1500 MCMC iterations and may take some time, repenting on your data size.; Bei der "SI-Schätzungsmethode" unter Verwendung von Übertragungsdaten basiert die Analyse auf 1500 MCMC-Iterationen und kann je nach Datenumfang einige Zeit in Anspruch nehmen.
+Summary statistics for observed offspring distribution; Zusammenfassende Statistiken für die beobachtete Nachkommen-Verteilung
+Choose the serial interval range; Wählen Sie den Bereich des seriellen Intervalls
+Choose distribution with best fit; Wählen Sie die bestepassende Verteilung
+Distribution with best fit has smallest AIC or BIC; Die Verteilung mit der besten Anpassung hat den kleinsten AIC oder BIC
+Specify number of bootstrap iteration; Anzahl der Bootstrap-Iterationen festlegen
+Show model diagnostics plots; Modell-Disgnostik-Diagramme anzeigen
+This section estimates the serial interval (SI). The data used here is the case-based data of infector-infertee pairs extracted from the transmission network data.; In diesem Abschnitt wird das Serielle Intervall (SI) geschätzt. Bei den hier verwendeten Daten handelt es sich um fallbezogene Daten von Infektor-Infizierten-Paaren; die aus den Daten des Übertragungsnetzes extrahiert wurden.
+Different distributions are fitted to the observed SI. After choosing the distribution with best fit based on smallest AIC, the app then estimate the mean SI and 95% CI using bootstrap.; Verschiedene Verteilungen werden an das beobachtete SI angepasst. Nach der Auswahl der Verteilung mit der besten Anpassung auf der Grundlage des kleinsten AIC schätzt die App dann den mittleren SI und den 95 %-KI mithilfe von Bootstrapping-Verfahren.
+Specify degree of the polynomial curve; Geben Sie den Grad des Polynoms an
+This section estimates the superspreading parameter (k) and effective reproduction number (R). The data used here is the case-based infector-infertee pairs extracted from the transmission network data.; n diesem Abschnitt werden der Superspreading-Parameter (k) und die effektive Reproduktionszahl (R) geschätzt. Die hier verwendeten Daten sind die fallbasierten Infektor-Infizierten-Paare, die aus den Daten des Übertragungsnetzes extrahiert wurden.
+A negative binomial distribution (NB) is fitted to the offspring distribution (number of infector per infectee). The mean of the NB estimates the effective reproductive number (R) while the dispersion parameter estimate the superspreading parameter (k). The 95% confidence interval is estimated using `confint` function of the R `stats` package.; Eine negative Binomialverteilung (NB) wird an die Verteilung der Nachkommenschaft (Anzahl der Ansteckenden pro Angesteckten) angepasst. Der Mittelwert der NB schätzt die effektive Reproduktionszahl (R), während der Streuungsparameter den Parameter der Überstreuung (k) schätzt. Das 95 %-Konfidenzintervall wird mit der Funktion `confint` des R-Pakets `stats` geschätzt.
+Event data analysis; Ereignisdatenanalyse
+Please select filter options and click on the `Apply changes` icon below.; Bitte wählen Sie Filter und drücken Sie auf "Änderungen überehmen" um die Analyse zu starten
+The relevant date filter uses  the date of event and if missing, impute with report date.; Der entsprechende Datumsfilter verwendet das Datum des Ereignisses. Fehlt es, so wird das Meldedatum verwendet.
+Choose table columns; Tabellenspalten auswählen
+Choose variables to use for table columns; Wählen Sie Variablen für die Tabellenspalten
+Choose variables to plot 2X2 table; Wählen Sie Variablen für die Darstellung einer 2X2-Tabelle
+Please select 2 variables; Bitte wählen Sie 2 Variablen
+Only 2 variables can be selected; Es können nur 2 Variablen ausgewählt werden
+Transpose 2 X 2 table ?; Zeilen und Spalten der 2 X 2 Tabelle tauschen?
+Choose variable to plot Pie chart; Variable für Tortendiagramm auswählen
+Choose variable to plot bar graph; Variable für Balkendiagramm auswählen
+Relevant date (dd-mm-yyyy); Relevantes Datum (tt-mm-jjjj)
+Region of event; Region des Ereignisses
+Identification source; Identifikationsquelle
+Event dashboard; Event-Dashboard
+Bar chart for events by region/district grouped by event status; Balkendiagramm für Ereignisse nach Region/Bezirk, gruppiert nach Ereignisstatus
+Table 1: Event status by type of place; Tabelle 1: Ereignisstatus nach Art des Ortes
+Table 2: Event status by management status; Tabelle 2: Ereignisstatus nach Verwaltungsstatus
+Table 3: Event status by risk level; Tabelle 3: Ereignisstatus nach Risikostufe
+Fig 2: Event status; Abb. 2: Ereignisstatus
+Fig 3: Event source type; Abb. 3: Art der Ereignisquelle
+Fig 4: Event district; Abb. 4: Ereignisbezirk
+Event by Jurisdiction; Ereignis nach Zuständigkeitsbereich
+2 X 2 table. Change filter options plot for other variables.; 2 X 2 Tabelle. Ändern Sie die Filteroptionen für die Darstellung anderer Variablen.
+Dynamic bar graph. Change filter options to plot for another variables.; Dynamisches Balkendiagramm. Ändern Sie die Filteroptionen, um für andere Variablen zu zeichnen.
+Dynamic pie chart. Change filter options to plot for another variables.; Dynamisches Kreisdiagramm. Ändern Sie die Filteroptionen, um für andere Variablen zu zeichnen.
+District of event; Bezirk des Ereignisses
+Contact dashboard; Kontakt-Dashboard
+Contact data analysis; Kontaktdatenanalyse
+Region of contact; Region des Kontaktes
+Download; Herunterladen
+Each bar in this plot represents a region or district and the height of the bar corresponds to the number of contacts in the region or district.; Jeder Balken in diesem Diagramm steht für eine Region oder einen Bezirk, und die Höhe des Balkens entspricht der Anzahl der Kontakte in der Region oder dem Bezirk.
+Contact per region export; Kontakt pro Region Export
+Contact entity type; Kontakt Entitätstyp
+Rows to show; Anzuzeigende Zeilen
+Each row in this data is a region with corresponding number of contacts. The data was obtained by summing the number of contacts in each region. The region of the source case was used in case the region of the contact was missing.; Chaque ligne de ces données est une région avec le nombre de contacts correspondant. Jede Zeile in diesen Daten ist eine Region mit der entsprechenden Anzahl von Kontakten. Die Daten wurden durch Summierung der Anzahl der Kontakte in jeder Region ermittelt. Die Region des Ausgangsfalls wurde verwendet, wenn die Region des Kontakts fehlte.
+Contact per case plot; Kontakt-pro-Fall-Plot
+Contact per case; Kontakt pro Fall
+Contacts per case export, Kontakt pro Fall Export
+Each row in this data is a case. The data was obtained by summing the number of contacts for each case. Cases with no contact are not included in this table; Jede Zeile in diesen Daten ist ein Fall. Die Daten wurden durch Summierung der Anzahl der Kontakte für jeden Fall ermittelt. Fälle, die keinen Kontakt hatten, sind in dieser Tabelle nicht enthalten.
+Sample data analysis; Probendatenanalyse
+The date filter uses the report date of sample, not the report date of the associated entity (case, contact, event participant, ...); Der Datumsfilter verwendet das Meldedatum der Probe, nicht das Meldedatum der zugehörigen Entität (Fall, Kontakt, Veranstaltungsteilnehmer, ...)
+Choose sample purpose; Wählen Sie den Zweck der Probe
+Region of sample; Region der Probe
+Sample dashboard; Proben-Dashboard
+Dynamic pie chart; Dynamisches Tortendiagramm
+Dynamic bar graph; Dynamisches Balkendiagramm
+Choose custom indicator variable; Benutzerdefinierte Indikatorvariable auswählen
+District of sample; Bezirk der Probe
+Please select filter options and click on `Apply changes` to run analysis.; Bitte wählen Sie die Filteroptionen aus und klicken Sie auf "Änderungen übernehmen", um die Analyse durchzuführen.
