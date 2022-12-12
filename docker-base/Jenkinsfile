@@ -16,10 +16,10 @@ node {
 	        	cp ../sormas-stats-shinyapp/sormas-stats-app/renv.lock .
 	            sudo docker build --pull --no-cache -t sormas-stats-base:${BRANCH} .
 	            sudo docker login -u '${DOCKERUSER}' -p '${DOCKERPASS}' docker.io
-	            sudo docker tag sormas-stats-base:${BRANCH} docker.io/hzibraunschweig/sormas-stats-base:${BRANCH}
-	            sudo docker push docker.io/hzibraunschweig/sormas-stats-base:${BRANCH}
+	            sudo docker tag sormas-stats-base:${BRANCH} docker.io/hzibraunschweig/sormas-stats-base:${TAG}
+	            sudo docker push docker.io/hzibraunschweig/sormas-stats-base:${TAG}
 	            sudo docker logout docker.io
-	            """                                                                                                                 
+	            """      
 	        }
         }
     }
