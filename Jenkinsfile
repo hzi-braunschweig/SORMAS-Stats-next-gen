@@ -33,7 +33,7 @@ node {
             """     
             if(tag_latest) {
                 sh """
-                ssudo docker tag sormas-stats:${BRANCH} docker.io/hzibraunschweig/sormas-stats:latest
+                sudo docker tag sormas-stats:${BRANCH} docker.io/hzibraunschweig/sormas-stats:latest
                 sudo docker push docker.io/hzibraunschweig/sormas-stats:latest
                 """
                 
