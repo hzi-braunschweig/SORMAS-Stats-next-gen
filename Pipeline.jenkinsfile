@@ -1,6 +1,9 @@
 
 node {
         
+    echo "TAG_LATEST=${env.TAG_LATEST}"
+    
+        
     stage('checkout') {
         git branch: '${BRANCH}', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
     }
@@ -8,7 +11,7 @@ node {
     stage('Build base image') {
         if (params.BUILD_BASE != null && params.BUILD_BASE) {
 	        echo 'Build base image....'
-	    	build job: 'Build_SORMAS_Stats_Base', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+	    	build job: 'Build_SORMAS_Stats_Base', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG), booleanParam(name: "TAG_LATEST", value: env.TAG_LATEST)  ]
     	}
     	else {
     	    echo 'Skipping base image....'
@@ -44,7 +47,7 @@ node {
         withCredentials([ usernamePassword(credentialsId: credentials_id, usernameVariable: 'ANSIBLE_USER', passwordVariable: 'ANSIBLE_PASS' )]) {
 	    	sh """
 	    	job_result=\$(awx --conf.host 'https://${ANSIBLE_TOWER}' --conf.username ${ANSIBLE_USER} --conf.password ${ANSIBLE_PASS} \
-	           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --estra_vars "stats_image: docker.io/hzibraunschweig/sormas-stats:${TAG}" --limit '${SERVER_LIMIT}' 316)
+	           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --extra_vars "stats_image: docker.io/hzibraunschweig/sormas-stats:${TAG}" --limit '${SERVER_LIMIT}' 316)
 	        echo \$job_result
 	    	"""       
     	}              
