@@ -1,16 +1,16 @@
 node {
     def tag_latest = false    
-    envVars = env.getEnvironment()
-    echo envVars.containsKey("TAG_LATEST")
-    
-    if (envVars.containsKey("TAG_LATEST")) {
-    	tag_latest = Boolean.parseBoolean(TAG_LATEST)     
-    	echo "Tagging as latest also"   
+    if (env.TAG_LATEST != null) {
+    	tag_latest = Boolean.parseBoolean(TAG_LATEST)       
+    }
+    if (tag_latest) {
+        echo "Tagging as latest also"     
     }
     else {
         echo "Do not tag as latest"   
         
     }
+    echo "TAG_LATEST=${tag_latest}"
 
     
         
