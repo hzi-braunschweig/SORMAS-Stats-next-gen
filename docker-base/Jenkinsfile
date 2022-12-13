@@ -1,4 +1,9 @@
 node {
+    def tag_latest = false    
+    
+    if (getBinding().hasVariable("TAG_LATEST")) {
+    	tag_latest = Boolean.parseBoolean(TAG_LATEST)        
+    }
     
         
     stage('checkout') {
@@ -20,6 +25,14 @@ node {
 	            sudo docker push docker.io/hzibraunschweig/sormas-stats-base:${TAG}
 	            sudo docker logout docker.io
 	            """      
+	            if(tag_latest) {
+	                sh """
+	                sudo docker tag sormas-stats-base:${BRANCH} docker.io/hzibraunschweig/sormas-stats-base:latest
+	                sudo docker push docker.io/hzibraunschweig/sormas-stats-base:latest
+	                """
+	                
+	            }
+
 	        }
         }
     }

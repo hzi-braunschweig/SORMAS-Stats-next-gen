@@ -1,7 +1,13 @@
 
 node {
-        
-    echo "TAG_LATEST=${env.TAG_LATEST}"
+    def tag_latest = false    
+    
+    if (getBinding().hasVariable("TAG_LATEST")) {
+    	tag_latest = Boolean.parseBoolean(TAG_LATEST)        
+    }
+    
+
+    echo "TAG_LATEST=${tag_latest}"
     
         
     stage('checkout') {
@@ -11,7 +17,7 @@ node {
     stage('Build base image') {
         if (params.BUILD_BASE != null && params.BUILD_BASE) {
 	        echo 'Build base image....'
-	    	build job: 'Build_SORMAS_Stats_Base', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG), booleanParam(name: "TAG_LATEST", value: env.TAG_LATEST)  ]
+	    	build job: 'Build_SORMAS_Stats_Base', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG), booleanParam(name: "TAG_LATEST", value: tag_latest)  ]
     	}
     	else {
     	    echo 'Skipping base image....'
@@ -37,7 +43,7 @@ node {
     	}
     	else {
     	    echo 'Build stats image....'
-			build job: 'Build_SORMAS_Stats', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+			build job: 'Build_SORMAS_Stats', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG), booleanParam(name: "TAG_LATEST", value: tag_latest)  ]
     	}
     }
     
