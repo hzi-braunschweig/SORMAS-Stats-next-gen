@@ -1,9 +1,16 @@
 
 node {
     def tag_latest = false    
+    envVars = env.getEnvironment()
+    echo envVars.containsKey("TAG_LATEST")
     
-    if (getBinding().hasVariable("TAG_LATEST")) {
-    	tag_latest = Boolean.parseBoolean(TAG_LATEST)        
+    if (envVars.containsKey("TAG_LATEST")) {
+    	tag_latest = Boolean.parseBoolean(TAG_LATEST)     
+    	echo "Tagging as latest also"   
+    }
+    else {
+        echo "Do not tag as latest"   
+        
     }
     
 
