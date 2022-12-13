@@ -44,7 +44,7 @@ node {
         withCredentials([ usernamePassword(credentialsId: credentials_id, usernameVariable: 'ANSIBLE_USER', passwordVariable: 'ANSIBLE_PASS' )]) {
 	    	sh """
 	    	job_result=\$(awx --conf.host 'https://${ANSIBLE_TOWER}' --conf.username ${ANSIBLE_USER} --conf.password ${ANSIBLE_PASS} \
-	           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --limit '${SERVER_LIMIT}' 316)
+	           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --estra_vars "stats_image: docker.io/hzibraunschweig/sormas-stats:${TAG}" --limit '${SERVER_LIMIT}' 316)
 	        echo \$job_result
 	    	"""       
     	}              
