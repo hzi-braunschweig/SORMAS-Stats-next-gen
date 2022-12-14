@@ -78,7 +78,7 @@ node {
         		sh """
         		git config --global credential.username ${GITHUB_USER}
                 git config --global credential.helper '!f() { echo password=${GITHUB_PASS}; }; f'
-                git tag ${TAG}
+                git tag -f ${TAG}
                 git push https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git --tags
         		"""
         	}				                                                                           
