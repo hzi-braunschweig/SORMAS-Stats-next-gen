@@ -76,8 +76,8 @@ node {
 		if (env.GITHUB_CREDENTIALS != null && env.GITHUB_CREDENTIALS.trim() != '' && tag_latest ) {
         	withCredentials([ usernamePassword(credentialsId: env.GITHUB_CREDENTIALS, usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PASS' )]) {
         		sh """
-        		git config --global credential.username ${GITHUB_USER}
-                git config --global credential.helper '!f() { echo password=${GITHUB_PASS}; }; f'
+        		git config --local credential.username ${GITHUB_USER}
+                git config --local credential.helper '!f() { echo password=${GITHUB_PASS}; }; f'
                 git tag -f v${TAG}
                 git push https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git --tags
         		"""
