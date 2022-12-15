@@ -78,7 +78,7 @@ node {
         		sh """
         		git config --local credential.username ${GITHUB_USER}
                 git config --local credential.helper '!f() { echo password=${GITHUB_PASS}; }; f'
-                git tag -f v${TAG}
+                git tag -a -f v${TAG} -m "Build ${currentBuild.number}"
                 git push https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git -f --tags
         		"""
         	}				                                                                           
@@ -87,6 +87,13 @@ node {
 		    echo "No GITHUB_CREDENTIALS specified - skipping release"
 		    
 		}
+		
+		def displayName = '${TAG}'
+		if (tag_latest) {
+			displayName = displayName + ' - latest'
+		}
+
+		currentBuild.displayName = displayName
 
 	                   
 	}
