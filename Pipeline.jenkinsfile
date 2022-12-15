@@ -88,7 +88,7 @@ node {
 		    
 		}
 		
-		def displayName = '${TAG}'
+		def displayName = "${TAG}"
 		if (tag_latest) {
 			displayName = displayName + ' - latest'
 		}
