@@ -13,6 +13,7 @@ node {
     }
     echo "TAG_LATEST=${tag_latest}"
     
+    
         
     stage('checkout') {
         git branch: '${BRANCH}', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
@@ -54,15 +55,48 @@ node {
     def credentials_id = params.CREDENTIALS_ID
     
     stage('Deploy to server') {
-        withCredentials([ usernamePassword(credentialsId: credentials_id, usernameVariable: 'ANSIBLE_USER', passwordVariable: 'ANSIBLE_PASS' )]) {
-	    	sh """
-	    	job_result=\$(awx --conf.host 'https://${ANSIBLE_TOWER}' --conf.username ${ANSIBLE_USER} --conf.password ${ANSIBLE_PASS} \
-	           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --extra_vars "stats_image: docker.io/hzibraunschweig/sormas-stats:${TAG}" --limit '${SERVER_LIMIT}' 316)
-	        echo \$job_result
-	    	"""       
-    	}              
+        if (env.SERVER_LIMIT != null && env.SERVER_LIMIT.trim() != '') {
+        	withCredentials([ usernamePassword(credentialsId: credentials_id, usernameVariable: 'ANSIBLE_USER', passwordVariable: 'ANSIBLE_PASS' )]) {
+		    	sh """
+		    	job_result=\$(awx --conf.host 'https://${ANSIBLE_TOWER}' --conf.username ${ANSIBLE_USER} --conf.password ${ANSIBLE_PASS} \
+		           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --extra_vars "stats_image: docker.io/hzibraunschweig/sormas-stats:${TAG}" --limit '${SERVER_LIMIT}' 316)
+		        echo \$job_result
+		    	"""       
+	    	}       
+        }
+        else {
+            echo "Skipping deploy to server"
+            
+        }
     }
     
+    
+    
+	stage('Create release') {
+		if (env.GITHUB_CREDENTIALS != null && env.GITHUB_CREDENTIALS.trim() != '' ) {
+        	withCredentials([ usernamePassword(credentialsId: env.GITHUB_CREDENTIALS, usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PASS' )]) {
+        		sh """
+        		git config --local credential.username ${GITHUB_USER}
+                git config --local credential.helper '!f() { echo password=${GITHUB_PASS}; }; f'
+                git tag -a -f v${TAG} -m "Build ${currentBuild.number}"
+                git push https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git -f --tags
+        		"""
+        	}				                                                                           
+		}
+		else {
+		    echo "No GITHUB_CREDENTIALS specified - skipping release"
+		    
+		}
+		
+		def displayName = "${TAG}"
+		if (tag_latest) {
+			displayName = displayName + ' - latest'
+		}
+
+		currentBuild.displayName = displayName
+
+	                   
+	}
 
 
     
