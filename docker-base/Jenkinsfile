@@ -1,4 +1,16 @@
 node {
+    def tag_latest = false    
+    if (env.TAG_LATEST != null) {
+    	tag_latest = Boolean.parseBoolean(TAG_LATEST)       
+    }
+    if (tag_latest) {
+        echo "Tagging as latest also"     
+    }
+    else {
+        echo "Do not tag as latest"   
+        
+    }
+    echo "TAG_LATEST=${tag_latest}"
     
         
     stage('checkout') {
@@ -14,12 +26,20 @@ node {
 	        withCredentials([ usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERUSER', passwordVariable: 'DOCKERPASS' )]) {
 	        	sh """
 	        	cp ../sormas-stats-shinyapp/sormas-stats-app/renv.lock .
-	            sudo docker build --pull --no-cache -t sormas-stats-base:${BRANCH} .
+	            sudo docker build --pull -t sormas-stats-base:${BRANCH} .
 	            sudo docker login -u '${DOCKERUSER}' -p '${DOCKERPASS}' docker.io
-	            sudo docker tag sormas-stats-base:${BRANCH} docker.io/hzibraunschweig/sormas-stats-base:${BRANCH}
-	            sudo docker push docker.io/hzibraunschweig/sormas-stats-base:${BRANCH}
+	            sudo docker tag sormas-stats-base:${BRANCH} docker.io/hzibraunschweig/sormas-stats-base:${TAG}
+	            sudo docker push docker.io/hzibraunschweig/sormas-stats-base:${TAG}
 	            sudo docker logout docker.io
-	            """                                                                                                                 
+	            """      
+	            if(tag_latest) {
+	                sh """
+	                sudo docker tag sormas-stats-base:${BRANCH} docker.io/hzibraunschweig/sormas-stats-base:latest
+	                sudo docker push docker.io/hzibraunschweig/sormas-stats-base:latest
+	                """
+	                
+	            }
+
 	        }
         }
     }

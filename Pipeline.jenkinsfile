@@ -1,5 +1,19 @@
 
 node {
+    def tag_latest = false    
+    if (env.TAG_LATEST != null) {
+    	tag_latest = Boolean.parseBoolean(TAG_LATEST)       
+    }
+    if (tag_latest) {
+        echo "Tagging as latest also"     
+    }
+    else {
+        echo "Do not tag as latest"   
+        
+    }
+    echo "TAG_LATEST=${tag_latest}"
+    
+    
         
     stage('checkout') {
         git branch: '${BRANCH}', url: 'https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git'
@@ -8,7 +22,7 @@ node {
     stage('Build base image') {
         if (params.BUILD_BASE != null && params.BUILD_BASE) {
 	        echo 'Build base image....'
-	    	build job: 'Build_SORMAS_Stats_Base', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+	    	build job: 'Build_SORMAS_Stats_Base', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG), booleanParam(name: "TAG_LATEST", value: tag_latest)  ]
     	}
     	else {
     	    echo 'Skipping base image....'
@@ -34,22 +48,55 @@ node {
     	}
     	else {
     	    echo 'Build stats image....'
-			build job: 'Build_SORMAS_Stats', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG)  ]
+			build job: 'Build_SORMAS_Stats', parameters:  [string(name: "BRANCH", value: env.BRANCH), string(name: "TAG", value: env.TAG), booleanParam(name: "TAG_LATEST", value: tag_latest)  ]
     	}
     }
     
     def credentials_id = params.CREDENTIALS_ID
     
     stage('Deploy to server') {
-        withCredentials([ usernamePassword(credentialsId: credentials_id, usernameVariable: 'ANSIBLE_USER', passwordVariable: 'ANSIBLE_PASS' )]) {
-	    	sh """
-	    	job_result=\$(awx --conf.host 'https://${ANSIBLE_TOWER}' --conf.username ${ANSIBLE_USER} --conf.password ${ANSIBLE_PASS} \
-	           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --limit '${SERVER_LIMIT}' 316)
-	        echo \$job_result
-	    	"""       
-    	}              
+        if (env.SERVER_LIMIT != null && env.SERVER_LIMIT.trim() != '') {
+        	withCredentials([ usernamePassword(credentialsId: credentials_id, usernameVariable: 'ANSIBLE_USER', passwordVariable: 'ANSIBLE_PASS' )]) {
+		    	sh """
+		    	job_result=\$(awx --conf.host 'https://${ANSIBLE_TOWER}' --conf.username ${ANSIBLE_USER} --conf.password ${ANSIBLE_PASS} \
+		           job_templates launch --monitor --wait --inventory ${ANSIBLE_INVENTORY} --extra_vars "stats_image: docker.io/hzibraunschweig/sormas-stats:${TAG}" --limit '${SERVER_LIMIT}' 316)
+		        echo \$job_result
+		    	"""       
+	    	}       
+        }
+        else {
+            echo "Skipping deploy to server"
+            
+        }
     }
     
+    
+    
+	stage('Create release') {
+		if (env.GITHUB_CREDENTIALS != null && env.GITHUB_CREDENTIALS.trim() != '' ) {
+        	withCredentials([ usernamePassword(credentialsId: env.GITHUB_CREDENTIALS, usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PASS' )]) {
+        		sh """
+        		git config --local credential.username ${GITHUB_USER}
+                git config --local credential.helper '!f() { echo password=${GITHUB_PASS}; }; f'
+                git tag -a -f v${TAG} -m "Build ${currentBuild.number}"
+                git push https://github.com/hzi-braunschweig/SORMAS-Stats-next-gen.git -f --tags
+        		"""
+        	}				                                                                           
+		}
+		else {
+		    echo "No GITHUB_CREDENTIALS specified - skipping release"
+		    
+		}
+		
+		def displayName = "${TAG}"
+		if (tag_latest) {
+			displayName = displayName + ' - latest'
+		}
+
+		currentBuild.displayName = displayName
+
+	                   
+	}
 
 
     
