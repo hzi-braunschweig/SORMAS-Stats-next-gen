@@ -1,0 +1,119 @@
+---
+title: "Information"
+author: "Onkar Singh"
+date: '2023-02-18'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#  Risk Assessment Module
+
+The COVID-19 pandemic has had a profound impact on human life and the global economy. To combat the pandemic's spread, it is crucial to assess the risk associated with it. A new R Shiny app has been developed to assist in pandemic risk assessment. This report will discuss the app's features and how it can help in pandemic risk assessment.
+
+
+**Link**: https://onkarsingh23.shinyapps.io/idis-ram/
+
+
+## Introduction
+Based on the SORMAS dataset, risk was defined on the epidemiologcal indicators for each Country/Region/Districts and was computed and classified in three categories as:
+
+* LOW
+* MODERATE
+* HIGH
+
+These risk levels and indicators are presented as tables and graphics in an interactive dashboard. Parameters can be set dynamically: disease and indicator to display, type of risk to consider, number of reference and observation weeks (see below), risk thresholds.
+At present this webapp only address and shows the information for only one disease i.e.**Coronavirus**. This can be further upgrade in the near future as we get the new information about any other pathogenic diseases.
+
+## Features
+The app has several features that assist in risk assessment. These features include main page with four tabs, a sidebar panel, and group by options.
+
+* Main page
+* Sidebar Panel
+
+* **Main Page**: Main Page:
+The app's main page contains four tabs: Heatmap, Timeseries Analysis, Data, and Information. 
+ 
+
+* **Heat map**: The Heatmap tab displays a map of the selected region, highlighting areas with the highest number of COVID-19 cases, hospitalizations, or deaths and each column demonstrate the observation week. Three different color form represents the risk type (Red:High, Yellow: Medium, Green: Low).
+
+
+* **Time series**: The Timeseries Analysis tab displays a graph of the selected region's COVID-19 case count, hospitalization count, or death count over time.
+* Data: The tab "Data" shows the data computed in the back end as a table. They are updated when the thresholds or the number of weeks are changed.
+
+* **Info**: The Information tab provides information on how to use the app and how it works.
+
+
+* **Sidebar Panel**: Sidebar panel consist of various filters and parameters that allows user to select and visualize the risk based on the given/selected information.
+* Location filter: This filter comprises three categories: By Default as "Select All"
+
+* Country
+* Region
+* District
+
+Here user can select country of interest, region and district and then user need to click on apply button to start the process.
+
+
+### Indicator Types
+
+* Weekly case count
+* Weekly death count 
+* Weekly hospitalization count
+
+### Risk Types
+
+This application allows user to select two risk types as follows:
+
+* Absolute
+* Anomly
+
+* **Absoulute Risk Type**: In the absolute risk type, there are three risk levels: low, moderate, and high. These risk levels are determined based on whether the indicator value is below, between, or above predefined thresholds. The thresholds are divided into two categories: low-mid and mid-high. If the indicator value is below the low-mid threshold, the risk is considered low. If the indicator value is at or above the low-mid threshold but below the mid-high threshold, the risk is considered moderate. If the indicator value is above the mid-high threshold, the risk is considered high. It is important to note that the thresholds used for each indicator type may differ based on the specific situation.
+
+
+* **Anomly Risk Type**: In the anomaly risk type, a statistical model is used to compare the current week's indicator value to previous weeks' values to identify anomalies. The statistical model used is a negative-binomial distribution. The model is trained on the indicator values from the reference weeks, which are the weeks preceding the observation weeks. The number of reference weeks is set by the user. Once the model is trained, the indicator value from the observation week is compared to the inferred negative-binomial statistical distribution. The resulting probability is used to determine the risk level. The anomaly thresholds are the probabilities below which the risk levels are considered. The absolute thresholds on the counts are derived from those probabilities, and the risk levels are then computed as in the absolute risk case.
+
+* **Explanation of Anomly Risk Type**
+Anomaly detection is a process of identifying rare events or observations that differ significantly from the expected or typical behavior. In the anomaly risk type, statistical models are used to identify such events or observations.
+
+Let's say we have a dataset of weekly sales figures for a retail store. We want to detect any  in the sales figures to identify potential issues that need attention. We use a negative-binomial distribution statistical model to identify anomalies.
+
+To use the model, we first need to train it on the reference weeks, which are the weeks preceding the observation week. The number of reference weeks is set by the user. For example, if the user sets the number of reference weeks to 4, then the model will be trained on the sales figures from the four weeks preceding the current week.
+
+Once the model is trained, we can use it to compare the sales figure from the observation week to the inferred negative-binomial statistical distribution. The resulting probability is used to determine the risk level. The lower the probability, the higher the risk level.
+anomalies
+The anomaly thresholds are the probabilities below which the risk levels are considered. For example, if we set the anomaly threshold to 0.05, then any observation with a probability less than 0.05 will be considered an anomaly.
+
+To compute the risk levels, we derive absolute thresholds on the counts from the probabilities. For example, if the probability is 0.05, we can derive an absolute threshold on the sales count, below which the risk level will be considered high.
+In summary, the negative-binomial distribution statistical model is used to detect anomalies in the sales figures. The model is trained on the sales figures from the reference weeks, and the resulting probability is used to determine the risk level. The anomaly thresholds are the probabilities below which the risk levels are considered, and the absolute thresholds on the counts are derived from those probabilities.
+
+
+### Group By:
+The app also includes a Group By option, which allows users to view data by country, region, district, or city. This feature helps users to analyze the risk at different levels.
+
+**NOTE**
+In group by filter User must select at least 2 country/region/District to use group function.
+
+
+## Conclusion:
+In conclusion, the R Shiny app for pandemic risk assessment is a powerful tool for assessing the risk associated with the pandemic. The app's features, including four tabs, a sidebar panel, and group by options, make it easy for users to analyze the data and make informed decisions. The system described in this report provides two types of risk assessments: absolute and anomaly. The absolute risk type uses predefined thresholds to determine risk levels, while the anomaly risk type uses a statistical model to identify anomalies and calculate risk levels based on the resulting probability. The thresholds and anomaly thresholds used may differ based on the specific situation. The system provides a useful tool for assessing and managing risk related to the three indicators: weekly case count, weekly death count, and weekly hospitalization count.With the ongoing pandemic, the app's relevance is critical, and it is a valuable tool for public health officials, researchers, and policymakers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
