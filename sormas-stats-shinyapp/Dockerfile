@@ -1,6 +1,6 @@
 # Base image https://hub.docker.com/u/rocker/
 # FROM rocker/shiny:latest 
-FROM rocker/shiny:4.2.0
+FROM rocker/shiny:4.3.0 
 
 #env variables
 ENV DB_USER="sormas_user"
