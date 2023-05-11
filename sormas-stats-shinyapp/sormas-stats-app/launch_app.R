@@ -8,4 +8,5 @@
 # renv::init(bare = TRUE) # initialize the project without attempting to discover and install R package dependencies
 # renv::snapshot()  #  save the state of your project to renv.lock  , do not run in active session 
 
-shiny::runApp(appDir = getwd(), launch.browser = TRUE, host = "127.0.0.1")    
+shiny::runApp(appDir = getwd(), launch.browser = TRUE, host = "127.0.0.1") 
+

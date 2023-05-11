@@ -1,9 +1,9 @@
-###### Transmission chain analysis ##########
+###### Transmission chain analysis ########## 
 # This sub section of the ui.r file renders the transmission network diagram tab
 # All front-end methods related to this tab should be added in this file
 
 tabPanel( i18n$t("Transmission Network"), 
-          icon = icon("project-diagram"), # icon("filter"),
+          icon = icon("project-diagram"), 
           sidebarLayout(
             sidebarPanel(
               pickerInput('selected_language',
@@ -11,19 +11,17 @@ tabPanel( i18n$t("Transmission Network"),
                   choices = i18n$get_languages(),
                   selected = i18n$get_key_translation()
                 ),
-              
               # Filter specific to network diagram only
               span(tags$i(h5(i18n$t("Please select filter options and click on the `Apply changes` icon below. Click on `Visualize network diagram` to plot the diagram."))), style="color:#045a8d"),
               pickerInput("diseaseUi", i18n$t("Disease"), 
-                          choices = c("CORONAVIRUS"), # sort(levels(as.factor(elist$disease))) # for more diseases
+                          choices = sort(levels(as.factor(elist$disease))),
                           selected = c("CORONAVIRUS"),
                           multiple = FALSE),
               #br(),
               dateRangeInput("reportdateUi", i18n$t("Report date (dd-mm-yyyy)") , start = Sys.Date() - delay_default_UI, end = Sys.Date(), min = NULL,
                              max = NULL, format = "dd-mm-yyyy", startview = "month",
                              weekstart = 0, language = "en", separator = " to ", width = NULL,
-                             autoclose = TRUE),  # replace start = Sys.Date()-30 in case you need to show default statistics for last 30 days only
-              
+                             autoclose = TRUE),  
               # filter by Region
               pickerInput(
                 inputId = "regionNetworkUi",
@@ -50,7 +48,6 @@ tabPanel( i18n$t("Transmission Network"),
                 selected = NULL,
                 multiple = TRUE
               ),
-              
               # filter by relationship with infector
               pickerInput(
                 inputId = "relationCaseUi", 
@@ -63,7 +60,6 @@ tabPanel( i18n$t("Transmission Network"),
                 selected = NULL,
                 multiple = TRUE
               ),
-              
               # filter by event status
               pickerInput(
                 inputId = "eventstatusUI", 
@@ -76,7 +72,6 @@ tabPanel( i18n$t("Transmission Network"),
                 selected = NULL,
                 multiple = TRUE
               ),
-              
               # filter by event risk level
               pickerInput(
                 inputId = "risklevelUI", 

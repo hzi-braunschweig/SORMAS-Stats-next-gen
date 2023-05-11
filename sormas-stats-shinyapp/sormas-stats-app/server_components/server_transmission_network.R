@@ -1,6 +1,7 @@
 ###### Transmission chain analysis ##########
 # This sub section of the server.r file renders the transmission network diagram tab
 # All back-end methods related to this tab should be added in this file
+
 # ui element to filter transmission chain by district based of users selected region 
 output$pickerInputDistrict2 <- renderUI({
   if(!is.null(input$regionNetworkUi))
@@ -178,8 +179,8 @@ elistSel2ResCaseSourseCaseArch  = reactive({
 # Take a dependency on input$transChainAction ie render for elistSel2ResCaseSourseCase only works when the action icon is clicked
 # Any output or computation that depend on elistSel2ResCaseSourseCase wouuld run only when input$transChainAction is clicked
 elistSel2ResCaseSourseCase = eventReactive(input$transChainAction, { 
-  elistSel2ResCaseSourseCaseArch() #elistSel2ResCaseSourseCaseUUID()
-}, ignoreNULL = FALSE)
+  elistSel2ResCaseSourseCaseArch()
+}, ignoreNULL = TRUE)
 
 # Ordering column of elist to be plotted, this is needed to be in this specific order
 elistToPlot = reactive({
@@ -202,7 +203,6 @@ nodeToPlot = reactive({
 
 ## plotting network
 output$transChain <- renderVisNetwork({
-   
   if(input$visNetworkDiagramUi == TRUE){
     plotNet(nodeLineList= nodeToPlot(), elist = elistToPlot(), IgraphLayout= input$IgraphLayoutUi) 
   } 
@@ -211,7 +211,6 @@ output$transChain <- renderVisNetwork({
 ## computation of network parameters using transmission network data ----
 ## total number of contacts
 output$totalEdges <- renderInfoBox({
-   
   infoBox(
     title = NULL, 
     value =  nrow(elistSel2ResCaseSourseCase() ),
@@ -222,7 +221,6 @@ output$totalEdges <- renderInfoBox({
 })  
 ## Total number of edges (contacts or event participants) resulting to cases
 output$totalReultingcasesEdges <- renderInfoBox({
-   
   temp = elistSel2ResCaseSourseCase() %>%
     dplyr::filter(resultingcase_id != "NA")
   infoBox(
@@ -236,7 +234,6 @@ output$totalReultingcasesEdges <- renderInfoBox({
 ## Total number of unique infector-infectee pair
 # this is the same as contacts resulting to cases
 output$totalInfectorInfecteePair <- renderInfoBox({
-   
   temp =  elistSel2ResCaseSourseCase() %>%
     dplyr::filter(resultingcase_id != "NA") # deleting records with missing person id for infector
   # no need to count unique pairs of person since elist has unique pairs of nodes when exported from sormas db
@@ -250,7 +247,6 @@ output$totalInfectorInfecteePair <- renderInfoBox({
 
 ## total number of nodes: ie person and events
 output$totalNodes <- renderInfoBox({
-   
   infoBox(
     title = NULL, 
     value = length(unique(c(elistSel2ResCaseSourseCase()$from_uuid_person, elistSel2ResCaseSourseCase()$to_uuid_person ))),
@@ -310,7 +306,7 @@ output$totalContactEpPersonNodes <- renderInfoBox({
     subtitle = "∑ Contact & EP person"
   )
 })  
-## Prpportion of ep and contact person converted to case
+## Proportion of ep and contact person converted to case
 output$propContactEpPersonConverted <- renderInfoBox({
   temp = as.numeric(prop_cont_ep_person_convertedToCase(elist = elistSel2ResCaseSourseCase() )$prop_converted)
   infoBox(
@@ -324,7 +320,6 @@ output$propContactEpPersonConverted <- renderInfoBox({
 
 ### Computing network parameters using igraph----
 graphObject <- reactive({
-   
   net = convertNetworkToGraph(elist=elistSel2ResCaseSourseCase(), nodeLineList=nodeLineList) # converting network to graph object
   return(net)
 })

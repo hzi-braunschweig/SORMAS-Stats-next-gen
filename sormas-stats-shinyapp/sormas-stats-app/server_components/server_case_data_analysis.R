@@ -1,6 +1,7 @@
 ## CASE DATA ANALYSIS-----
 # This sub section of the server.r file renders the case data analysis tab
 # All back-end methods related to this tab should be added in this file
+
 # ui element to filter casePersonRegionDist by district based on user selected region 
 output$pickerInputdistrictCaseUi <- renderUI({
   if(!is.null(input$regionCaseUi))
@@ -13,7 +14,7 @@ output$pickerInputdistrictCaseUi <- renderUI({
               choices = temp, options = list(`actions-box` = TRUE, size = 12),
               selected = NULL, multiple = TRUE)
   })
-# Filtering casepersonRegion
+# Filtering casePersonRegionDist by region, disease and time
 casePersonRegionFilter = reactive({
 if(is.null(input$regionCaseUi))
 { casePersonRegionDist[((casePersonRegionDist$disease == input$diseaseCaseUi) & (casePersonRegionDist$reportdate >= (min(input$reportdateCaseUi))) & (casePersonRegionDist$reportdate <= (max(input$reportdateCaseUi)) )), ]
@@ -23,7 +24,6 @@ if(is.null(input$regionCaseUi))
 })
 # filter by district of case
 casePersonRegionDistFilter = reactive({
-  
   if(is.null(input$districtCaseUi))
   {
     temp = casePersonRegionFilter()
@@ -32,10 +32,9 @@ casePersonRegionDistFilter = reactive({
       dplyr::filter(district_name %in% input$districtCaseUi)
   }
   return(temp)
-  
 })
 # Adding control based on apply changes icon on front ui
-# Any output or computation that depend on casePersonFilter wouuld run only when caseDataAnalysisAction is clicked
+# Any output or computation that depend on casePersonFilter would run only when caseDataAnalysisAction is clicked
 casePersonFilter = eventReactive(input$caseDataAnalysisAction, { 
   casePersonRegionDistFilter() 
 }, ignoreNULL = FALSE)

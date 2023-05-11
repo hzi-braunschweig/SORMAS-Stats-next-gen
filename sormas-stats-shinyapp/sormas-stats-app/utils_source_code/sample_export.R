@@ -4,23 +4,24 @@ sample_export = function(sormas_db, fromDate, toDate){
   # leading sample table linked to cases only. A sample can be referenced by contacts, cases, and event participants
   # the goal is to export sample for each entity type and stack the tables 
   # this implementation is for samples linked to cases only, others can be added later 
-  querySample <- base::paste0("SELECT uuid AS uuid_sample, id AS id_sample, creationdate, sampledatetime AS data_sample_collected, reportdatetime AS date_of_report, pathogentestresult,
+  sqlSample <-"SELECT uuid AS uuid_sample, id AS id_sample, creationdate, sampledatetime AS data_sample_collected, reportdatetime AS date_of_report, pathogentestresult,
   associatedcase_id, samplingreason, samplepurpose, shipped, received, referredto_id,specimencondition, samplesource, shipmentdate, receiveddate, samplematerial
   FROM public.samples
-  WHERE deleted = FALSE and associatedcase_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+  WHERE deleted = FALSE and associatedcase_id IS NOT NULL and reportdatetime between ?fromDateTemp and ?toDateTemp"
+  querySample = DBI::sqlInterpolate(sormas_db, sqlSample, fromDateTemp=fromDate, toDateTemp=toDate)  
   sample_cases = dbGetQuery(sormas_db,querySample)
 #determining derived attributes (disease, region, district) by merging with source entity (case) of sample
 #reading case data that are linked to the extracted samples
 if(!dataframe_is_empty(sample_cases)){
   #loading cases
-  queryCase <- base::paste0("SELECT uuid AS case_uuid, id AS case_id, disease AS disease_case, responsibleregion_id AS region_id_case, responsibledistrict_id AS district_id_case,
+  sqlCase <-"SELECT uuid AS case_uuid, id AS case_id, disease AS disease_case, responsibleregion_id AS region_id_case, responsibledistrict_id AS district_id_case,
   caseclassification AS case_classification
   FROM public.cases
   WHERE deleted = FALSE and id IN (
   SELECT  distinct associatedcase_id
   FROM public.samples 
-  WHERE deleted = FALSE and associatedcase_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "')" )
-  
+  WHERE deleted = FALSE and associatedcase_id IS NOT NULL and reportdatetime between ?fromDateTemp and ?toDateTemp)" 
+  queryCase = DBI::sqlInterpolate(sormas_db, sqlCase, fromDateTemp=fromDate, toDateTemp=toDate)  
   case = dbGetQuery(sormas_db, queryCase)
   # load region
   region = dbGetQuery(sormas_db, 

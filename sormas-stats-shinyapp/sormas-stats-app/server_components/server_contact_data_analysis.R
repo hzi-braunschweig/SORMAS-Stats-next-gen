@@ -2,7 +2,7 @@
 # This sub section of the server.r file renders the contact data analysis tab
 # All back-end methods related to this tab should be added in this file
 
-# Filter contact data  based on region district time and disease
+# Filter contact data  based on region, district, time and disease
 contRegionDistDiseaseDate = reactive({
   if(is.null(input$regionContactUi))
   {
@@ -20,7 +20,7 @@ d = eventReactive(input$contactDataAnalysisAction, {
 # Begin of contact analysis    
 ## Bar plot
 output$plot <- renderPlot({
-  if(nrow(d( ) ) == 0)
+  if(nrow(d()) == 0)
   {
     plot(NULL, xlim=c(0,1), ylim=c(0,1), ylab="Number of contacts", xlab=" ",
          main = "No data exist based on your selection, please choose another selection for which data exist")
@@ -60,7 +60,7 @@ output$downloadBarplot = downloadHandler(
 ## Row 1 All contacts
 output$allCont <- renderInfoBox({
   infoBox(
-    "", nrow(d( )), icon = icon("handshake"),
+    "", nrow(d()), icon = icon("handshake"),
     color = colCont, fill = FALSE , subtitle = "All contacts"   )
 })
 # confirmed contacts
@@ -141,7 +141,7 @@ if(contact_per_case_plot=="t"){
     c( min(p()$Freq), max(p()$Freq)+20)
   })
   output$plotContPerCase <- renderPlot({
-    if(nrow(d( ) ) == 0)
+    if(nrow(d() ) == 0)
     {
       plot(NULL, xlim=c(0,1), ylim=c(0,1), ylab="Number of contacts", xlab=" ",
            main = "No data exist based on your selection, please choose another selection for which data exist")
