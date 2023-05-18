@@ -1,25 +1,22 @@
 # This function export the data of disease transmission chain from sormas
 mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonContact = TRUE)
 { 
-  ## computing default time based on 90 days in the past if  not provided by user
-  if(missing(fromDate) | missing(toDate)){
-    fromDate = as.character(Sys.Date() - delay) 
-    toDate = as.character(Sys.Date()) 
-  }
   # connecting to sormas db and reading data needed by sormas-stats
   ## reading contact data ###
-  queryContact <- base::paste0("SELECT id, uuid, caze_id, district_id, region_id, person_id,reportdatetime, lastcontactdate, disease,
+  sqlContact <-"SELECT id, uuid, caze_id, district_id, region_id, person_id,reportdatetime, lastcontactdate, disease,
   contactclassification,contactproximity,resultingcase_id, followupstatus, followupuntil, contactstatus, contactcategory, relationtocase
   FROM public.contact
-  WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
+  WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between ?fromDateTemp and ?toDateTemp"
+  queryContact = DBI::sqlInterpolate(sormas_db, sqlContact, fromDateTemp=fromDate, toDateTemp=toDate)
   contact = dbGetQuery(sormas_db,queryContact)
   
   # reading cases
-  queryCase <- base::paste0("SELECT  id AS caze_id, uuid AS uuid_case, disease AS disease_case, reportdate AS reportdate_case, person_id AS person_idcase,
+  sqlCase <-"SELECT  id AS caze_id, uuid AS uuid_case, disease AS disease_case, reportdate AS reportdate_case, person_id AS person_idcase,
   responsibleregion_id AS region_idcase, responsibledistrict_id AS district_idcase, caseclassification AS caseclassification_case, outcome AS outcome_case, epidnumber,
   symptoms_id AS symptoms_idcase
   FROM public.cases
-  WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "' ")
+  WHERE deleted = FALSE and reportdate between ?fromDateTemp and ?toDateTemp"
+  queryCase = DBI::sqlInterpolate(sormas_db, sqlCase, fromDateTemp=fromDate, toDateTemp=toDate)
   case = dbGetQuery(sormas_db,queryCase)
   
   # reading region
@@ -28,63 +25,74 @@ mergingDataFromDB = function(sormas_db, fromDate, toDate, uniquePersonPersonCont
   district = dbGetQuery(sormas_db,"SELECT id AS district_id, name AS district_name  FROM public.district")
   
   #loading symptom data, only symptoms linked to selected cases are loaded
-  symptoms = dbGetQuery(sormas_db,
-  base::paste0("SELECT id, onsetdate
+  sqlSymptoms = "SELECT id, onsetdate
   FROM public.symptoms
   WHERE id IN
   (SELECT distinct symptoms_id AS id
   FROM public.cases
-  WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "')"))
+  WHERE deleted = FALSE and reportdate between ?fromDateTemp and ?toDateTemp)"
+  querySymptoms = DBI::sqlInterpolate(sormas_db, sqlSymptoms, fromDateTemp=fromDate, toDateTemp=toDate) 
+  symptoms = dbGetQuery(sormas_db,querySymptoms)
   
   # reading event
-  queryEvent <- base::paste0("SELECT id AS event_id, uuid AS uuevent_id, reportdatetime AS reportdatetime_event, eventstatus, disease AS disease_events,
+  sqlEvent = "SELECT id AS event_id, uuid AS uuevent_id, reportdatetime AS reportdatetime_event, eventstatus, disease AS disease_events,
   typeofplace, eventlocation_id, archived, risklevel AS risklevel_event
   FROM public.events
-  WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ")
-  
-  events = dbGetQuery(sormas_db,queryEvent)
+  WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between ?fromDateTemp and ?toDateTemp"
+  queryEvent <- DBI::sqlInterpolate(sormas_db, sqlEvent, fromDateTemp=fromDate, toDateTemp=toDate) 
+  events = dbGetQuery(sormas_db, queryEvent)
   
   ## reading event participants linked to selected events
-  eventsParticipant = dbGetQuery(sormas_db,
-  base::paste0("SELECT id AS id_eventparticipant, uuid AS uuid_eventparticipant, event_id, person_id AS person_id_eventparticipant,
+  sqlParticipant = "SELECT id AS id_eventparticipant, uuid AS uuid_eventparticipant, event_id, person_id AS person_id_eventparticipant,
   resultingcase_id AS resultingcase_id_eventparticipant
   FROM public.eventParticipant
   WHERE deleted = FALSE and event_id  IN (
   SELECT id AS event_id
   FROM public.events
-  WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "')"))
+  WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between ?fromDateTemp and ?toDateTemp)"
+  queryParticipant <- DBI::sqlInterpolate(sormas_db, sqlParticipant, fromDateTemp=fromDate, toDateTemp=toDate) 
+  eventsParticipant = dbGetQuery(sormas_db, queryParticipant)
   
-  ## reading location
-  location = dbGetQuery(sormas_db,
-  base::paste0("SELECT id, district_id, region_id
+  ## reading location corresponding to events only
+  sqlLocation = "SELECT id, district_id, region_id
   FROM public.location
-  WHERE id IN ( SELECT distinct eventlocation_id  FROM public.events WHERE  deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "' ) "))
+  WHERE id IN (
+  SELECT distinct eventlocation_id
+  FROM public.events
+  WHERE  deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between ?fromDateTemp and ?toDateTemp)"
+  queryLocation <- DBI::sqlInterpolate(sormas_db, sqlLocation, fromDateTemp=fromDate, toDateTemp=toDate)
+  location = dbGetQuery(sormas_db, queryLocation)
   
 ## reading person data  ###
 ## only persons linked to cases, contacts or eps
-person_case = dbGetQuery(sormas_db,
-base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
+# case person
+sql_person_case = "SELECT id AS id_person, uuid AS uuid_person, sex 
  FROM public.person
  WHERE id IN (SELECT distinct person_id AS id
  FROM public.cases
- WHERE deleted = FALSE and reportdate between '", fromDate, "' and '", toDate, "')"))
-
-person_contact = dbGetQuery(sormas_db,
-base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
+ WHERE deleted = FALSE and reportdate between ?fromDateTemp and ?toDateTemp)"
+query_person_case = DBI::sqlInterpolate(sormas_db, sql_person_case, fromDateTemp=fromDate, toDateTemp=toDate) 
+person_case = dbGetQuery(sormas_db,query_person_case)
+# contact person
+sql_person_contact = "SELECT id AS id_person, uuid AS uuid_person, sex 
  FROM public.person 
  WHERE id IN (SELECT distinct person_id AS id
  FROM public.contact
- WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "')")) 
-
-person_event_part = dbGetQuery(sormas_db,
- base::paste0("SELECT id AS id_person, uuid AS uuid_person, sex 
+ WHERE deleted = FALSE and caze_id IS NOT NULL and reportdatetime between ?fromDateTemp and ?toDateTemp)"
+query_person_contact = DBI::sqlInterpolate(sormas_db, sql_person_contact, fromDateTemp=fromDate, toDateTemp=toDate) 
+person_contact = dbGetQuery(sormas_db, query_person_contact) 
+# event participant person
+sql_person_event_part = "SELECT id AS id_person, uuid AS uuid_person, sex 
  FROM public.person
  WHERE id IN ( SELECT person_id AS id
  FROM public.eventParticipant
  WHERE deleted = FALSE and event_id  IN (
  SELECT id AS event_id
  FROM public.events
- WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between '", fromDate, "' and '", toDate, "'))" )) 
+ WHERE deleted = FALSE and eventstatus != 'DROPPED' and disease IS NOT NULL and reportdatetime between ?fromDateTemp and ?toDateTemp))"
+query_person_event_part = DBI::sqlInterpolate(sormas_db, sql_person_event_part, fromDateTemp=fromDate, toDateTemp=toDate)
+person_event_part = dbGetQuery(sormas_db, query_person_event_part) 
+
 # row bind and keep distinct person id
 person = dplyr::bind_rows(person_case, person_contact, person_event_part) %>%
     dplyr::distinct(id_person, .keep_all = TRUE)

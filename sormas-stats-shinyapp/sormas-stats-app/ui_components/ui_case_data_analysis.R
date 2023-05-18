@@ -28,7 +28,7 @@ sidebarLayout(
    conditionalPanel(condition = "input.tabs1==4",
                     radioButtons("caseMapshapesUi", "Map shapes",  choices = c("By region","By district"),selected = c("By region")),
                     radioButtons("caseIndicatorTypeMapUi","Indicator type",  choices = c("Count", "Incidence proportion / 100,000"),selected = c("Count")), 
-                    #  the corresponding back-end method for "Incidence proportion / 100,000" has not been implemented, this is just a place holder
+                    # the corresponding back-end method for "Incidence proportion / 100,000" has not been implemented, this is just a place holder
                     # A possible option is to add indicator type as a parameter to the regionMapPlot and districtMapPlot functions + option to include population data
                     # filter map by Region of case
                     # Only shapes of the selected regions would be plotted

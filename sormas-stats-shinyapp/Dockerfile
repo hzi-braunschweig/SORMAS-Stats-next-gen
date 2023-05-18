@@ -1,6 +1,6 @@
 # Base image https://hub.docker.com/u/rocker/
 # FROM rocker/shiny:latest 
-FROM rocker/shiny:4.2.0
+FROM rocker/shiny:4.3.0 
 
 #env variables
 ENV DB_USER="sormas_user"
@@ -20,7 +20,7 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     libssl-dev \
     && install2.r --error \
     --deps TRUE \
-    # tidyverse \
+    tidyverse \
     # dplyr \
     # devtools \
     formatR \

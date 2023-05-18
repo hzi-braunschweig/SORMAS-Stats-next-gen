@@ -3,25 +3,28 @@
 # The case table would be merged with person, region, district, etc to et other attributs of the case
 case_export = function(sormas_db, fromDate, toDate){ 
   # reading cases
-  queryCase <- paste0("SELECT distinct id AS case_id, disease, reportdate, creationdate, person_id, responsibleregion_id AS region_id, 
+  sqlCase <-"SELECT distinct id AS case_id, disease, reportdate, creationdate, person_id, responsibleregion_id AS region_id, 
   responsibledistrict_id AS district_id, caseclassification, epidnumber, symptoms_id, healthfacility_id, outcome,caseorigin,quarantine
   FROM public.cases 
-  WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ")
+  WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between ?fromDateTemp and ?toDateTemp"
+  queryCase = DBI::sqlInterpolate(sormas_db, sqlCase, fromDateTemp=fromDate, toDateTemp=toDate)  
   case = dbGetQuery(sormas_db,queryCase)
   ### reading person data 
-  queryPerson = base::paste0("SELECT id AS person_id, sex, occupationtype, presentcondition, birthdate_dd, birthdate_mm, birthdate_yyyy
+  sqlPerson = "SELECT id AS person_id, sex, occupationtype, presentcondition, birthdate_dd, birthdate_mm, birthdate_yyyy
   FROM public.person
   WHERE id IN (SELECT person_id AS id
   FROM public.cases
-  WHERE deleted = FALSE AND caseclassification != 'NO_CASE' AND reportdate between '", fromDate, "' and '", toDate, "')")
+  WHERE deleted = FALSE AND caseclassification != 'NO_CASE' AND reportdate between ?fromDateTemp and ?toDateTemp)"
+  queryPerson = DBI::sqlInterpolate(sormas_db, sqlPerson, fromDateTemp=fromDate, toDateTemp=toDate) 
   person = dbGetQuery(sormas_db, queryPerson)
   ###  reading symptom data corresponding to selected cases only
-  querySymptom = base::paste0("SELECT id AS symptoms_id, onsetdate
+  sqlSymptom = "SELECT id AS symptoms_id, onsetdate
   FROM public.symptoms
   WHERE id IN
   (SELECT distinct symptoms_id AS id
   FROM public.cases 
-  WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "')")
+  WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between ?fromDateTemp and ?toDateTemp)"
+  querySymptom = DBI::sqlInterpolate(sormas_db, sqlSymptom, fromDateTemp=fromDate, toDateTemp=toDate)
   symptoms = dbGetQuery(sormas_db, querySymptom)
   
   # reading region

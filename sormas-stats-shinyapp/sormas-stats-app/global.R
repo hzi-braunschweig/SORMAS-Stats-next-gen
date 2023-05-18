@@ -42,4 +42,3 @@ source(file.path(".", "feature_config.R"))
 ## loading data ----
 ## loading_data connects to sormas db, pull all the non sensitive data needed by sormas-stats and disconnect when done
 source(file.path(".", "loading_data.R"))
-

@@ -39,3 +39,8 @@ vignettes/*.pdf
 /.project
 /install_base.txt
 /install_single.txt
+
+ser/*
+.DS_Store
+.Rproj.user
+rsconnect/*

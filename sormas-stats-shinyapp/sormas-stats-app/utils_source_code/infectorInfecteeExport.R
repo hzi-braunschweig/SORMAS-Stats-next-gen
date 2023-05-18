@@ -1,53 +1,55 @@
 infectorInfecteeExport = function(sormas_db, fromDate, toDate){
-  ## computing default time based on 90 days in the past if  not provided by user
-  if(missing(fromDate) | missing(toDate)){
-    fromDate = as.character(Sys.Date() - delay) 
-    toDate = as.character(Sys.Date()) 
-  }
   # loading tables from sormas db
   # load cases
-  queryCase <- paste0("SELECT  DISTINCT uuid AS case_uuid, id AS case_id, disease, reportdate AS report_date_case, creationdate AS creation_date_case, person_id AS person_id_case,
+  sqlCase <- "SELECT  DISTINCT uuid AS case_uuid, id AS case_id, disease, reportdate AS report_date_case, creationdate AS creation_date_case, person_id AS person_id_case,
     responsibleregion_id AS region_id_case, responsibledistrict_id AS district_id_case, caseclassification AS case_classification, caseorigin AS case_origin, symptoms_id
                           FROM public.cases 
-                          WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ") # this WHERE clause should be matched with sub queries below
+                          WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between ?fromDateTemp and ?toDateTemp" 
+  queryCase = DBI::sqlInterpolate(sormas_db, sqlCase, fromDateTemp=fromDate, toDateTemp=toDate) 
   case = dbGetQuery(sormas_db,queryCase)
   
-  # load contacts having source case among the selected cases only.
-  contact = dbGetQuery(sormas_db,
-    base::paste0("SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
+  # load contacts having their source case among the selected cases only.
+  sqlContact ="SELECT uuid AS contact_uuid, id AS contact_id, caze_id AS case_id, district_id AS district_id_contact, region_id AS region_id_contact,
     person_id AS person_id_contact, reportdatetime AS report_date_contact, creationdate AS creation_date_contact, lastcontactdate AS lastcontact_date_contact,
     contactproximity AS contact_proximity, resultingcase_id, contactstatus, contactclassification
     FROM public.contact
-     WHERE deleted = FALSE and caze_id IS NOT NULL and caze_id IN
+    WHERE deleted = FALSE and caze_id IS NOT NULL and caze_id IN
      (SELECT id AS caze_id
      FROM public.cases
-     WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "')"))
+     WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between ?fromDateTemp and ?toDateTemp)"
+  queryContact = DBI::sqlInterpolate(sormas_db, sqlContact, fromDateTemp=fromDate, toDateTemp=toDate) 
+  contact = dbGetQuery(sormas_db, queryContact)
   
   #loading symptom data corresponding to selected cases only
-  symptoms = dbGetQuery(sormas_db,
-             base::paste0("SELECT id AS symptom_id, onsetdate AS onset_date
-                           FROM public.symptoms
-                           WHERE id IN
-                           (SELECT symptoms_id AS id
-                           FROM public.cases
-                           WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "')"))
+  sqlSymptoms = "SELECT id AS symptom_id, onsetdate AS onset_date
+  FROM public.symptoms
+  WHERE id IN
+  (SELECT symptoms_id AS id
+  FROM public.cases
+  WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between ?fromDateTemp and ?toDateTemp)"
+  querySymptoms = DBI::sqlInterpolate(sormas_db, sqlSymptoms, fromDateTemp=fromDate, toDateTemp=toDate) 
+  symptoms = dbGetQuery(sormas_db, querySymptoms)
  ### loading person data
-  ## only persons linked to cases or contacts, events and ep persons are not included in this export
+  ## only persons linked to cases or contacts (not events or event participant persons) are included in this export
   ## since the goal is to get pairs on infectors and infectees with corresponding onset dates to be used to estimate serial interval
-  person_case = dbGetQuery(sormas_db,
-                           paste0("SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
+  # case person
+  sql_person_case = "SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
                            FROM public.person
                            WHERE id IN (SELECT person_id AS id
                            FROM public.cases
-                           WHERE deleted = FALSE AND caseclassification != 'NO_CASE' AND reportdate between '", fromDate, "' and '", toDate, "')"))
-  person_contact = dbGetQuery(sormas_db,
-                              paste0("SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
+                           WHERE deleted = FALSE AND caseclassification != 'NO_CASE' AND reportdate between ?fromDateTemp and ?toDateTemp)"
+  query_person_case = DBI::sqlInterpolate(sormas_db, sql_person_case, fromDateTemp=fromDate, toDateTemp=toDate) 
+  person_case = dbGetQuery(sormas_db, query_person_case)
+  # contact person
+  sql_person_contact = "SELECT id AS person_id, sex, birthdate_dd, birthdate_mm, birthdate_yyyy
                               FROM public.person 
                               WHERE id IN (SELECT person_id AS id
                               FROM public.contact
                               WHERE deleted = FALSE and caze_id IS NOT NULL and caze_id IN (SELECT id AS caze_id 
                               FROM public.cases
-                              WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between '", fromDate, "' and '", toDate, "' ))"))
+                              WHERE deleted = FALSE and caseclassification != 'NO_CASE' and reportdate between ?fromDateTemp and ?toDateTemp ))"
+  query_person_contact = DBI::sqlInterpolate(sormas_db, sql_person_contact, fromDateTemp=fromDate, toDateTemp=toDate) 
+  person_contact = dbGetQuery(sormas_db, query_person_contact)
   # row bind and keep distinct person id
   person = dplyr::bind_rows(person_case, person_contact) %>%
     dplyr::distinct(person_id, .keep_all = TRUE)                    

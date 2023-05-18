@@ -6,13 +6,10 @@ showModal(modalDialog(title = NULL, "Loading data from the database.", "Just a m
 # connect to sormas_db
 sormas_db = DBI::dbConnect(PostgreSQL(), user=DB_USER,  dbname=DB_NAME, password = DB_PASS, host=DB_HOST, port=DB_PORT)
 
-# Extracting user data, Hashing Passwords with sodium ----
-#users = userExport(sormas_db=sormas_db, authenticat_user= authenticat_user_global)
-
 ## Extracting event Data -----
 eventData = eventExport(sormas_db,fromDate = event_fromDate, toDate = event_toDate)
-# adding random lat, lng, and ep to event to event data
-#  to be added to event data export later
+# adding random lat, lng, and event participant count to event data, just for demo purposes
+# This needs to be added to event data export and replaces with reals counts and GPS coordinates
 eventData = eventData %>%
   dplyr::mutate(n_ep = rep(5,nrow(eventData)), lat = 10.53128 + rnorm(nrow(eventData)), long = 52.21099 + nrow(eventData) ) %>%
   dplyr::select(-c(latitude, longitude ))
@@ -42,7 +39,8 @@ dbDisconnect(sormas_db)
 removeModal()
 
 ## Updating UI filters -----
-# elist
+# transmission network
+updatePickerInput(session = session, inputId = "diseaseUi", choices = sort(levels(as.factor(elist$disease))), selected = c("CORONAVIRUS"))
 updatePickerInput(session = session, inputId = "regionNetworkUi", choices = sort(levels(as.factor(elist$region_name))))
 updatePickerInput(session = session, inputId = "contactEntitiyTypeUi", choices = sort(unique(elist$entityType)))
 updatePickerInput(session = session, inputId = "relationCaseUi", choices = sort(levels(as.factor(elist$relationtocase))))
@@ -64,8 +62,9 @@ updatePickerInput(session = session, inputId = "regionEventUi", choices = sort(l
 updatePickerInput(session = session, inputId = "eventIdentificationSourceUi", choices = sort(levels(as.factor(eventData$event_identification_source))))  
 updateSliderInput(session = session, inputId = "range", min =  min(eventData$n_ep), max = max(eventData$n_ep), value = range(eventData$n_ep))
 updatePickerInput(session = session, inputId = "diseaseEventUi", choices = sort(levels(as.factor(eventData$disease_event))), selected = c("CORONAVIRUS"))
-# contRegionDist
+# contact data analysis
 updatePickerInput(session = session, inputId = "regionContactUi", choices = sort(levels(as.factor(contRegionDist$region_name))))
+updatePickerInput(session = session, inputId = "diseaseContactUi", choices = sort(levels(as.factor(contRegionDist$disease))), selected = c("CORONAVIRUS"))
 # sample_table
 updatePickerInput(session = session, inputId = "diseaseSampleUi", choices = sort(levels(as.factor(sample_table$disease_sample))), selected = c("CORONAVIRUS"))
 updatePickerInput(session = session, inputId = "reportdateSampleUi", choices = sort(levels(as.factor(sample_table$date_of_report))))

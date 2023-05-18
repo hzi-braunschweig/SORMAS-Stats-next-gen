@@ -1,10 +1,10 @@
 shinyServer(
 function(input, output,session) { 
-### LANGUAGE SETTINGS ----   
+### LANGUAGE SETTINGS ----
 observeEvent(input$selected_language, {
   # update language in session
-  shiny.i18n::update_lang(session, input$selected_language)
-})    
+  shiny.i18n::update_lang(session=shiny::getDefaultReactiveDomain(), language = input$selected_language)
+})
 
 #### EXTRACTING DATA FROM SORMAS DATABASE -----
 msg <- try({
@@ -13,7 +13,6 @@ msg <- try({
 if(inherits(msg, "try-error")){
   showModal(modalDialog(title = "Startup error", as.character(msg), easyClose = TRUE))
 }
-
 #### TRANSMISSION CHAIN ANALYSIS ----
 # Sourcing the component of server to render the network tab. To remove this tab, comment this line and restart R
 base::source(file.path("./server_components","server_transmission_network.R"), local = TRUE)$value
