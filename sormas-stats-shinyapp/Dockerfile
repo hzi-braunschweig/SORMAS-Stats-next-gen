@@ -20,7 +20,7 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     libssl-dev \
     && install2.r --error \
     --deps TRUE \
-    # tidyverse \
+    tidyverse \
     # dplyr \
     # devtools \
     formatR \
