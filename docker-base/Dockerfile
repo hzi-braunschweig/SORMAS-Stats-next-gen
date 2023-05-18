@@ -1,5 +1,5 @@
 # check available R versions here: <https://hub.docker.com/r/rocker/shiny/tags>
-FROM rocker/shiny:4.2.0
+FROM rocker/shiny:4.3.0
 # ---------------------------------------------
 LABEL org.opencontainers.image.authors="bernard.silenou@helmholtz-hzi.de"
 
@@ -22,6 +22,7 @@ RUN apt-get update -qq && apt-get upgrade -y \
   
 RUN install2.r --error \
     --deps TRUE \
+    tidyverse \
     formatR \
     caTools \
   && rm -rf /tmp/downloaded_packages 
